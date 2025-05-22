@@ -126,7 +126,7 @@ class _LoginState extends State<Login> {
         
                 // Login Button
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  width: MediaQuery.of(context).size.width * 0.6,
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
