@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/employee_home.dart';
 
 class DashboardEmployee extends StatefulWidget {
   const DashboardEmployee({super.key});
@@ -11,11 +12,11 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    Center(child: Text("Home")),
-    Center(child: Text("Apply Leave")),
-    Center(child: Text("Attendance")),
-    Center(child: Text("Announcements")),
-    Center(child: Text("Profile")),
+    const EmployeeHome(),
+    const Center(child: Text("Apply Leave")),
+    const Center(child: Text("Attendance")),
+    const Center(child: Text("Announcements")),
+    const Center(child: Text("Profile")),
   ];
 
   void _onItemTapped(int index) {
@@ -51,8 +52,8 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         height: 70,
-        margin: EdgeInsets.all(16),
-        padding: EdgeInsets.symmetric(horizontal: 24),
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(40),
