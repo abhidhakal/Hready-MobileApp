@@ -11,66 +11,83 @@ class _DashboardAdminState extends State<DashboardAdmin> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    Center(child: Text("Admin Home Page", style: TextStyle(fontSize: 18))),
-    Center(child: Text("Admin Tasks", style: TextStyle(fontSize: 18))),
-    Center(child: Text("Admin Profile", style: TextStyle(fontSize: 18))),
+    Center(child: Text("Dashboard Home")),
+    Center(child: Text("Employees")),
+    Center(child: Text("Attendance")),
+    Center(child: Text("Leave Requests")),
+    Center(child: Text("Announcements")),
+    Center(child: Text("Profile")),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      Navigator.pop(context); // Close drawer after selection
     });
+  }
+
+  Widget buildDrawerItem(IconData icon, String label, int index) {
+    final bool selected = _selectedIndex == index;
+    return ListTile(
+      leading: Icon(icon, color: selected ? Color(0xFF042F46) : Colors.grey),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: selected ? Color(0xFF042F46) : Colors.grey,
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      selected: selected,
+      onTap: () => _onItemTapped(index),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFf5f5f5),
-      appBar: AppBar(
-        title: const Text("Admin Dashboard"),
-        backgroundColor: const Color(0xFF042F46),
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        child: _pages[_selectedIndex],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black,
-              blurRadius: 8,
-              offset: Offset(0, -1),
+      backgroundColor: Color(0xFFF5F5F5),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color(0xFF042F46),
+              ),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'Admin Panel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF042F46),
-          unselectedItemColor: Colors.grey,
-          backgroundColor: Colors.white,
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              label: 'Home',
+            buildDrawerItem(Icons.dashboard_outlined, "Dashboard", 0),
+            buildDrawerItem(Icons.people_outline, "Employees", 1),
+            buildDrawerItem(Icons.access_time, "Attendance", 2),
+            buildDrawerItem(Icons.request_page, "Leave Requests", 3),
+            buildDrawerItem(Icons.announcement_outlined, "Announcements", 4),
+            buildDrawerItem(Icons.person_outline, "Profile", 5),
+            Spacer(),
+            ListTile(
+              leading: Icon(Icons.logout, color: Colors.grey),
+              title: Text(
+                "Logout",
+                style: TextStyle(color: Colors.grey),
+              ),
+              onTap: () {
+                // Add logout functionality here
+              },
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.task_alt_outlined),
-              label: 'Tasks',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Profile',
-            ),
+            SizedBox(height: 20),
           ],
         ),
       ),
+      appBar: null, // no app bar as per your request
+      body: _pages[_selectedIndex],
     );
   }
 }

@@ -11,9 +11,11 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    Center(child: Text("Employee Home Page", style: TextStyle(fontSize: 18))),
-    Center(child: Text("Employee Tasks", style: TextStyle(fontSize: 18))),
-    Center(child: Text("Employee Profile", style: TextStyle(fontSize: 18))),
+    Center(child: Text("Home")),
+    Center(child: Text("Apply Leave")),
+    Center(child: Text("Attendance")),
+    Center(child: Text("Announcements")),
+    Center(child: Text("Profile")),
   ];
 
   void _onItemTapped(int index) {
@@ -22,53 +24,67 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
     });
   }
 
+  Widget buildNavItem(IconData icon, String label, int index) {
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon,
+              color: _selectedIndex == index ? Color(0xFF042F46) : Colors.grey),
+          Text(label,
+              style: TextStyle(
+                color:
+                    _selectedIndex == index ? Color(0xFF042F46) : Colors.grey,
+                fontSize: 12,
+              )),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFf5f5f5),
-      appBar: AppBar(
-        title: const Text("Employee Dashboard"),
-        backgroundColor: const Color(0xFF042F46),
-        foregroundColor: Colors.white,
+      backgroundColor: Color(0xFFF5F5F5),
+      body: _pages[_selectedIndex],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _onItemTapped(2), // Attendance
+        backgroundColor: Color(0xFF042F46),
+        child: Icon(Icons.access_time),
+        elevation: 6,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        child: _pages[_selectedIndex],
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
+        height: 70,
+        margin: EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.white,
+          borderRadius: BorderRadius.circular(40),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: Offset(0, -1),
-            ),
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            )
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF042F46),
-          unselectedItemColor: Colors.grey,
-          backgroundColor: Colors.white,
-          type: BottomNavigationBarType.fixed,
+        child: BottomAppBar(
+          color: Colors.transparent,
           elevation: 0,
-          selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.task_alt_outlined),
-              label: 'Tasks',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Profile',
-            ),
-          ],
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 8.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              buildNavItem(Icons.home_outlined, "Home", 0),
+              buildNavItem(Icons.beach_access, "Leave", 1),
+              SizedBox(width: 40), // Space for FAB
+              buildNavItem(Icons.announcement_outlined, "News", 3),
+              buildNavItem(Icons.person_outline, "Profile", 4),
+            ],
+          ),
         ),
       ),
     );
