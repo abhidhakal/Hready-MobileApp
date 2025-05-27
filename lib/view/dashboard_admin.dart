@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hready/view/login.dart';
 
 class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});
@@ -45,7 +46,20 @@ class _DashboardAdminState extends State<DashboardAdmin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Color(0xFF042F46),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu, color: Colors.white),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+      ),
+
       drawer: Drawer(
         child: Column(
           children: [
@@ -79,14 +93,16 @@ class _DashboardAdminState extends State<DashboardAdmin> {
                 style: TextStyle(color: Colors.grey),
               ),
               onTap: () {
-                // Add logout functionality here
+                Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => Login()),
+                (Route<dynamic> route) => false,
+              );
               },
             ),
             SizedBox(height: 20),
           ],
         ),
       ),
-      appBar: null, // no app bar as per your request
       body: _pages[_selectedIndex],
     );
   }

@@ -19,7 +19,6 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFf5f5f5),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -141,13 +140,13 @@ class _LoginState extends State<Login> {
                         final email = emailController.text.trim();
                         final password = pwController.text.trim();
         
-                        if (email == "admin@hready.com" && password == "admin123") {
+                        if (email == "admin" && password == "admin123") {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => const DashboardAdmin()),
                           );
-                        } else if (email == "abhinav@gmail.com" &&
-                            password == "hello123") {
+                        } else if (email == "abhi" &&
+                            password == "abhi123") {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => const DashboardEmployee()),

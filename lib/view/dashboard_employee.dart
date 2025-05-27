@@ -32,12 +32,14 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
         children: [
           Icon(icon,
               color: _selectedIndex == index ? Color(0xFF042F46) : Colors.grey),
-          Text(label,
-              style: TextStyle(
-                color:
-                    _selectedIndex == index ? Color(0xFF042F46) : Colors.grey,
-                fontSize: 12,
-              )),
+          Text(
+            label,
+            style: TextStyle(
+              color:
+                  _selectedIndex == index ? Color(0xFF042F46) : Colors.grey,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
@@ -46,15 +48,7 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5),
       body: _pages[_selectedIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onItemTapped(2), // Attendance
-        backgroundColor: Color(0xFF042F46),
-        child: Icon(Icons.access_time),
-        elevation: 6,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
         height: 70,
         margin: EdgeInsets.all(16),
@@ -67,20 +61,18 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
               color: Colors.black.withOpacity(0.1),
               blurRadius: 10,
               offset: Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: BottomAppBar(
           color: Colors.transparent,
           elevation: 0,
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8.0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               buildNavItem(Icons.home_outlined, "Home", 0),
               buildNavItem(Icons.beach_access, "Leave", 1),
-              SizedBox(width: 40), // Space for FAB
+              buildNavItem(Icons.fingerprint, "Attendance", 2), // New icon
               buildNavItem(Icons.announcement_outlined, "News", 3),
               buildNavItem(Icons.person_outline, "Profile", 4),
             ],
