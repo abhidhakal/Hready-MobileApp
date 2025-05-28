@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- This style is used as the launch screen theme -->
-    <style name="LaunchTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- You can remove this or keep it transparent -->
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowDisablePreview">true</item>
+<resources>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
     </style>
-
-    <!-- This is the normal theme applied after Flutter draws the first frame -->
-    <style name="NormalTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowBackground">@android:color/white</item>
-    </style>
-
 </resources>
