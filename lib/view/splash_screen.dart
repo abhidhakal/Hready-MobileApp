@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/light.png', height: 250),
+            Image.asset('assets/images/light.webp', height: 250),
             const SizedBox(height: 16),
             Lottie.asset(
               'assets/animations/loading.json',

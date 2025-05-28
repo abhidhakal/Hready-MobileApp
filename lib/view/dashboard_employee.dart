@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hready/view/pages/employee_announcements.dart';
+import 'package:hready/view/pages/employee_attendance.dart';
+import 'package:hready/view/pages/employee_leave.dart';
+import 'package:hready/view/pages/employee_profile.dart';
 import 'pages/employee_home.dart';
 
 class DashboardEmployee extends StatefulWidget {
@@ -13,10 +17,10 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
 
   final List<Widget> _pages = [
     const EmployeeHome(),
-    const Center(child: Text("Apply Leave")),
-    const Center(child: Text("Attendance")),
-    const Center(child: Text("Announcements")),
-    const Center(child: Text("Profile")),
+    const EmployeeLeave(),
+    const EmployeeAttendance(),
+    const EmployeeAnnouncements(),
+    const EmployeeProfile(),
   ];
 
   void _onItemTapped(int index) {

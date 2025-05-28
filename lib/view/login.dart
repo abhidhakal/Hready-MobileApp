@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/light.png', height: 100),
+                Image.asset('assets/images/light.webp', height: 100),
                 const SizedBox(height: 24),
                 const Text(
                   "Welcome to HReady!",
