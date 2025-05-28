@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hready/view/login.dart';
+import 'package:hready/view/pages/admin_announcements.dart';
+import 'package:hready/view/pages/admin_attendance.dart';
+import 'package:hready/view/pages/admin_employees.dart';
+import 'package:hready/view/pages/admin_home.dart';
+import 'package:hready/view/pages/admin_leave.dart';
+import 'package:hready/view/pages/admin_profile.dart';
 
 class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});
@@ -12,12 +18,12 @@ class _DashboardAdminState extends State<DashboardAdmin> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    Center(child: Text("Dashboard Home")),
-    Center(child: Text("Employees")),
-    Center(child: Text("Attendance")),
-    Center(child: Text("Leave Requests")),
-    Center(child: Text("Announcements")),
-    Center(child: Text("Profile")),
+    const AdminHome(),
+    const AdminEmployees(),
+    const AdminAttendance(),
+    const AdminLeave(),
+    const AdminAnnouncements(),
+    const AdminProfile(),
   ];
 
   void _onItemTapped(int index) {
