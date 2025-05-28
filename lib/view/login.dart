@@ -45,13 +45,6 @@ class _LoginState extends State<Login> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Enter your email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF042F46),
-                        width: 2,
-                      ),
-                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -68,13 +61,6 @@ class _LoginState extends State<Login> {
                   obscureText: !isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Enter your password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF042F46),
-                        width: 2,
-                      ),
-                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         isPasswordVisible
@@ -130,7 +116,7 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     onPressed: () {

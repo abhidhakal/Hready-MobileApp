@@ -21,23 +21,26 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
   }
 
   void _startSplash() {
-    // Run splash screen only once per fresh app start
-    if (!hasRunSplash) {
-      hasRunSplash = true;
-      Timer(const Duration(milliseconds: 2400), () {
+  if (!hasRunSplash) {
+    hasRunSplash = true;
+
+    // Wait for first frame to complete before starting splash timer
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 2400), () {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const Login()),
           );
         }
       });
-    } else {
-      // If resumed from background, skip splash
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const Login()),
-      );
-    }
+    });
+  } else {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const Login()),
+    );
   }
+}
+
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
