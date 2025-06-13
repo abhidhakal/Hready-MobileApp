@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hready/view/login.dart';
-import 'package:hready/view/pages/admin_announcements.dart';
-import 'package:hready/view/pages/admin_attendance.dart';
-import 'package:hready/view/pages/admin_employees.dart';
-import 'package:hready/view/pages/admin_home.dart';
-import 'package:hready/view/pages/admin_leave.dart';
-import 'package:hready/view/pages/admin_profile.dart';
+import 'package:hready/features/admin/presentation/pages/admin_announcements.dart';
+import 'package:hready/features/admin/presentation/pages/admin_attendance.dart';
+import 'package:hready/features/admin/presentation/pages/admin_employees.dart';
+import 'package:hready/features/admin/presentation/pages/admin_home.dart';
+import 'package:hready/features/admin/presentation/pages/admin_leave.dart';
+import 'package:hready/features/admin/presentation/pages/admin_profile.dart';
 
 class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});

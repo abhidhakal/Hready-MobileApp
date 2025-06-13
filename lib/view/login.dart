@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hready/view/dashboard_admin.dart';
+import 'package:hready/features/admin/presentation/pages/dashboard_admin.dart';
 import 'package:hready/view/dashboard_employee.dart';
 
 class Login extends StatefulWidget {
