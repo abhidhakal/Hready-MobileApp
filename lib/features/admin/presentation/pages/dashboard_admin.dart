@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hready/view/login.dart';
+import 'package:hready/features/auth/presentation/pages/login.dart';
 import 'package:hready/features/admin/presentation/pages/admin_announcements.dart';
 import 'package:hready/features/admin/presentation/pages/admin_attendance.dart';
 import 'package:hready/features/admin/presentation/pages/admin_employees.dart';

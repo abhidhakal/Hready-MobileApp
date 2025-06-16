@@ -35,7 +35,7 @@ class _LoginState extends State<Login> {
                     color: Colors.black,
                     fontWeight: FontWeight.w700,
                     fontSize: 22,
-                  ),
+                  ), 
                 ),
                 const SizedBox(height: 42),
         

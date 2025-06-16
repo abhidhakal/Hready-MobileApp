@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:hready/view/login.dart';
+import 'package:hready/features/auth/presentation/pages/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
