@@ -6,10 +6,10 @@ class EmployeeLeave extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Apply Leave'),
-        backgroundColor: const Color(0xFF042F46),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Apply Leave'),
+      //   backgroundColor: const Color(0xFF042F46),
+      // ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

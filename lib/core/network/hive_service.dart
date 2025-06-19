@@ -3,7 +3,6 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hready/app/constant/hive/hive_table_constant.dart';
 import 'package:hready/features/admin/data/models/admin_hive_model.dart';
-import 'package:path_provider/path_provider.dart';
 
 class HiveService {
   Future<void> init() async {

@@ -14,10 +14,10 @@ class EmployeeAttendance extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Attendance'),
-        backgroundColor: const Color(0xFF042F46),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Attendance'),
+      //   backgroundColor: const Color(0xFF042F46),
+      // ),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: attendanceData.length,

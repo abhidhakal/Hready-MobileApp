@@ -13,10 +13,10 @@ class EmployeeProfile extends StatelessWidget {
     };
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: const Color(0xFF042F46),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Profile'),
+      //   backgroundColor: const Color(0xFF042F46),
+      // ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
