@@ -41,6 +41,7 @@ class AuthViewModel extends Bloc<AuthEvent, AuthState> {
         await registerEmployeeUseCase(event.employee);
         emit(const AuthSuccess(role: 'employee', user: null));
       } catch (e) {
+        print("❌ Employee registration error: $e");
         emit(AuthFailure('Employee registration failed'));
       }
     });
