@@ -13,44 +13,46 @@ class AdminProfile extends StatelessWidget {
     };
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // align all left
-          children: [
-            // Profile picture stuck to left
-            Align(
-              alignment: Alignment.centerLeft,
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: AssetImage('assets/images/profile.webp'),
-              ),
-            ),
-            const SizedBox(height: 24),
-            ...userData.entries.map((entry) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${entry.key}: ',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        entry.value,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // align all left
+            children: [
+              // Profile picture stuck to left
+              Align(
+                alignment: Alignment.centerLeft,
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundImage: AssetImage('assets/images/profile.webp'),
                 ),
-              );
-            }).toList(),
-          ],
+              ),
+              const SizedBox(height: 24),
+              ...userData.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${entry.key}: ',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          entry.value,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
         ),
       ),
     );

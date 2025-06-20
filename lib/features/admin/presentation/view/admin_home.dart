@@ -5,10 +5,12 @@ class AdminHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Admin Dashboard Home',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return SafeArea(
+      child: Center(
+        child: Text(
+          'Admin Dashboard Home',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

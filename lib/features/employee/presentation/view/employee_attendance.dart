@@ -18,21 +18,23 @@ class EmployeeAttendance extends StatelessWidget {
       //   title: const Text('Attendance'),
       //   backgroundColor: const Color(0xFF042F46),
       // ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: attendanceData.length,
-        separatorBuilder: (_, __) => const Divider(),
-        itemBuilder: (context, index) {
-          final item = attendanceData[index];
-          return ListTile(
-            leading: Icon(
-              item['status'] == 'Present' ? Icons.check_circle : Icons.cancel,
-              color: item['status'] == 'Present' ? Colors.green : Colors.red,
-            ),
-            title: Text(item['date']!),
-            subtitle: Text(item['status']!),
-          );
-        },
+      body: SafeArea(
+        child: ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: attendanceData.length,
+          separatorBuilder: (_, __) => const Divider(),
+          itemBuilder: (context, index) {
+            final item = attendanceData[index];
+            return ListTile(
+              leading: Icon(
+                item['status'] == 'Present' ? Icons.check_circle : Icons.cancel,
+                color: item['status'] == 'Present' ? Colors.green : Colors.red,
+              ),
+              title: Text(item['date']!),
+              subtitle: Text(item['status']!),
+            );
+          },
+        ),
       ),
     );
   }

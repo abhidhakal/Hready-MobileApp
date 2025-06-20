@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:hready/features/splash/viewmodel/splash_event.dart';
 import 'package:hready/features/splash/viewmodel/splash_state.dart';
-import 'package:hready/features/splash/viewmodel/splash_viewmodel.dart';
+import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -22,20 +22,22 @@ class SplashScreen extends StatelessWidget {
           }
         },
         child: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/light.webp', height: 250),
-                const SizedBox(height: 16),
-                Lottie.asset(
-                  'assets/animations/loading.json',
-                  width: 400,
-                  height: 100,
-                  repeat: true,
-                  animate: true,
-                ),
-              ],
+          body: SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/light.webp', height: 250),
+                  const SizedBox(height: 16),
+                  Lottie.asset(
+                    'assets/animations/loading.json',
+                    width: 400,
+                    height: 100,
+                    repeat: true,
+                    animate: true,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

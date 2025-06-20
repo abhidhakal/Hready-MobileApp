@@ -46,7 +46,7 @@ class DashboardEmployee extends StatelessWidget {
       child: BlocBuilder<EmployeeDashboardViewModel, EmployeeDashboardState>(
         builder: (context, state) {
           return Scaffold(
-            body: _pages[state.selectedIndex],
+            body: SafeArea(child: _pages[state.selectedIndex]),
             bottomNavigationBar: Container(
               height: 70,
               margin: const EdgeInsets.all(16),

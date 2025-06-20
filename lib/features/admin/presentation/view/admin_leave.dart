@@ -5,10 +5,12 @@ class AdminLeave extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Leave Requests',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return SafeArea(
+      child: Center(
+        child: Text(
+          'Leave Requests',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
