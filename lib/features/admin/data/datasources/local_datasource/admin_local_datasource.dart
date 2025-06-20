@@ -22,7 +22,6 @@ class AdminLocalDatasource implements IAdminDataSource {
 
   @override
   Future<AdminEntity> getAdmin() {
-    // TODO: implement getAdmin
     throw UnimplementedError();
   }
 
@@ -42,7 +41,6 @@ class AdminLocalDatasource implements IAdminDataSource {
 
   @override
   Future<String> uploadProfilePicture(File file) {
-    // TODO: implement uploadProfilePicture
     throw UnimplementedError();
   }
 }

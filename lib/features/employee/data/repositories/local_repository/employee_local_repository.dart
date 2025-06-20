@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:hready/core/common/failure.dart';
 import 'package:hready/features/employee/data/datasources/local_datasource/employee_local_data_source.dart';
@@ -34,25 +36,13 @@ class EmployeeLocalRepository implements IEmployeeRepository {
   }
 
   @override
-  Future<Either<Failure, EmployeeEntity?>> getEmployee(
-      String employeeId) async {
-    try {
-      final result = await _employeeLocalDatasource.getEmployee(employeeId);
-      return Right(result);
-    } catch (e) {
-      return Left(LocalDataBaseFailure(message: 'Failed to get employee: $e'));
-    }
+  Future<Either<Failure, EmployeeEntity?>> getEmployee() {
+    throw UnimplementedError();
   }
 
   @override
-  Future<Either<Failure, void>> uploadProfilePicture(
-      String employeeId, String imagePath) async {
-    try {
-      await _employeeLocalDatasource.uploadProfilePicture(employeeId, imagePath);
-      return Right(null);
-    } catch (e) {
-      return Left(
-          LocalDataBaseFailure(message: 'Failed to upload profile picture: $e'));
-    }
+  Future<Either<Failure, String>> uploadProfilePicture(
+      File file){
+        throw UnimplementedError();
   }
 }
