@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/employee/presentation/view/employee_announcements.dart';
 import 'package:hready/features/employee/presentation/view/employee_attendance.dart';
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_profile.dart';
-import 'employee_home.dart';
+import 'package:hready/features/employee/presentation/view/employee_home.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_event.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_state.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
 
-class DashboardEmployee extends StatefulWidget {
+class DashboardEmployee extends StatelessWidget {
   const DashboardEmployee({super.key});
 
-  @override
-  State<DashboardEmployee> createState() => _DashboardEmployeeState();
-}
-
-class _DashboardEmployeeState extends State<DashboardEmployee> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = [
+  static final List<Widget> _pages = [
     const EmployeeHome(),
     const EmployeeLeave(),
     const EmployeeAttendance(),
@@ -23,25 +20,17 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
     const EmployeeProfile(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  Widget buildNavItem(IconData icon, String label, int index) {
+  Widget buildNavItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
     return GestureDetector(
-      onTap: () => _onItemTapped(index),
+      onTap: () => context.read<EmployeeDashboardViewModel>().add(EmployeeTabChanged(index)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon,
-              color: _selectedIndex == index ? Color(0xFF042F46) : Colors.grey),
+          Icon(icon, color: selectedIndex == index ? const Color(0xFF042F46) : Colors.grey),
           Text(
             label,
             style: TextStyle(
-              color:
-                  _selectedIndex == index ? Color(0xFF042F46) : Colors.grey,
+              color: selectedIndex == index ? const Color(0xFF042F46) : Colors.grey,
               fontSize: 12,
             ),
           ),
@@ -52,37 +41,44 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        height: 70,
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: Offset(0, 4),
+    return BlocProvider(
+      create: (_) => EmployeeDashboardViewModel(),
+      child: BlocBuilder<EmployeeDashboardViewModel, EmployeeDashboardState>(
+        builder: (context, state) {
+          return Scaffold(
+            body: _pages[state.selectedIndex],
+            bottomNavigationBar: Container(
+              height: 70,
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: BottomAppBar(
+                color: Colors.transparent,
+                elevation: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    buildNavItem(context, Icons.home_outlined, "Home", 0, state.selectedIndex),
+                    buildNavItem(context, Icons.beach_access, "Leave", 1, state.selectedIndex),
+                    buildNavItem(context, Icons.fingerprint, "Attendance", 2, state.selectedIndex),
+                    buildNavItem(context, Icons.announcement_outlined, "News", 3, state.selectedIndex),
+                    buildNavItem(context, Icons.person_outline, "Profile", 4, state.selectedIndex),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-        child: BottomAppBar(
-          color: Colors.transparent,
-          elevation: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              buildNavItem(Icons.home_outlined, "Home", 0),
-              buildNavItem(Icons.beach_access, "Leave", 1),
-              buildNavItem(Icons.fingerprint, "Attendance", 2), // New icon
-              buildNavItem(Icons.announcement_outlined, "News", 3),
-              buildNavItem(Icons.person_outline, "Profile", 4),
-            ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
