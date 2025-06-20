@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:hready/features/auth/presentation/pages/login.dart';
+import 'package:hready/features/auth/presentation/view/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,14 +29,14 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
       Future.delayed(const Duration(milliseconds: 2400), () {
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const Login()),
+            MaterialPageRoute(builder: (_) => const LoginPage()),
           );
         }
       });
     });
   } else {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const Login()),
+      MaterialPageRoute(builder: (_) => const LoginPage()),
     );
   }
 }

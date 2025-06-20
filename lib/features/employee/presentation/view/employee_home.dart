@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hready/features/auth/presentation/pages/login.dart';
+import 'package:hready/features/auth/presentation/view/login.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
@@ -11,7 +11,7 @@ class EmployeeHome extends StatelessWidget {
         onPressed: () {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => Login()),
+            MaterialPageRoute(builder: (context) => LoginPage()),
             (route) => false,
           );
         },

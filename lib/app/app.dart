@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hready/features/splash/splash_screen.dart';
+import 'package:hready/features/splash/view/splash_screen.dart';
 import 'package:hready/app/theme/hready_theme.dart';
 
 class App extends StatelessWidget {

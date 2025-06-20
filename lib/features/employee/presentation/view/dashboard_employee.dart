@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hready/features/employee/presentation/pages/employee_announcements.dart';
-import 'package:hready/features/employee/presentation/pages/employee_attendance.dart';
-import 'package:hready/features/employee/presentation/pages/employee_leave.dart';
-import 'package:hready/features/employee/presentation/pages/employee_profile.dart';
+import 'package:hready/features/employee/presentation/view/employee_announcements.dart';
+import 'package:hready/features/employee/presentation/view/employee_attendance.dart';
+import 'package:hready/features/employee/presentation/view/employee_leave.dart';
+import 'package:hready/features/employee/presentation/view/employee_profile.dart';
 import 'employee_home.dart';
 
 class DashboardEmployee extends StatefulWidget {
