@@ -1,48 +1,45 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_event.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_state.dart';
+import 'package:hready/features/auth/domain/use_cases/get_cached_user_use_case.dart';
 import 'package:hready/features/auth/domain/use_cases/login_use_case.dart';
-import 'package:hready/features/auth/domain/use_cases/register_admin_use_case.dart';
-import 'package:hready/features/auth/domain/use_cases/register_employee_use_case.dart';
-
+import 'package:hready/features/auth/domain/use_cases/register_use_case.dart';
+import 'auth_event.dart';
+import 'auth_state.dart';
 class AuthViewModel extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
-  final RegisterAdminUseCase registerAdminUseCase;
-  final RegisterEmployeeUseCase registerEmployeeUseCase;
+  final RegisterUseCase registerUseCase;
+  final GetCachedUserUseCase getCachedUserUseCase;
 
   AuthViewModel({
     required this.loginUseCase,
-    required this.registerAdminUseCase,
-    required this.registerEmployeeUseCase,
+    required this.registerUseCase,
+    required this.getCachedUserUseCase,
   }) : super(AuthInitial()) {
     on<LoginRequested>((event, emit) async {
       emit(AuthLoading());
       try {
-        final (role, user) = await loginUseCase(event.email, event.password);
-        emit(AuthSuccess(role: role, user: user));
+        final user = await loginUseCase(event.email, event.password);
+        emit(AuthSuccess(user));
       } catch (e) {
         emit(AuthFailure('Invalid email or password'));
       }
     });
 
-    on<RegisterAdmin>((event, emit) async {
+    on<RegisterRequested>((event, emit) async {
       emit(AuthLoading());
       try {
-        await registerAdminUseCase(event.admin);
-        emit(const AuthSuccess(role: 'admin', user: null));
+        final user = await registerUseCase(event.payload);
+        emit(AuthSuccess(user));
       } catch (e) {
-        emit(AuthFailure('Admin registration failed'));
+        emit(AuthFailure('Registration failed'));
       }
     });
 
-    on<RegisterEmployee>((event, emit) async {
-      emit(AuthLoading());
-      try {
-        await registerEmployeeUseCase(event.employee);
-        emit(const AuthSuccess(role: 'employee', user: null));
-      } catch (e) {
-        print("❌ Employee registration error: $e");
-        emit(AuthFailure('Employee registration failed'));
+    on<GetCachedUserRequested>((event, emit) async {
+      final user = await getCachedUserUseCase();
+      if (user != null) {
+        emit(AuthSuccess(user));
+      } else {
+        emit(AuthInitial());
       }
     });
   }

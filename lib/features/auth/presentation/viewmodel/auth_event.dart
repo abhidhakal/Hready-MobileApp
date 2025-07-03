@@ -1,6 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:hready/features/admin/data/models/admin_hive_model.dart';
-import 'package:hready/features/employee/data/models/employee_hive_model.dart';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -16,20 +14,18 @@ class LoginRequested extends AuthEvent {
   List<Object> get props => [email, password];
 }
 
-class RegisterAdmin extends AuthEvent {
-  final AdminHiveModel admin;
+class RegisterRequested extends AuthEvent {
+  final Map<String, dynamic> payload;
 
-  const RegisterAdmin(this.admin);
+  const RegisterRequested(this.payload);
 
   @override
-  List<Object> get props => [admin];
+  List<Object> get props => [payload];
 }
 
-class RegisterEmployee extends AuthEvent {
-  final EmployeeHiveModel employee;
-
-  const RegisterEmployee(this.employee);
+class GetCachedUserRequested extends AuthEvent {
+  const GetCachedUserRequested();
 
   @override
-  List<Object> get props => [employee];
+  List<Object> get props => [];
 }
