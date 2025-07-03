@@ -9,7 +9,7 @@ class UserRemoteDatasource implements IUserRemoteDatasource {
 
   @override
   Future<UserEntity> login(String email, String password) async {
-    final json = await apiService.post('/api/login', {
+    final json = await apiService.post('/api/auth/login', {
       'email': email,
       'password': password,
     });
@@ -19,7 +19,7 @@ class UserRemoteDatasource implements IUserRemoteDatasource {
 
   @override
   Future<UserEntity> register(Map<String, dynamic> payload) async {
-    final json = await apiService.post('/api/register', payload);
+    final json = await apiService.post('/api/auth/register', payload);
     return _parseUser(json);
   }
 

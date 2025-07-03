@@ -47,33 +47,35 @@ class DashboardEmployee extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             body: SafeArea(child: _pages[state.selectedIndex]),
-            bottomNavigationBar: Container(
-              height: 70,
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: BottomAppBar(
-                color: Colors.transparent,
-                elevation: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    buildNavItem(context, Icons.home_outlined, "Home", 0, state.selectedIndex),
-                    buildNavItem(context, Icons.beach_access, "Leave", 1, state.selectedIndex),
-                    buildNavItem(context, Icons.fingerprint, "Attendance", 2, state.selectedIndex),
-                    buildNavItem(context, Icons.announcement_outlined, "News", 3, state.selectedIndex),
-                    buildNavItem(context, Icons.person_outline, "Profile", 4, state.selectedIndex),
+            bottomNavigationBar: SafeArea(
+              child: Container(
+                height: 70,
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
                   ],
+                ),
+                child: BottomAppBar(
+                  color: Colors.transparent,
+                  elevation: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      buildNavItem(context, Icons.home_outlined, "Home", 0, state.selectedIndex),
+                      buildNavItem(context, Icons.beach_access, "Leave", 1, state.selectedIndex),
+                      buildNavItem(context, Icons.fingerprint, "Attendance", 2, state.selectedIndex),
+                      buildNavItem(context, Icons.announcement_outlined, "News", 3, state.selectedIndex),
+                      buildNavItem(context, Icons.person_outline, "Profile", 4, state.selectedIndex),
+                    ],
+                  ),
                 ),
               ),
             ),

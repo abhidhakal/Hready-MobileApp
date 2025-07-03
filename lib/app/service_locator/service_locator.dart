@@ -28,12 +28,13 @@ final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
   // Core
-  getIt.registerLazySingleton(() => ApiService('http://127.0.0.1:3000'));
+  getIt.registerLazySingleton(() => ApiService('http://192.168.1.243:3000')); // Replace with your local IP
 
   // Auth - Remote Datasource
   getIt.registerLazySingleton<IUserRemoteDatasource>(
-    () => UserRemoteDatasource(getIt()),
-  );
+  () => UserRemoteDatasource(getIt()),
+);
+
 
   // Hive box for caching UserEntity
   final userBox = await Hive.openBox<UserHiveModel>('userBox');
@@ -41,7 +42,7 @@ Future<void> setupLocator() async {
   // Auth Repository
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRemoteRepository(
-      remoteDatasource: getIt(),
+      remoteDatasource: getIt<IUserRemoteDatasource>(),
       hiveBox: userBox,
     ),
   );

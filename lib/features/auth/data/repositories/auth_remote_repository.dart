@@ -1,11 +1,11 @@
 import 'package:hive/hive.dart';
-import 'package:hready/features/auth/data/datasources/remote_datasource/user_remote_data_source.dart';
+import 'package:hready/features/auth/data/datasources/user_remote_data_source.dart';
 import 'package:hready/features/auth/data/models/user_hive_model.dart';
 import 'package:hready/features/auth/domain/entities/user_entity.dart';
 import 'package:hready/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRemoteRepository implements AuthRepository {
-  final UserRemoteDatasource remoteDatasource;
+  final IUserRemoteDatasource remoteDatasource;
   final Box<UserHiveModel> hiveBox;
 
   AuthRemoteRepository({required this.remoteDatasource, required this.hiveBox});
