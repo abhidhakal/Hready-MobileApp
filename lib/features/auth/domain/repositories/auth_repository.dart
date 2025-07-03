@@ -1,7 +1,3 @@
-import 'package:hready/core/network/hive_service.dart';
-import 'package:hready/features/admin/data/models/admin_hive_model.dart';
-import 'package:hready/features/employee/data/models/employee_hive_model.dart';
-
 // class AuthRepository {
 //   final HiveService hiveService;
 
@@ -30,7 +26,7 @@ import 'package:hready/features/employee/data/models/employee_hive_model.dart';
 //   }
 // }
 
-import '../entities/user_entity.dart';
+import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthRepository {
   Future<UserEntity> login(String email, String password);
