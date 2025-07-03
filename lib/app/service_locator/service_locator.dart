@@ -28,7 +28,7 @@ final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
   // Core
-  getIt.registerLazySingleton(() => ApiService('http://192.168.1.243:3000')); // Replace with your local IP
+  getIt.registerLazySingleton(() => ApiService('http://192.168.18.177:3000'));
 
   // Auth - Remote Datasource
   getIt.registerLazySingleton<IUserRemoteDatasource>(
