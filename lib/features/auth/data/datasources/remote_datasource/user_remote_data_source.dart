@@ -45,6 +45,7 @@ class UserRemoteDatasource implements IUserRemoteDatasource {
         ? DateTime.tryParse(json['date_of_joing'])
         : null,
     status: json['status'],
+    token: json['token'],
   );
 }
 

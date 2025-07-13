@@ -3,18 +3,25 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   final String _baseUrl;
+  final Future<String?> Function()? getToken;
 
-  ApiService(this._baseUrl);
+  ApiService(this._baseUrl, {this.getToken});
 
   Future<Map<String, dynamic>> post(
     String endpoint,
     Map<String, dynamic> body, {
     Map<String, String>? headers,
   }) async {
+    String? token;
+    if (getToken != null) {
+      token = await getToken!();
+    }
+
     final response = await http.post(
       Uri.parse('$_baseUrl$endpoint'),
       headers: {
         'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
         ...?headers,
       },
       body: jsonEncode(body),
@@ -31,10 +38,16 @@ class ApiService {
     String endpoint, {
     Map<String, String>? headers,
   }) async {
+    String? token;
+    if (getToken != null) {
+      token = await getToken!();
+    }
+
     final response = await http.get(
       Uri.parse('$_baseUrl$endpoint'),
       headers: {
         'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
         ...?headers,
       },
     );

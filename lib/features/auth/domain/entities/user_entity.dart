@@ -11,6 +11,7 @@ class UserEntity extends Equatable {
   final String? position;
   final DateTime? dateOfJoining;
   final String? status;
+  final String token;
 
   const UserEntity({
     this.userId,
@@ -23,6 +24,7 @@ class UserEntity extends Equatable {
     this.position,
     this.dateOfJoining,
     this.status,
+    required this.token,
   });
 
   @override
@@ -37,5 +39,6 @@ class UserEntity extends Equatable {
         position,
         dateOfJoining,
         status,
+        token,
       ];
 }

@@ -36,6 +36,9 @@ class UserHiveModel extends Equatable {
 
   @HiveField(9)
   final String? status;
+  
+  @HiveField(10)
+  final String token;
 
   const UserHiveModel({
     this.userId,
@@ -48,6 +51,7 @@ class UserHiveModel extends Equatable {
     this.position,
     this.dateOfJoining,
     this.status,
+    required this.token,
   });
 
   factory UserHiveModel.fromEntity(UserEntity entity) {
@@ -62,6 +66,7 @@ class UserHiveModel extends Equatable {
       position: entity.position,
       dateOfJoining: entity.dateOfJoining,
       status: entity.status,
+      token: entity.token,
     );
   }
 
@@ -77,6 +82,7 @@ class UserHiveModel extends Equatable {
       position: position,
       dateOfJoining: dateOfJoining,
       status: status,
+      token: token,
     );
   }
 
@@ -92,5 +98,6 @@ class UserHiveModel extends Equatable {
         position,
         dateOfJoining,
         status,
+        token,
       ];
 }

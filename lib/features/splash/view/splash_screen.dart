@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hready/app/service_locator/service_locator.dart';
+import 'package:hready/features/admin/presentation/view/dashboard_admin.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
+import 'package:hready/features/employee/presentation/view/dashboard_employee.dart';
 import 'package:hready/features/splash/viewmodel/splash_event.dart';
 import 'package:hready/features/splash/viewmodel/splash_state.dart';
 import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
@@ -12,10 +15,16 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SplashViewModel()..add(StartSplash()),
+      create: (_) => getIt<SplashViewModel>()..add(StartSplash()),
       child: BlocListener<SplashViewModel, SplashState>(
         listener: (context, state) {
-          if (state is SplashCompleted) {
+          if (state is SplashLoggedIn) {
+            if (state.user.role == "admin") {
+              MaterialPageRoute(builder: (_) => const DashboardAdmin());
+            } else {
+              MaterialPageRoute(builder: (_) => const DashboardEmployee());
+            }
+          } else if (state is SplashNotLoggedIn) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const LoginPage()),
             );

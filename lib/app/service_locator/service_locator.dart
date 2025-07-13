@@ -27,17 +27,22 @@ import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
-  // Core
-  getIt.registerLazySingleton(() => ApiService('http://192.168.18.177:3000'));
+  // Hive box for caching UserEntity
+  final userBox = await Hive.openBox<UserHiveModel>('userBox');
+
+  // Core - ApiService with getToken from Hive
+  getIt.registerLazySingleton(() => ApiService(
+        'http://192.168.18.177:3000',
+        getToken: () async {
+          final model = userBox.get('current_user');
+          return model?.token;
+        },
+      ));
 
   // Auth - Remote Datasource
   getIt.registerLazySingleton<IUserRemoteDatasource>(
-  () => UserRemoteDatasource(getIt()),
-);
-
-
-  // Hive box for caching UserEntity
-  final userBox = await Hive.openBox<UserHiveModel>('userBox');
+    () => UserRemoteDatasource(getIt()),
+  );
 
   // Auth Repository
   getIt.registerLazySingleton<AuthRepository>(
@@ -64,5 +69,7 @@ Future<void> setupLocator() async {
   getIt.registerFactory(() => EmployeeDashboardViewModel());
 
   // Splash
-  getIt.registerFactory(() => SplashViewModel());
+  getIt.registerFactory(() => SplashViewModel(
+        getCachedUserUseCase: getIt(),
+      ));
 }
