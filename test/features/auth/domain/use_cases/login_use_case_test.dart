@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:hready/features/auth/domain/use_cases/login_use_case.dart';
-import 'package:hready/features/auth/domain/repositories/auth_repository.dart';
 import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
 import '../../../../helpers/token.mock.dart';
