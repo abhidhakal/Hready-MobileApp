@@ -32,7 +32,7 @@ Future<void> setupLocator() async {
 
   // Core - ApiService with getToken from Hive
   getIt.registerLazySingleton(() => ApiService(
-        'http://192.168.18.177:3000',
+        'http://192.168.18.176:3000',
         getToken: () async {
           final model = userBox.get('current_user');
           return model?.token;

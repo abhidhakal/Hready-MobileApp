@@ -10,7 +10,6 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
-import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -22,7 +21,6 @@ class App extends StatelessWidget {
         BlocProvider(create: (_) => getIt<AuthViewModel>()),
         BlocProvider(create: (_) => getIt<AdminDashboardViewModel>()),
         BlocProvider(create: (_) => getIt<EmployeeDashboardViewModel>()),
-        BlocProvider(create: (_) => getIt<SplashViewModel>()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -33,3 +31,4 @@ class App extends StatelessWidget {
     );
   }
 }
+
