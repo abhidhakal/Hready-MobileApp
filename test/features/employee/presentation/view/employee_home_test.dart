@@ -11,7 +11,6 @@ void main() {
       ),
     );
 
-    // Verify the Logout button is present
     expect(find.text('Logout'), findsOneWidget);
   });
 }
