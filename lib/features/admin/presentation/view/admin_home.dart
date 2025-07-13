@@ -8,7 +8,7 @@ class AdminHome extends StatelessWidget {
     return SafeArea(
       child: Center(
         child: Text(
-          'Admin Dashboard Home',
+          'Hello, Admin',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
