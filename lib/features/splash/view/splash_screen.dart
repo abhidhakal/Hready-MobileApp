@@ -20,9 +20,13 @@ class SplashScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is SplashLoggedIn) {
             if (state.user.role == "admin") {
-              MaterialPageRoute(builder: (_) => const DashboardAdmin());
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const DashboardAdmin()),
+              );
             } else {
-              MaterialPageRoute(builder: (_) => const DashboardEmployee());
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const DashboardEmployee()),
+              );
             }
           } else if (state is SplashNotLoggedIn) {
             Navigator.of(context).pushReplacement(

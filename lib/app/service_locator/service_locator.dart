@@ -24,6 +24,17 @@ import 'package:hready/features/employee/presentation/viewmodel/employee_dashboa
 // Splash
 import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
 
+// Announcements
+import 'package:hready/features/announcements/data/datasources/remote_datasource/announcement_remote_data_source.dart';
+import 'package:hready/features/announcements/data/repositories/announcement_remote_repository.dart';
+import 'package:hready/features/announcements/domain/use_cases/get_announcements_use_case.dart';
+import 'package:hready/features/announcements/domain/use_cases/create_announcement_use_case.dart';
+import 'package:hready/features/announcements/domain/use_cases/update_announcement_use_case.dart';
+import 'package:hready/features/announcements/domain/use_cases/delete_announcement_use_case.dart';
+import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
+import 'package:hready/features/announcements/domain/repositories/announcement_repository.dart';
+import 'package:dio/dio.dart';
+
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
@@ -32,7 +43,7 @@ Future<void> setupLocator() async {
 
   // Core - ApiService with getToken from Hive
   getIt.registerLazySingleton(() => ApiService(
-        'http://192.168.18.176:3000',
+        'http://192.168.18.177:3000',
         getToken: () async {
           final model = userBox.get('current_user');
           return model?.token;
@@ -72,4 +83,50 @@ Future<void> setupLocator() async {
   getIt.registerFactory(() => SplashViewModel(
         getCachedUserUseCase: getIt(),
       ));
+
+  // Register Dio for API calls
+  getIt.registerLazySingleton<Dio>(() {
+    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.177:3000/api'));
+    // Optionally add an interceptor to always add the token
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await getToken();
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+    ));
+    return dio;
+  });
+
+  // Announcements - Remote Data Source
+  getIt.registerLazySingleton(() => AnnouncementRemoteDataSource(getIt<Dio>()));
+
+  // Announcements - Repository
+  getIt.registerLazySingleton(() => AnnouncementRemoteRepository(getIt()));
+  getIt.registerLazySingleton<AnnouncementRepository>(
+    () => getIt<AnnouncementRemoteRepository>(),
+  );
+
+  // Announcements - Use Cases
+  getIt.registerLazySingleton(() => GetAnnouncementsUseCase(getIt()));
+  getIt.registerLazySingleton(() => CreateAnnouncementUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateAnnouncementUseCase(getIt()));
+  getIt.registerLazySingleton(() => DeleteAnnouncementUseCase(getIt()));
+
+  // Announcements - ViewModel
+  getIt.registerFactory(() => AnnouncementViewModel(
+    getAnnouncementsUseCase: getIt(),
+    createAnnouncementUseCase: getIt(),
+    updateAnnouncementUseCase: getIt(),
+    deleteAnnouncementUseCase: getIt(),
+  ));
+}
+
+Future<String?> getToken() async {
+  final box = Hive.box<UserHiveModel>('userBox');
+  final user = box.get('current_user');
+  print('Token from Hive: ${user?.token}');
+  return user?.token;
 }
