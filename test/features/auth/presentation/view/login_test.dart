@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hready/features/auth/presentation/view/login.dart';
+import 'package:hready/features/auth/presentation/viewmodel/auth_state.dart';
+import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
 
-import 'package:your_app/features/auth/presentation/view/login.dart';
-import 'package:your_app/features/auth/presentation/viewmodel/auth_view_model.dart';
-import 'package:your_app/features/auth/presentation/viewmodel/auth_state.dart';
 
-import '../../../../mocks/mock_auth_bloc.dart';
+import '../../../../mocks/viewmodel.mock.dart';
 
 void main() {
   late MockAuthViewModel mockAuthViewModel;
