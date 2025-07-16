@@ -13,7 +13,7 @@ import 'package:hready/features/auth/domain/use_cases/login_use_case.dart';
 import 'package:hready/features/auth/domain/use_cases/register_use_case.dart';
 import 'package:hready/features/auth/domain/use_cases/get_cached_user_use_case.dart';
 import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
-import 'package:hready/features/auth/data/models/user_hive_model.dart';
+import 'package:hready/features/auth/data/models/user_model.dart';
 
 // Admin Dashboard
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';

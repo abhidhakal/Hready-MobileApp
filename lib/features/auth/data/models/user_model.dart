@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hready/app/constant/hive/hive_table_constant.dart';
 import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
-part 'user_hive_model.g.dart';
+part 'user_model.g.dart';
 
 @HiveType(typeId: HiveTableConstant.userTableId)
 class UserHiveModel extends Equatable {
