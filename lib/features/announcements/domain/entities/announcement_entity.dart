@@ -1,4 +1,6 @@
-class AnnouncementEntity {
+import 'package:equatable/equatable.dart';
+
+class AnnouncementEntity extends Equatable {
   final String? id;
   final String? title;
   final String? message;
@@ -6,7 +8,7 @@ class AnnouncementEntity {
   final String? postedBy;
   final DateTime? createdAt;
 
-  AnnouncementEntity({
+  const AnnouncementEntity({
     this.id,
     this.title,
     this.message,
@@ -14,4 +16,7 @@ class AnnouncementEntity {
     this.postedBy,
     this.createdAt,
   });
+
+  @override
+  List<Object?> get props => [id, title, message, audience, postedBy, createdAt];
 } 

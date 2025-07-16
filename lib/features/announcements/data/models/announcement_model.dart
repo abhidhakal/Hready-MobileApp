@@ -1,4 +1,6 @@
-class AnnouncementModel {
+import 'package:equatable/equatable.dart';
+
+class AnnouncementModel extends Equatable {
   final String? id;
   final String? title;
   final String? message;
@@ -6,7 +8,7 @@ class AnnouncementModel {
   final String? postedBy;
   final DateTime? createdAt;
 
-  AnnouncementModel({
+  const AnnouncementModel({
     this.id,
     this.title,
     this.message,
@@ -32,4 +34,7 @@ class AnnouncementModel {
         'message': message ?? '',
         'audience': audience ?? 'all',
       };
+
+  @override
+  List<Object?> get props => [id, title, message, audience, postedBy, createdAt];
 } 
