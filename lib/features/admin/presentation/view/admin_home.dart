@@ -47,7 +47,7 @@ class AdminHome extends StatelessWidget {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            icon: const Icon(Icons.edit, color: Color(0xFF042F46)),
                             onPressed: () {},
                           ),
                         ],

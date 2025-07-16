@@ -1,16 +1,51 @@
 import 'package:equatable/equatable.dart';
+import 'package:hready/features/employee/domain/entities/employee_entity.dart';
+import 'package:hready/features/tasks/domain/entities/task_entity.dart';
+import 'package:hready/features/announcements/domain/entities/announcement_entity.dart';
 
 class EmployeeDashboardState extends Equatable {
   final int selectedIndex;
+  final EmployeeEntity? employee;
+  final String attendanceStatus;
+  final int leaveDaysLeft;
+  final List<TaskEntity> tasks;
+  final List<AnnouncementEntity> announcements;
+  final bool isLoading;
+  final String? error;
 
-  const EmployeeDashboardState({required this.selectedIndex});
+  const EmployeeDashboardState({
+    required this.selectedIndex,
+    this.employee,
+    this.attendanceStatus = 'Not Done',
+    this.leaveDaysLeft = 0,
+    this.tasks = const [],
+    this.announcements = const [],
+    this.isLoading = false,
+    this.error,
+  });
 
-  EmployeeDashboardState copyWith({int? selectedIndex}) {
+  EmployeeDashboardState copyWith({
+    int? selectedIndex,
+    EmployeeEntity? employee,
+    String? attendanceStatus,
+    int? leaveDaysLeft,
+    List<TaskEntity>? tasks,
+    List<AnnouncementEntity>? announcements,
+    bool? isLoading,
+    String? error,
+  }) {
     return EmployeeDashboardState(
       selectedIndex: selectedIndex ?? this.selectedIndex,
+      employee: employee ?? this.employee,
+      attendanceStatus: attendanceStatus ?? this.attendanceStatus,
+      leaveDaysLeft: leaveDaysLeft ?? this.leaveDaysLeft,
+      tasks: tasks ?? this.tasks,
+      announcements: announcements ?? this.announcements,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 
   @override
-  List<Object?> get props => [selectedIndex];
+  List<Object?> get props => [selectedIndex, employee, attendanceStatus, leaveDaysLeft, tasks, announcements, isLoading, error];
 }

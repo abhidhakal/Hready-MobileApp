@@ -35,6 +35,23 @@ import 'package:hready/features/announcements/presentation/view_model/announceme
 import 'package:hready/features/announcements/domain/repositories/announcement_repository.dart';
 import 'package:dio/dio.dart';
 
+// Tasks
+import 'package:hready/features/tasks/data/datasources/remote_datasource/task_remote_data_source.dart';
+import 'package:hready/features/tasks/data/repositories/task_remote_repository.dart';
+import 'package:hready/features/tasks/domain/repositories/task_repository.dart';
+import 'package:hready/features/tasks/domain/use_cases/get_my_tasks_use_case.dart';
+
+// Attendance
+import 'package:hready/features/attendance/data/datasources/remote_datasource/attendance_remote_data_source.dart';
+import 'package:hready/features/attendance/data/repositories/attendance_remote_repository.dart';
+import 'package:hready/features/attendance/domain/repositories/attendance_repository.dart';
+import 'package:hready/features/attendance/domain/use_cases/get_my_attendance_use_case.dart';
+
+// Leaves
+import 'package:hready/features/leaves/data/datasources/remote_datasource/leave_remote_data_source.dart';
+import 'package:hready/features/leaves/data/repositories/leave_remote_repository.dart';
+import 'package:hready/features/leaves/domain/repositories/leave_repository.dart';
+
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
@@ -43,7 +60,7 @@ Future<void> setupLocator() async {
 
   // Core - ApiService with getToken from Hive
   getIt.registerLazySingleton(() => ApiService(
-        'http://192.168.18.177:3000',
+        'http://192.168.18.174:3000',
         getToken: () async {
           final model = userBox.get('current_user');
           return model?.token;
@@ -86,7 +103,7 @@ Future<void> setupLocator() async {
 
   // Register Dio for API calls
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.177:3000/api'));
+    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.174:3000/api'));
     // Optionally add an interceptor to always add the token
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -122,6 +139,29 @@ Future<void> setupLocator() async {
     updateAnnouncementUseCase: getIt(),
     deleteAnnouncementUseCase: getIt(),
   ));
+
+  // Tasks - Remote Data Source
+  getIt.registerLazySingleton(() => TaskRemoteDataSource(getIt<Dio>()));
+  // Tasks - Repository
+  getIt.registerLazySingleton(() => TaskRemoteRepository(getIt()));
+  getIt.registerLazySingleton<TaskRepository>(() => getIt<TaskRemoteRepository>());
+  // Tasks - Use Cases
+  getIt.registerLazySingleton(() => GetMyTasksUseCase(getIt()));
+
+  // Attendance - Remote Data Source
+  getIt.registerLazySingleton(() => AttendanceRemoteDataSource(getIt<Dio>()));
+  // Attendance - Repository
+  getIt.registerLazySingleton(() => AttendanceRemoteRepository(getIt()));
+  getIt.registerLazySingleton<AttendanceRepository>(() => getIt<AttendanceRemoteRepository>());
+  // Attendance - Use Cases
+  getIt.registerLazySingleton(() => GetMyAttendanceUseCase(getIt()));
+
+  // Leaves - Remote Data Source
+  getIt.registerLazySingleton(() => LeaveRemoteDataSource(getIt<Dio>()));
+  // Leaves - Repository
+  getIt.registerLazySingleton(() => LeaveRemoteRepository(getIt()));
+  getIt.registerLazySingleton<LeaveRepository>(() => getIt<LeaveRemoteRepository>());
+  // Leaves - Use Cases
 }
 
 Future<String?> getToken() async {
