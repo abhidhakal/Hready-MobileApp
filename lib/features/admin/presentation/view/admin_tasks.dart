@@ -5,8 +5,6 @@ import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_state.dart';
 import 'package:hready/features/tasks/domain/entities/task_entity.dart';
-import 'package:hready/features/employee/domain/entities/employee_entity.dart';
-import 'package:hready/features/auth/domain/entities/user_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
