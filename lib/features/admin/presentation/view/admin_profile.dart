@@ -47,7 +47,12 @@ class AdminProfilePage extends StatelessWidget {
         child: BlocBuilder<AdminProfileBloc, AdminProfileState>(
           builder: (context, state) {
             return Scaffold(
-              appBar: AppBar(title: const Text('Admin Profile')),
+              appBar: AppBar(
+                title: const Text('Admin Profile'),
+                backgroundColor: const Color(0xFFF5F5F5),
+                foregroundColor: Colors.black,
+                centerTitle: false,
+              ),
               body: state.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Center(

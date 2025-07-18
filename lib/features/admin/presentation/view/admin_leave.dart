@@ -4,10 +4,10 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
 import 'package:hready/features/leaves/domain/entities/leave_entity.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AdminLeave extends StatefulWidget {
-  final bool showAppBar;
-  const AdminLeave({this.showAppBar = false, Key? key}) : super(key: key);
+  const AdminLeave({Key? key}) : super(key: key);
 
   @override
   State<AdminLeave> createState() => _AdminLeaveState();
@@ -35,7 +35,13 @@ class _AdminLeaveState extends State<AdminLeave> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Request Leave for Myself'),
+          title: Row(
+            children: const [
+              Icon(Icons.beach_access, color: Colors.green),
+              SizedBox(width: 8),
+              Text('Request Leave for Myself'),
+            ],
+          ),
           content: SizedBox(
             width: 500,
             child: Form(
@@ -43,7 +49,10 @@ class _AdminLeaveState extends State<AdminLeave> {
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Text('Leave Type', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: leaveType.isEmpty ? null : leaveType,
                       items: const [
@@ -54,57 +63,59 @@ class _AdminLeaveState extends State<AdminLeave> {
                         DropdownMenuItem(value: 'Other', child: Text('Other')),
                       ],
                       onChanged: (v) => setState(() => leaveType = v ?? ''),
-                      decoration: const InputDecoration(labelText: 'Leave Type'),
+                      decoration: const InputDecoration(border: OutlineInputBorder()),
                       validator: (v) => v == null || v.isEmpty ? 'Select leave type' : null,
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InputDatePickerFormField(
-                            initialDate: startDate ?? DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2100),
-                            fieldLabelText: 'Start Date',
-                            onDateSubmitted: (date) => setState(() => startDate = date),
-                            onDateSaved: (date) => setState(() => startDate = date),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: InputDatePickerFormField(
-                            initialDate: endDate ?? DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2100),
-                            fieldLabelText: 'End Date',
-                            onDateSubmitted: (date) => setState(() => endDate = date),
-                            onDateSaved: (date) => setState(() => endDate = date),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 16),
+                    const Text('Start Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: startDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) setState(() => startDate = picked);
+                      },
+                      child: InputDecorator(
+                        decoration: const InputDecoration(border: OutlineInputBorder()),
+                        child: Text(startDate != null ? DateFormat('yyyy-MM-dd').format(startDate!) : 'Select'),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    const Text('End Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: endDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) setState(() => endDate = picked);
+                      },
+                      child: InputDecorator(
+                        decoration: const InputDecoration(border: OutlineInputBorder()),
+                        child: Text(endDate != null ? DateFormat('yyyy-MM-dd').format(endDate!) : 'Select'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Reason', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Reason'),
+                      decoration: const InputDecoration(border: OutlineInputBorder()),
                       onChanged: (v) => setState(() => reason = v),
                       validator: (v) => v == null || v.isEmpty ? 'Reason required' : null,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     CheckboxListTile(
                       value: halfDay,
                       onChanged: (v) => setState(() => halfDay = v ?? false),
                       title: const Text('Half Day'),
                       controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                    const SizedBox(height: 12),
-                    // File upload can be a TODO
-                    const Text('Attachment (optional):'),
-                    const SizedBox(height: 4),
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO: File picker for attachment
-                      },
-                      child: const Text('Upload File'),
                     ),
                   ],
                 ),
@@ -116,7 +127,7 @@ class _AdminLeaveState extends State<AdminLeave> {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
                   final leave = LeaveEntity(
@@ -125,7 +136,6 @@ class _AdminLeaveState extends State<AdminLeave> {
                     endDate: endDate,
                     reason: reason,
                     halfDay: halfDay,
-                    // attachment: ...
                     status: 'Pending',
                   );
                   context.read<LeaveBloc>().add(CreateLeave(leave));
@@ -159,9 +169,41 @@ class _AdminLeaveState extends State<AdminLeave> {
       child: BlocBuilder<LeaveBloc, LeaveState>(
         builder: (context, state) {
           return Scaffold(
-            appBar: widget.showAppBar ? AppBar(title: const Text('All Leave Requests')) : null,
+            appBar: AppBar(
+              title: const Text('All Leave Requests'),
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black,
+              centerTitle: false,
+            ),
             body: state is LeaveLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 4,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(height: 18, width: 120, color: Colors.white),
+                              const SizedBox(height: 10),
+                              Container(height: 14, width: 80, color: Colors.white),
+                              const SizedBox(height: 10),
+                              Container(height: 12, width: 180, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
                 : state is LeaveError
                     ? Center(child: Text('Error: ${state.error}'))
                     : SafeArea(
@@ -170,8 +212,6 @@ class _AdminLeaveState extends State<AdminLeave> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (!widget.showAppBar) const Text('All Leave Requests', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                              if (!widget.showAppBar) const SizedBox(height: 18),
                               if (state is LeaveLoaded && state.leaves.isNotEmpty)
                                 ...state.leaves.map((leave) => Card(
                                   margin: const EdgeInsets.symmetric(vertical: 10),

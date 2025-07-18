@@ -5,6 +5,7 @@ import 'package:hready/features/leaves/domain/entities/leave_entity.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:shimmer/shimmer.dart';
 
 class EmployeeLeave extends StatefulWidget {
   const EmployeeLeave({super.key});
@@ -62,6 +63,118 @@ class _EmployeeLeaveState extends State<EmployeeLeave> {
           }
         },
         builder: (context, state) {
+          Widget leaveRecordsWidget;
+          if (state is LeaveLoading) {
+            leaveRecordsWidget = ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 4,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) => Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Card(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(height: 18, width: 120, color: Colors.white),
+                        const SizedBox(height: 10),
+                        Container(height: 14, width: 80, color: Colors.white),
+                        const SizedBox(height: 10),
+                        Container(height: 12, width: 180, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          } else if (state is LeaveLoaded) {
+            leaveRecordsWidget = state.leaves.isEmpty
+                ? const Center(child: Text('No leave records found.', style: TextStyle(color: Colors.grey)))
+                : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: state.leaves.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final leave = state.leaves[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Chip(
+                                    label: Text(leave.status ?? 'Pending', style: const TextStyle(color: Colors.white)),
+                                    backgroundColor: (leave.status == 'Approved')
+                                        ? Colors.green
+                                        : (leave.status == 'Rejected')
+                                            ? Colors.red
+                                            : Colors.orange,
+                                  ),
+                                  const Spacer(),
+                                  if (leave.attachment != null && leave.attachment!.isNotEmpty)
+                                    IconButton(
+                                      icon: const Icon(Icons.attach_file, color: Colors.blue),
+                                      onPressed: () {
+                                        // TODO: Implement file open/download
+                                      },
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Text('Type: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  Text(leave.leaveType ?? '-')
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text('Dates: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  Text(leave.startDate != null ? DateFormat('yyyy-MM-dd').format(leave.startDate!) : '-'),
+                                  const Text(' to '),
+                                  Text(leave.endDate != null ? DateFormat('yyyy-MM-dd').format(leave.endDate!) : '-')
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text('Half Day: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  Text(leave.halfDay == true ? 'Yes' : 'No')
+                                ],
+                              ),
+                              if (leave.reason != null && leave.reason!.isNotEmpty)
+                                Row(
+                                  children: [
+                                    Text('Reason: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    Expanded(child: Text(leave.reason!)),
+                                  ],
+                                ),
+                              if (leave.adminComment != null && leave.adminComment!.isNotEmpty)
+                                Row(
+                                  children: [
+                                    Text('Comment: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                    Expanded(child: Text(leave.adminComment!, style: const TextStyle(color: Colors.blue))),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+          } else {
+            leaveRecordsWidget = const SizedBox.shrink();
+          }
           return Scaffold(
             body: SafeArea(
               child: SingleChildScrollView(
@@ -176,87 +289,7 @@ class _EmployeeLeaveState extends State<EmployeeLeave> {
                     const SizedBox(height: 24),
                     const Text('Your Leave Records', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    if (state is LeaveLoading)
-                      const Center(child: CircularProgressIndicator()),
-                    if (state is LeaveLoaded)
-                      state.leaves.isEmpty
-                        ? const Center(child: Text('No leave records found.', style: TextStyle(color: Colors.grey)))
-                        : ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state.leaves.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final leave = state.leaves[index];
-                              return Card(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                elevation: 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Chip(
-                                            label: Text(leave.status ?? 'Pending', style: const TextStyle(color: Colors.white)),
-                                            backgroundColor: (leave.status == 'Approved')
-                                              ? Colors.green
-                                              : (leave.status == 'Rejected')
-                                                ? Colors.red
-                                                : Colors.orange,
-                                          ),
-                                          const Spacer(),
-                                          if (leave.attachment != null && leave.attachment!.isNotEmpty)
-                                            IconButton(
-                                              icon: const Icon(Icons.attach_file, color: Colors.blue),
-                                              onPressed: () {
-                                                // TODO: Implement file open/download
-                                              },
-                                            ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Text('Type: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          Text(leave.leaveType ?? '-')
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Dates: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          Text(leave.startDate != null ? DateFormat('yyyy-MM-dd').format(leave.startDate!) : '-'),
-                                          const Text(' to '),
-                                          Text(leave.endDate != null ? DateFormat('yyyy-MM-dd').format(leave.endDate!) : '-')
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Half Day: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          Text(leave.halfDay == true ? 'Yes' : 'No')
-                                        ],
-                                      ),
-                                      if (leave.reason != null && leave.reason!.isNotEmpty)
-                                        Row(
-                                          children: [
-                                            Text('Reason: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                            Expanded(child: Text(leave.reason!)),
-                                          ],
-                                        ),
-                                      if (leave.adminComment != null && leave.adminComment!.isNotEmpty)
-                                        Row(
-                                          children: [
-                                            Text('Comment: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                            Expanded(child: Text(leave.adminComment!, style: const TextStyle(color: Colors.blue))),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                    leaveRecordsWidget,
                   ],
                 ),
               ),

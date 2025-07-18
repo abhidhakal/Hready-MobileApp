@@ -7,6 +7,7 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AdminRequests extends StatelessWidget {
   const AdminRequests({Key? key}) : super(key: key);
@@ -22,16 +23,46 @@ class AdminRequests extends StatelessWidget {
       child: BlocBuilder<RequestsBloc, RequestsState>(
         builder: (context, state) {
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('All Employee Requests'),
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black,
+              centerTitle: false,
+            ),
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('All Employee Requests', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 18),
-                  if (state.isLoading)
-                    const Center(child: CircularProgressIndicator()),
+                    if (state.isLoading)
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 4,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(height: 16, width: 120, color: Colors.white),
+                                  const SizedBox(height: 8),
+                                  Container(height: 12, width: 80, color: Colors.white),
+                                  const SizedBox(height: 8),
+                                  Container(height: 12, width: 180, color: Colors.white),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   if (state.error != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),

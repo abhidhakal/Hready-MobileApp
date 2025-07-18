@@ -9,6 +9,7 @@ import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_c
 import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:shimmer/shimmer.dart';
 
 class EmployeeRequestsPage extends StatelessWidget {
   const EmployeeRequestsPage({Key? key}) : super(key: key);
@@ -161,7 +162,33 @@ class EmployeeRequestsPage extends StatelessWidget {
                       Builder(
                         builder: (context) {
                           if (state.isLoading) {
-                            return const Center(child: CircularProgressIndicator());
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 4,
+                              separatorBuilder: (_, __) => const SizedBox(height: 16),
+                              itemBuilder: (context, index) => Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Card(
+                                  elevation: 2,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(height: 16, width: 120, color: Colors.white),
+                                        const SizedBox(height: 8),
+                                        Container(height: 12, width: 80, color: Colors.white),
+                                        const SizedBox(height: 8),
+                                        Container(height: 12, width: 180, color: Colors.white),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
                           } else if (state.error != null && state.requests.isEmpty) {
                             return Center(child: Text('Error: ${state.error!}', style: TextStyle(color: Colors.red)));
                           } else if (state.requests.isEmpty) {

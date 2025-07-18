@@ -7,6 +7,7 @@ import 'package:hready/features/employee/presentation/viewmodel/employee_profile
 import 'package:file_picker/file_picker.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
@@ -151,7 +152,38 @@ class EmployeeProfile extends StatelessWidget {
           builder: (context, state) {
             return Scaffold(
               body: state.isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(60),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Container(height: 22, width: 120, color: Colors.white),
+                                const SizedBox(height: 8),
+                                Container(height: 16, width: 180, color: Colors.white),
+                                const SizedBox(height: 8),
+                                Container(height: 14, width: 80, color: Colors.white),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
                   : SafeArea(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(24),

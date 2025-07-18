@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class EmployeeAnnouncements extends StatelessWidget {
   const EmployeeAnnouncements({super.key});
@@ -24,7 +25,45 @@ class EmployeeAnnouncements extends StatelessWidget {
                     const Text('Announcements', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     SizedBox(height: 16),
                     state.isLoading
-                        ? const Center(child: CircularProgressIndicator())
+                        ? ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: 4,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) => Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Card(
+                                margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(18.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(18),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Container(height: 18, width: 120, color: Colors.white),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Container(height: 12, width: 180, color: Colors.white),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
                         : state.error != null
                             ? Center(child: Text('Error: ${state.error}'))
                             : state.announcements.isEmpty

@@ -233,7 +233,12 @@ class _AdminTasksState extends State<AdminTasks> {
             final users = state.users;
             final tasks = state.tasks;
             return Scaffold(
-              appBar: AppBar(title: const Text('Tasks')),
+              appBar: AppBar(
+                title: const Text('Tasks'),
+                backgroundColor: const Color(0xFFF5F5F5),
+                foregroundColor: Colors.black,
+                centerTitle: false,
+              ),
               body: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(16),

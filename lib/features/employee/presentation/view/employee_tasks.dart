@@ -6,6 +6,7 @@ import 'package:hready/features/tasks/presentation/view_model/task_state.dart';
 import 'package:hready/features/tasks/domain/entities/task_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
+import 'package:shimmer/shimmer.dart';
 
 class EmployeeTasks extends StatelessWidget {
   const EmployeeTasks({super.key});
@@ -65,7 +66,38 @@ class EmployeeTasks extends StatelessWidget {
       child: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state is TaskLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 5,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) => Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
+                  child: ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    title: Container(height: 16, width: 120, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(height: 12, width: 180, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                        Container(height: 12, width: 80, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
           } else if (state is TaskError) {
             return Center(child: Text('Error: ${state.error}'));
           } else if (state is TaskLoaded) {

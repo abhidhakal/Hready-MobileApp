@@ -20,6 +20,7 @@ import 'package:hready/features/attendance/presentation/view_model/attendance_bl
 import 'package:hready/features/attendance/presentation/view_model/attendance_state.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
 import 'package:hready/features/admin/presentation/view/admin_attendance.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
@@ -254,7 +255,11 @@ class AdminHome extends StatelessWidget {
                 children: [
                   const Text('Recent Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => AdminTasks()),
+                      );
+                    },
                     child: const Text('View All'),
                   ),
                 ],
@@ -263,7 +268,43 @@ class AdminHome extends StatelessWidget {
               BlocBuilder<TaskBloc, TaskState>(
                 builder: (context, state) {
                   if (state is TaskLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        elevation: 4,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 76,
+                                height: 76,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(38),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(height: 22, width: 120, color: Colors.white),
+                                    const SizedBox(height: 10),
+                                    Container(height: 16, width: 80, color: Colors.white),
+                                    const SizedBox(height: 10),
+                                    Container(height: 16, width: 60, color: Colors.white),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
                   } else if (state is TaskError) {
                     return Center(child: Text('Error: ${state.error}'));
                   } else if (state is TaskLoaded && state.tasks.isNotEmpty) {
@@ -337,7 +378,11 @@ class AdminHome extends StatelessWidget {
                 children: [
                   const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => AdminAnnouncements()),
+                      );
+                    },
                     child: const Text('View All'),
                   ),
                 ],
@@ -350,7 +395,43 @@ class AdminHome extends StatelessWidget {
                   builder: (context, vm, _) {
                     final state = vm.state;
                     if (state.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          elevation: 4,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 76,
+                                  height: 76,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(38),
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(height: 22, width: 120, color: Colors.white),
+                                      const SizedBox(height: 10),
+                                      Container(height: 16, width: 80, color: Colors.white),
+                                      const SizedBox(height: 10),
+                                      Container(height: 16, width: 60, color: Colors.white),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
                     } else if (state.error != null) {
                       return Center(child: Text('Error: ${state.error}'));
                     } else if (state.announcements.isEmpty) {

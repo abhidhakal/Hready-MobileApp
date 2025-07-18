@@ -33,11 +33,11 @@ class DashboardAdmin extends StatelessWidget {
   Widget buildDrawerItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
     final bool selected = selectedIndex == index;
     return ListTile(
-      leading: Icon(icon, color: selected ? const Color(0xFF042F46) : Colors.grey),
+      leading: Icon(icon, color: selected ? const Color(0xFFffffff) : Colors.grey),
       title: Text(
         label,
         style: TextStyle(
-          color: selected ? const Color(0xFF042F46) : Colors.grey,
+          color: selected ? const Color(0xFFffffff) : Colors.grey,
           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
@@ -57,9 +57,12 @@ class DashboardAdmin extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
+              backgroundColor: Color(0xFFf5f5f5),
+              title: const Text('Admin Panel', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+              centerTitle: false,
               leading: Builder(
                 builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.white),
+                  icon: const Icon(Icons.menu, color: Colors.black),
                   onPressed: () {
                     Scaffold.of(context).openDrawer();
                   },
@@ -68,6 +71,7 @@ class DashboardAdmin extends StatelessWidget {
             ),
             drawer: SafeArea(
               child: Drawer(
+                backgroundColor: Color(0xFF042F46),
                 child: Column(
                   children: [
                     const DrawerHeader(
@@ -75,9 +79,9 @@ class DashboardAdmin extends StatelessWidget {
                         color: Color(0xFF042F46),
                       ),
                       child: Align(
-                        alignment: Alignment.bottomLeft,
+                        alignment: Alignment.centerLeft,
                         child: Text(
-                          'Admin Panel',
+                          'HReady',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,

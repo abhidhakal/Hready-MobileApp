@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/employee/presentation/view_model/employee_bloc.dart';
 import 'package:hready/features/employee/domain/entities/employee_entity.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AdminEmployees extends StatefulWidget {
   const AdminEmployees({super.key});
@@ -242,23 +243,53 @@ class _AdminEmployeesState extends State<AdminEmployees> {
       child: BlocBuilder<EmployeeBloc, EmployeeState>(
         builder: (context, state) {
           if (state is EmployeeLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 6,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) => Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
+                  child: ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    title: Container(height: 16, width: 100, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(height: 12, width: 140, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                        Container(height: 12, width: 80, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
           } else if (state is EmployeeError) {
             return Center(child: Text('Error: ${state.error}'));
           }
           final employees = state is EmployeeLoaded ? state.employees : <EmployeeEntity>[];
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('Manage Employees'),
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black,
+              centerTitle: false,
+            ),
             body: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Manage Employees', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 18),
-                    _buildEmployeeList(employees),
-                  ],
-                ),
+                child: _buildEmployeeList(employees),
               ),
             ),
             floatingActionButton: FloatingActionButton(
