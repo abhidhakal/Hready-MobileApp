@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hready/features/auth/presentation/view/login.dart';
 
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
@@ -70,7 +71,11 @@ class EmployeeProfile extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                    // TODO: Clear user session/token if needed
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                    );
                   },
                 ),
               ),

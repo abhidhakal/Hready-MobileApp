@@ -27,6 +27,22 @@ class UserEntity extends Equatable {
     required this.token,
   });
 
+  factory UserEntity.fromJson(Map<String, dynamic> json) => UserEntity(
+    userId: json['_id'] ?? json['userId'],
+    name: json['name'] ?? '',
+    email: json['email'] ?? '',
+    role: json['role'] ?? '',
+    profilePicture: json['profilePicture'],
+    contactNo: json['contactNo'],
+    department: json['department'],
+    position: json['position'],
+    dateOfJoining: json['date_of_joing'] != null
+        ? DateTime.tryParse(json['date_of_joing'])
+        : null,
+    status: json['status'],
+    token: json['token'] ?? '',
+  );
+
   @override
   List<Object?> get props => [
         userId,

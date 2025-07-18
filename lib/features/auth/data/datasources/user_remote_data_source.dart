@@ -4,4 +4,6 @@ abstract class IUserRemoteDatasource {
   Future<UserEntity> login(String email, String password);
   Future<UserEntity> register(Map<String, dynamic> payload);
   Future<UserEntity> getProfile(String token);
+  /// Returns all employees (not all users)
+  Future<List<UserEntity>> getAllUsers();
 }

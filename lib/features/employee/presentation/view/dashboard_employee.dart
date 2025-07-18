@@ -5,6 +5,7 @@ import 'package:hready/features/employee/presentation/view/employee_attendance.d
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_profile.dart';
 import 'package:hready/features/employee/presentation/view/employee_home.dart';
+import 'package:hready/features/employee/presentation/view/employee_tasks.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_event.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_state.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
@@ -16,6 +17,7 @@ class DashboardEmployee extends StatelessWidget {
     const EmployeeHome(),
     const EmployeeLeave(),
     const EmployeeAttendance(),
+    const EmployeeTasks(),
     const EmployeeAnnouncements(),
     const EmployeeProfile(),
   ];
@@ -72,8 +74,9 @@ class DashboardEmployee extends StatelessWidget {
                       buildNavItem(context, Icons.home_outlined, "Home", 0, state.selectedIndex),
                       buildNavItem(context, Icons.beach_access, "Leave", 1, state.selectedIndex),
                       buildNavItem(context, Icons.fingerprint, "Attendance", 2, state.selectedIndex),
-                      buildNavItem(context, Icons.announcement_outlined, "News", 3, state.selectedIndex),
-                      buildNavItem(context, Icons.person_outline, "Profile", 4, state.selectedIndex),
+                      buildNavItem(context, Icons.assignment_outlined, "Tasks", 3, state.selectedIndex),
+                      buildNavItem(context, Icons.announcement_outlined, "News", 4, state.selectedIndex),
+                      buildNavItem(context, Icons.person_outline, "Profile", 5, state.selectedIndex),
                     ],
                   ),
                 ),

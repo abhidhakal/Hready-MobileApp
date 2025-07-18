@@ -7,4 +7,5 @@ abstract interface class IEmployeeDataSource {
   Future<EmployeeEntity?> loginEmployee(String email, String password);
   Future<EmployeeEntity?> getEmployee();
   Future<void> uploadProfilePicture(File file);
+  Future<List<EmployeeEntity>> getAllEmployees();
 }

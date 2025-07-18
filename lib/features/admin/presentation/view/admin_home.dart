@@ -29,7 +29,7 @@ class AdminHome extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          CircleAvatar(radius: 32, backgroundImage: AssetImage('assets/images/profile.png')),
+                          CircleAvatar(radius: 32, backgroundImage: AssetImage('assets/images/profile.webp')),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(

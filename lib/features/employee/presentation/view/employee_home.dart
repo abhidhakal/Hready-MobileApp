@@ -38,7 +38,7 @@ class EmployeeHome extends StatelessWidget {
                         radius: 32,
                         backgroundImage: profilePicture != null && profilePicture.isNotEmpty
                             ? NetworkImage(profilePicture) as ImageProvider
-                            : const AssetImage('assets/images/profile.png'),
+                            : const AssetImage('assets/images/profile.webp'),
                       ),
                       const SizedBox(width: 16),
                       Expanded(

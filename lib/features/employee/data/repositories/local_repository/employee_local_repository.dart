@@ -41,6 +41,16 @@ class EmployeeLocalRepository implements IEmployeeRepository {
   }
 
   @override
+  Future<Either<Failure, List<EmployeeEntity>>> getAllEmployees() async {
+    try {
+      final employees = await _employeeLocalDatasource.getAllEmployees();
+      return Right(employees);
+    } catch (e) {
+      return Left(LocalDataBaseFailure(message: 'Failed to fetch employees: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, String>> uploadProfilePicture(
       File file){
         throw UnimplementedError();

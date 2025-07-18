@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
+import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
 class TaskModel extends Equatable {
   final String? id;
   final String? title;
   final String? description;
   final DateTime? dueDate;
-  final String? assignedTo;
+  final UserEntity? assignedTo;
   final String? assignedDepartment;
   final String? status;
   final String? createdBy;
@@ -28,7 +29,9 @@ class TaskModel extends Equatable {
         title: json['title'],
         description: json['description'],
         dueDate: json['dueDate'] != null ? DateTime.tryParse(json['dueDate']) : null,
-        assignedTo: json['assignedTo'] is Map ? json['assignedTo']['_id'] : json['assignedTo']?.toString(),
+        assignedTo: json['assignedTo'] != null && json['assignedTo'] is Map
+            ? UserEntity.fromJson(json['assignedTo'])
+            : null,
         assignedDepartment: json['assignedDepartment'],
         status: json['status'],
         createdBy: json['createdBy'] is Map ? json['createdBy']['_id'] : json['createdBy']?.toString(),
@@ -39,7 +42,7 @@ class TaskModel extends Equatable {
         'title': title,
         'description': description,
         'dueDate': dueDate?.toIso8601String(),
-        'assignedTo': assignedTo,
+        'assignedTo': assignedTo?.userId,
         'assignedDepartment': assignedDepartment,
         'status': status,
       };

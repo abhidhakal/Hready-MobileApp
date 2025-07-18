@@ -40,4 +40,10 @@ class EmployeeLocalDatasource implements IEmployeeDataSource {
   Future<void> uploadProfilePicture(File file) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<List<EmployeeEntity>> getAllEmployees() async {
+    // TODO: Implement actual fetching logic from HiveService
+    return [];
+  }
 }

@@ -1,52 +1,38 @@
-import 'package:hready/core/network/api_service.dart';
-import 'package:hready/features/auth/data/datasources/user_remote_data_source.dart';
+import 'package:dio/dio.dart';
 import '../../../domain/entities/user_entity.dart';
+import 'package:hready/features/auth/data/datasources/user_remote_data_source.dart';
 
 class UserRemoteDatasource implements IUserRemoteDatasource {
-  final ApiService apiService;
+  final Dio dio;
 
-  UserRemoteDatasource(this.apiService);
+  UserRemoteDatasource(this.dio);
+
+  @override
+  Future<List<UserEntity>> getAllUsers() async {
+    final response = await dio.get('/employees');
+    return (response.data as List).map((u) => UserEntity.fromJson(u)).toList();
+  }
 
   @override
   Future<UserEntity> login(String email, String password) async {
-    final json = await apiService.post('/api/auth/login', {
+    final response = await dio.post('/auth/login', data: {
       'email': email,
       'password': password,
     });
-
-    return _parseUser(json);
+    return UserEntity.fromJson(response.data);
   }
 
   @override
   Future<UserEntity> register(Map<String, dynamic> payload) async {
-    final json = await apiService.post('/api/auth/register', payload);
-    return _parseUser(json);
+    final response = await dio.post('/auth/register', data: payload);
+    return UserEntity.fromJson(response.data);
   }
 
   @override
   Future<UserEntity> getProfile(String token) async {
-    final json = await apiService.get('/api/me', headers: {
+    final response = await dio.get('/me', options: Options(headers: {
       'Authorization': 'Bearer $token',
-    });
-    return _parseUser(json);
+    }));
+    return UserEntity.fromJson(response.data);
   }
-
-  UserEntity _parseUser(Map<String, dynamic> json) {
-  return UserEntity(
-    userId: json['_id'],
-    email: json['email'],
-    name: json['name'],
-    role: json['role'],
-    profilePicture: json['profilePicture'],
-    contactNo: json['contactNo'],
-    department: json['department'],
-    position: json['position'],
-    dateOfJoining: json['date_of_joing'] != null
-        ? DateTime.tryParse(json['date_of_joing'])
-        : null,
-    status: json['status'],
-    token: json['token'],
-  );
-}
-
 }

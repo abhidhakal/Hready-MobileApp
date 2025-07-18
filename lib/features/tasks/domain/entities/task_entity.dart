@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
+import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
 class TaskEntity extends Equatable {
   final String? id;
   final String? title;
   final String? description;
   final DateTime? dueDate;
-  final String? assignedTo;
+  final UserEntity? assignedTo;
   final String? assignedDepartment;
   final String? status;
   final String? createdBy;

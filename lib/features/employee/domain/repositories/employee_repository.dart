@@ -11,4 +11,5 @@ abstract interface class IEmployeeRepository {
   Future<Either<Failure, EmployeeEntity?>> getEmployee();
   Future<Either<Failure, void>> uploadProfilePicture(
       File file);
+  Future<Either<Failure, List<EmployeeEntity>>> getAllEmployees();
 }

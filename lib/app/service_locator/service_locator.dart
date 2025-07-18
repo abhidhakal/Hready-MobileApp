@@ -40,6 +40,14 @@ import 'package:hready/features/tasks/data/datasources/remote_datasource/task_re
 import 'package:hready/features/tasks/data/repositories/task_remote_repository.dart';
 import 'package:hready/features/tasks/domain/repositories/task_repository.dart';
 import 'package:hready/features/tasks/domain/use_cases/get_my_tasks_use_case.dart';
+import 'package:hready/features/tasks/domain/use_cases/get_all_tasks_use_case.dart';
+import 'package:hready/features/tasks/domain/use_cases/create_task_use_case.dart';
+import 'package:hready/features/tasks/domain/use_cases/update_task_use_case.dart';
+import 'package:hready/features/tasks/domain/use_cases/delete_task_use_case.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_view_model.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
+import 'package:hready/features/tasks/domain/use_cases/get_all_users_use_case.dart';
 
 // Attendance
 import 'package:hready/features/attendance/data/datasources/remote_datasource/attendance_remote_data_source.dart';
@@ -60,7 +68,7 @@ Future<void> setupLocator() async {
 
   // Core - ApiService with getToken from Hive
   getIt.registerLazySingleton(() => ApiService(
-        'http://192.168.18.174:3000',
+        'http://192.168.18.178:3000',
         getToken: () async {
           final model = userBox.get('current_user');
           return model?.token;
@@ -69,7 +77,7 @@ Future<void> setupLocator() async {
 
   // Auth - Remote Datasource
   getIt.registerLazySingleton<IUserRemoteDatasource>(
-    () => UserRemoteDatasource(getIt()),
+    () => UserRemoteDatasource(getIt<Dio>()),
   );
 
   // Auth Repository
@@ -80,10 +88,10 @@ Future<void> setupLocator() async {
     ),
   );
 
-  // Use Cases
-  getIt.registerLazySingleton(() => LoginUseCase(getIt()));
-  getIt.registerLazySingleton(() => RegisterUseCase(getIt()));
-  getIt.registerLazySingleton(() => GetCachedUserUseCase(getIt()));
+  // Auth Use Cases
+  getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => RegisterUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => GetCachedUserUseCase(getIt<AuthRepository>()));
 
   // Auth ViewModel
   getIt.registerFactory(() => AuthViewModel(
@@ -92,46 +100,48 @@ Future<void> setupLocator() async {
         getCachedUserUseCase: getIt(),
       ));
 
+  // Splash ViewModel
+  getIt.registerFactory(() => SplashViewModel(getCachedUserUseCase: getIt()));
+
   // Dashboards
   getIt.registerFactory(() => AdminDashboardViewModel());
   getIt.registerFactory(() => EmployeeDashboardViewModel());
 
-  // Splash
-  getIt.registerFactory(() => SplashViewModel(
-        getCachedUserUseCase: getIt(),
-      ));
-
   // Register Dio for API calls
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.174:3000/api'));
+    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.178:3000/api'));
     // Optionally add an interceptor to always add the token
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await getToken();so i cant 
+        final token = await getToken();
+        print('DIO REQUEST: ${options.method} ${options.path}');
+        print('DIO HEADERS (before): ${options.headers}');
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
+        print('DIO HEADERS (after): ${options.headers}');
         return handler.next(options);
       },
+      onError: (DioError e, handler) {
+        print('DIO ERROR: ${e.response?.statusCode} ${e.response?.data}');
+        return handler.next(e);
+      }
     ));
     return dio;
   });
 
   // Announcements - Remote Data Source
   getIt.registerLazySingleton(() => AnnouncementRemoteDataSource(getIt<Dio>()));
-
   // Announcements - Repository
   getIt.registerLazySingleton(() => AnnouncementRemoteRepository(getIt()));
   getIt.registerLazySingleton<AnnouncementRepository>(
     () => getIt<AnnouncementRemoteRepository>(),
   );
-
   // Announcements - Use Cases
-  getIt.registerLazySingleton(() => GetAnnouncementsUseCase(getIt()));
-  getIt.registerLazySingleton(() => CreateAnnouncementUseCase(getIt()));
-  getIt.registerLazySingleton(() => UpdateAnnouncementUseCase(getIt()));
-  getIt.registerLazySingleton(() => DeleteAnnouncementUseCase(getIt()));
-
+  getIt.registerLazySingleton(() => GetAnnouncementsUseCase(getIt<AnnouncementRepository>()));
+  getIt.registerLazySingleton(() => CreateAnnouncementUseCase(getIt<AnnouncementRepository>()));
+  getIt.registerLazySingleton(() => UpdateAnnouncementUseCase(getIt<AnnouncementRepository>()));
+  getIt.registerLazySingleton(() => DeleteAnnouncementUseCase(getIt<AnnouncementRepository>()));
   // Announcements - ViewModel
   getIt.registerFactory(() => AnnouncementViewModel(
     getAnnouncementsUseCase: getIt(),
@@ -146,7 +156,29 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => TaskRemoteRepository(getIt()));
   getIt.registerLazySingleton<TaskRepository>(() => getIt<TaskRemoteRepository>());
   // Tasks - Use Cases
-  getIt.registerLazySingleton(() => GetMyTasksUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetAllTasksUseCase(getIt<TaskRepository>()));
+  getIt.registerLazySingleton(() => CreateTaskUseCase(getIt<TaskRepository>()));
+  getIt.registerLazySingleton(() => UpdateTaskUseCase(getIt<TaskRepository>()));
+  getIt.registerLazySingleton(() => DeleteTaskUseCase(getIt<TaskRepository>()));
+  getIt.registerLazySingleton(() => GetAllUsersUseCase(getIt<IUserRemoteDatasource>()));
+  getIt.registerLazySingleton(() => GetMyTasksUseCase(getIt<TaskRepository>()));
+  // Tasks - ViewModel
+  getIt.registerFactory(() => TaskViewModel(
+    getAllTasksUseCase: getIt(),
+    createTaskUseCase: getIt(),
+    updateTaskUseCase: getIt(),
+    deleteTaskUseCase: getIt(),
+    getAllUsersUseCase: getIt(),
+    getMyTasksUseCase: getIt(),
+  ));
+  getIt.registerFactory(() => TaskBloc(
+    getAllTasksUseCase: getIt(),
+    getMyTasksUseCase: getIt(),
+    createTaskUseCase: getIt(),
+    updateTaskUseCase: getIt(),
+    deleteTaskUseCase: getIt(),
+    getAllUsersUseCase: getIt(),
+  ));
 
   // Attendance - Remote Data Source
   getIt.registerLazySingleton(() => AttendanceRemoteDataSource(getIt<Dio>()));
@@ -154,7 +186,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => AttendanceRemoteRepository(getIt()));
   getIt.registerLazySingleton<AttendanceRepository>(() => getIt<AttendanceRemoteRepository>());
   // Attendance - Use Cases
-  getIt.registerLazySingleton(() => GetMyAttendanceUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetMyAttendanceUseCase(getIt<AttendanceRepository>()));
 
   // Leaves - Remote Data Source
   getIt.registerLazySingleton(() => LeaveRemoteDataSource(getIt<Dio>()));
