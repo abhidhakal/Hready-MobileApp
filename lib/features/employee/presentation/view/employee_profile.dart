@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:hready/features/auth/presentation/view/login.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_profile_bloc.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_profile_event.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_profile_state.dart';
+import 'package:file_picker/file_picker.dart';
 
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
 
-  // Helper to resolve profile picture URL
-  String _resolveProfilePicture(String? picture) {
-    if (picture == null || picture.isEmpty) return '';
+  String _resolveProfilePicture(String picture) {
+    if (picture.isEmpty) return '';
     if (picture.startsWith('/uploads/')) {
       return 'http://192.168.18.175:3000$picture'; // <-- Use your API base URL
     }
@@ -14,87 +18,262 @@ class EmployeeProfile extends StatelessWidget {
     return '';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: Replace with actual user data from state/provider
-    final userData = {
-      'Name': 'John Doe',
-      'Email': 'john.doe@example.com',
-      'Position': 'Software Engineer',
-      'Phone': '+977 9865206747',
-    };
-    final profilePicture = null; // TODO: Replace with actual user profile picture
-
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Profile'),
-      //   backgroundColor: const Color(0xFF042F46),
-      // ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // align all left
+  void _showChangePasswordDialog(BuildContext context, EmployeeProfileState state) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String current = state.currentPassword;
+        String newPass = state.newPassword;
+        String confirm = state.confirmPassword;
+        return AlertDialog(
+          title: const Text('Change Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Profile picture stuck to left
-              Align(
-                alignment: Alignment.centerLeft,
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: (profilePicture != null && profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
-                      ? NetworkImage(_resolveProfilePicture(profilePicture)) as ImageProvider
-                      : const AssetImage('assets/images/profile.webp'),
-                ),
+              TextField(
+                obscureText: !state.showCurrent,
+                decoration: const InputDecoration(labelText: 'Current Password'),
+                onChanged: (val) => current = val,
               ),
-              const SizedBox(height: 24),
-              // User details listed below, aligned left
-              ...userData.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${entry.key}: ',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          entry.value,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.logout, color: Colors.white),
-                  label: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF042F46),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    // TODO: Clear user session/token if needed
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const LoginPage()),
-                      (route) => false,
-                    );
-                  },
-                ),
+              TextField(
+                obscureText: !state.showNew,
+                decoration: const InputDecoration(labelText: 'New Password'),
+                onChanged: (val) => newPass = val,
+              ),
+              TextField(
+                obscureText: !state.showConfirm,
+                decoration: const InputDecoration(labelText: 'Confirm New Password'),
+                onChanged: (val) => confirm = val,
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.read<EmployeeProfileBloc>().add(ChangePasswordRequested(current, newPass, confirm));
+                Navigator.of(context).pop();
+              },
+              child: const Text('Change'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeactivateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Deactivate Account'),
+        content: const Text('Are you sure you want to deactivate your account? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<EmployeeProfileBloc>().add(DeactivateAccountRequested());
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Deactivate'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
+      child: BlocListener<EmployeeProfileBloc, EmployeeProfileState>(
+        listenWhen: (previous, current) =>
+            previous.success != current.success || previous.error != current.error,
+        listener: (context, state) {
+          if (state.success.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.success),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          } else if (state.error.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(title: const Text('Employee Profile')),
+              body: state.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Card(
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        alignment: Alignment.bottomRight,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: state.isEditing
+                                                ? () async {
+                                                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+                                                    if (result != null && result.files.single.path != null) {
+                                                      context.read<EmployeeProfileBloc>().add(UploadProfilePicture(File(result.files.single.path!)));
+                                                    }
+                                                  }
+                                                : null,
+                                            child: CircleAvatar(
+                                              radius: 60,
+                                              backgroundImage: state.profilePicture.isNotEmpty
+                                                  ? NetworkImage(_resolveProfilePicture(state.profilePicture))
+                                                  : const AssetImage('assets/images/profile.webp') as ImageProvider,
+                                            ),
+                                          ),
+                                          if (state.isEditing)
+                                            Positioned(
+                                              bottom: 0,
+                                              right: 0,
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: IconButton(
+                                                  icon: const Icon(Icons.edit, color: Colors.white),
+                                                  onPressed: () async {
+                                                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+                                                    if (result != null && result.files.single.path != null) {
+                                                      context.read<EmployeeProfileBloc>().add(UploadProfilePicture(File(result.files.single.path!)));
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Text(state.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      Text(state.email, style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                                      const SizedBox(height: 2),
+                                      Text('Role: ${state.role}', style: const TextStyle(fontSize: 14, color: Colors.black45)),
+                                      const SizedBox(height: 16),
+                                      if (state.isEditing)
+                                        Column(
+                                          children: [
+                                            TextFormField(
+                                              initialValue: state.name,
+                                              decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                                              onChanged: (val) => context.read<EmployeeProfileBloc>().add(ProfileFieldChanged('name', val)),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            TextFormField(
+                                              initialValue: state.email,
+                                              decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                                              onChanged: (val) => context.read<EmployeeProfileBloc>().add(ProfileFieldChanged('email', val)),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            TextFormField(
+                                              initialValue: state.contactNo,
+                                              decoration: const InputDecoration(labelText: 'Contact No', border: OutlineInputBorder()),
+                                              onChanged: (val) => context.read<EmployeeProfileBloc>().add(ProfileFieldChanged('contactNo', val)),
+                                            ),
+                                            const SizedBox(height: 24),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                ElevatedButton(
+                                                  onPressed: state.isLoading
+                                                      ? null
+                                                      : () => context.read<EmployeeProfileBloc>().add(SaveProfile(
+                                                            name: state.name,
+                                                            email: state.email,
+                                                            contactNo: state.contactNo,
+                                                          )),
+                                                  child: state.isLoading ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Save'),
+                                                ),
+                                                const SizedBox(width: 16),
+                                                OutlinedButton(
+                                                  onPressed: state.isLoading
+                                                      ? null
+                                                      : () => context.read<EmployeeProfileBloc>().add(EditProfileToggled()),
+                                                  child: const Text('Cancel'),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        )
+                                      else
+                                        Column(
+                                          children: [
+                                            Text('Contact: ${state.contactNo}', style: const TextStyle(fontSize: 14)),
+                                            const SizedBox(height: 24),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                ElevatedButton(
+                                                  onPressed: () => context.read<EmployeeProfileBloc>().add(EditProfileToggled()),
+                                                  child: const Text('Edit Profile'),
+                                                ),
+                                                const SizedBox(width: 16),
+                                                OutlinedButton(
+                                                  onPressed: () => _showChangePasswordDialog(context, state),
+                                                  child: const Text('Change Password'),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 16),
+                                            OutlinedButton(
+                                              onPressed: () => _showDeactivateDialog(context),
+                                              style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                                              child: const Text('Deactivate Account'),
+                                            ),
+                                          ],
+                                        ),
+                                      if (state.error.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 16.0),
+                                          child: Text(state.error, style: const TextStyle(color: Colors.red)),
+                                        ),
+                                      if (state.success.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 16.0),
+                                          child: Text(state.success, style: const TextStyle(color: Colors.green)),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+            );
+          },
         ),
       ),
     );

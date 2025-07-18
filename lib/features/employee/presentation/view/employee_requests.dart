@@ -24,106 +24,118 @@ class EmployeeRequestsPage extends StatelessWidget {
       child: BlocBuilder<RequestsBloc, RequestsState>(
         builder: (context, state) {
           return Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Request/ Report to Admin', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    decoration: const InputDecoration(hintText: 'Title'),
-                                    initialValue: state.formTitle,
-                                    onChanged: (val) => context.read<RequestsBloc>().add(EmployeeFormChanged('title', val)),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    const Text('Requests & Reports', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 18),
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Form(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      decoration: const InputDecoration(hintText: 'Title'),
+                                      initialValue: state.formTitle,
+                                      onChanged: (val) => context.read<RequestsBloc>().add(EmployeeFormChanged('title', val)),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                DropdownButton<String>(
-                                  value: state.formType,
-                                  items: const [
-                                    DropdownMenuItem(value: 'request', child: Text('Request')),
-                                    DropdownMenuItem(value: 'report', child: Text('Report')),
-                                  ],
-                                  onChanged: (val) => context.read<RequestsBloc>().add(EmployeeFormChanged('type', val)),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              decoration: const InputDecoration(hintText: 'Message'),
-                              initialValue: state.formMessage,
-                              maxLines: 3,
-                              onChanged: (val) => context.read<RequestsBloc>().add(EmployeeFormChanged('message', val)),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(state.formAttachment != null ? (state.formAttachment as File).path.split('/').last : 'No file selected'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    FilePickerResult? result = await FilePicker.platform.pickFiles();
-                                    if (result != null && result.files.single.path != null) {
-                                      context.read<RequestsBloc>().add(EmployeeFormChanged('attachment', File(result.files.single.path!)));
-                                    }
-                                  },
-                                  child: const Text('Attach File'),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: state.isSubmitting
-                                  ? null
-                                  : () {
-                                      context.read<RequestsBloc>().add(SubmitRequest(
-                                            title: state.formTitle,
-                                            message: state.formMessage,
-                                            type: state.formType,
-                                            attachment: state.formAttachment,
-                                          ));
-                                    },
-                              child: state.isSubmitting ? const Text('Sending...') : const Text('Send'),
-                            ),
-                            if (state.error != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(state.error!, style: const TextStyle(color: Colors.red)),
+                                  const SizedBox(width: 8),
+                                  DropdownButton<String>(
+                                    value: state.formType,
+                                    items: const [
+                                      DropdownMenuItem(value: 'request', child: Text('Request')),
+                                      DropdownMenuItem(value: 'report', child: Text('Report')),
+                                    ],
+                                    onChanged: (val) => context.read<RequestsBloc>().add(EmployeeFormChanged('type', val)),
+                                  ),
+                                ],
                               ),
-                          ],
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                decoration: const InputDecoration(hintText: 'Message'),
+                                initialValue: state.formMessage,
+                                maxLines: 3,
+                                onChanged: (val) => context.read<RequestsBloc>().add(EmployeeFormChanged('message', val)),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(state.formAttachment != null ? (state.formAttachment as File).path.split('/').last : 'No file selected'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      FilePickerResult? result = await FilePicker.platform.pickFiles();
+                                      if (result != null && result.files.single.path != null) {
+                                        context.read<RequestsBloc>().add(EmployeeFormChanged('attachment', File(result.files.single.path!)));
+                                      }
+                                    },
+                                    child: const Text('Attach File'),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: state.isSubmitting
+                                      ? null
+                                      : () {
+                                          context.read<RequestsBloc>().add(SubmitRequest(
+                                                title: state.formTitle,
+                                                message: state.formMessage,
+                                                type: state.formType,
+                                                attachment: state.formAttachment,
+                                              ));
+                                        },
+                                  child: state.isSubmitting ? const Text('Sending...') : const Text('Send'),
+                                ),
+                              ),
+                              if (state.error != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(state.error!, style: const TextStyle(color: Colors.red)),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const Divider(height: 32),
-                  const Text('My Requests', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: state.requests.isEmpty
-                        ? const Center(child: Text('No requests yet.'))
-                        : ListView.separated(
+                    const SizedBox(height: 32),
+                    const Text('My Requests', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: Builder(
+                        builder: (context) {
+                          if (state.isLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (state.error != null && state.requests.isEmpty) {
+                            return Center(child: Text('Error: ${state.error!}', style: TextStyle(color: Colors.red)));
+                          } else if (state.requests.isEmpty) {
+                            return const Center(child: Text('No requests yet.'));
+                          }
+                          return ListView.separated(
                             itemCount: state.requests.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            separatorBuilder: (_, __) => const SizedBox(height: 16),
                             itemBuilder: (context, index) {
                               final r = state.requests[index];
                               return Card(
                                 elevation: 2,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(20.0),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -170,9 +182,12 @@ class EmployeeRequestsPage extends StatelessWidget {
                                 ),
                               );
                             },
-                          ),
-                  ),
-                ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

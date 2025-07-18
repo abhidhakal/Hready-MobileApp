@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/employee/presentation/view/employee_attendance.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_state.dart';
-import 'package:intl/intl.dart';
 import 'package:hready/features/employee/presentation/view/employee_profile.dart';
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_tasks.dart';
@@ -11,16 +8,25 @@ import 'package:hready/features/employee/presentation/view/employee_announcement
 import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_event.dart';
+import 'package:intl/intl.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_profile_bloc.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_profile_event.dart';
+import 'package:hready/features/employee/presentation/viewmodel/employee_profile_state.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_bloc.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_state.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_state.dart';
+import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
 
-  // Helper to resolve profile picture URL
   String _resolveProfilePicture(String? picture) {
     if (picture == null || picture.isEmpty) return '';
     if (picture.startsWith('/uploads/')) {
-      return 'http://192.168.18.175:3000$picture'; // <-- Use your API base URL
+      return 'http://192.168.18.175:3000$picture';
     }
     if (picture.startsWith('http')) return picture;
     return '';
@@ -28,304 +34,391 @@ class EmployeeHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<EmployeeDashboardViewModel, EmployeeDashboardState>(
-      builder: (context, state) {
-        final user = state.user;
-        final name = user?.name ?? 'Employee';
-        final position = user?.position ?? 'Employee';
-        final profilePicture = user?.profilePicture;
-        final attendanceStatus = state.attendanceStatus;
-        final leaveDaysLeft = state.leaveDaysLeft > 0 ? state.leaveDaysLeft : 15; // Placeholder
-        final tasks = state.tasks;
-        final announcements = state.announcements;
-        final email = user?.email ?? '-';
-        final contactNo = user?.contactNo ?? '-';
-        final department = user?.department ?? '-';
-        final role = user?.role ?? '-';
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            context.read<EmployeeDashboardViewModel>().add(LoadEmployeeDashboard());
-            // Wait for loading to finish
-            await Future.doWhile(() async {
-              await Future.delayed(const Duration(milliseconds: 100));
-              final loading = context.read<EmployeeDashboardViewModel>().state.isLoading;
-              return loading;
-            });
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome Banner
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 2,
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const EmployeeProfile()),
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 36,
-                            backgroundImage: (profilePicture != null && profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
-                                ? NetworkImage(_resolveProfilePicture(profilePicture)) as ImageProvider
-                                : const AssetImage('assets/images/profile.webp'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Hello, $name', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 6),
-                              Row(
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Welcome Banner
+            BlocProvider(
+              create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
+              child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
+                builder: (context, state) {
+                  if (state.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.error.isNotEmpty) {
+                    return Center(child: Text('Error: ${state.error}'));
+                  }
+                  final name = state.name.isNotEmpty ? state.name : 'Employee';
+                  final firstName = name.split(' ').first;
+                  final position = state.role.isNotEmpty ? state.role : 'Employee';
+                  final profilePicture = state.profilePicture;
+                  return BlocProvider(
+                    create: (_) => getIt<AttendanceBloc>()..add(LoadTodayAttendance()),
+                    child: BlocBuilder<AttendanceBloc, AttendanceState>(
+                      builder: (context, attState) {
+                        String attendance = '-';
+                        Color attColor = Colors.red;
+                        if (attState is AttendanceLoaded) {
+                          attendance = attState.todayStatus;
+                          if (attendance == 'Checked In' || attendance == 'Checked Out') {
+                            attColor = Colors.green;
+                          }
+                        }
+                        return SafeArea(
+                          child: Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            elevation: 4,
+                            color: Colors.blueGrey[50],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                              child: Row(
                                 children: [
-                                  InkWell(
-                                    child: Chip(
-                                      label: Text(
-                                        attendanceStatus,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                      ),
-                                      backgroundColor: (attendanceStatus == 'Checked In' || attendanceStatus == 'Checked Out')
-                                          ? Colors.green
-                                          : Colors.red,
+                                  CircleAvatar(
+                                    radius: 38,
+                                    backgroundImage: (profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
+                                        ? NetworkImage(_resolveProfilePicture(profilePicture)) as ImageProvider
+                                        : const AssetImage('assets/images/profile.webp'),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Welcome, $firstName!', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: attColor.withOpacity(0.15),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                attendance,
+                                                style: TextStyle(color: attColor, fontWeight: FontWeight.bold),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.settings, color: Color(0xFF042F46)),
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(builder: (_) => const EmployeeProfile()),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
-                              if (attendanceStatus != 'Checked In' && attendanceStatus != 'Checked Out')
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(builder: (_) => const EmployeeAttendance()),
-                                      );
-                                    },
-                                    child: const Text('Complete attendance', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500)),
-                                  ),
-                                ),
-                            ],
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.settings, color: Color(0xFF042F46)),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const EmployeeProfile()),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Info Cards Row (Role and Leave Days Left)
-                SizedBox(
-                  height: 120,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _InfoCard(
-                          title: 'Role',
-                          content: Text(user?.position ?? '-', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                          color: Colors.white,
-                          height: 120,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _InfoCard(
-                          title: 'Leave Days Left',
-                          content: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('$leaveDaysLeft', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => const EmployeeLeave()),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF042F46),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  minimumSize: const Size(40, 36),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                ),
-                                child: const Text('Request', style: TextStyle(fontSize: 14)),
-                              ),
-                            ],
-                          ),
-                          color: Colors.white,
-                          height: 120,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Recent Tasks
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Task List', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const EmployeeTasks()),
                         );
                       },
-                      child: const Text('View All'),
                     ),
-                  ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Info Cards Row
+            SizedBox(
+              height: 160,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: BlocProvider(
+                      create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
+                      child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
+                        builder: (context, state) {
+                          final position = state.role.isNotEmpty ? state.role : 'Employee';
+                          return _InfoCard(
+                            title: 'Position',
+                            content: Row(
+                              children: [
+                                const SizedBox(width: 10),
+                                Text(position, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            color: Colors.white,
+                            height: 160,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: BlocProvider(
+                      create: (_) => getIt<LeaveBloc>()..add(LoadMyLeaves()),
+                      child: BlocBuilder<LeaveBloc, LeaveState>(
+                        builder: (context, state) {
+                          int leaveDaysLeft = 4;
+                          if (state is LeaveLoaded) {
+                            final now = DateTime.now();
+                            final leavesThisMonth = state.leaves.where((l) =>
+                              l.startDate != null &&
+                              l.status != null &&
+                              l.status!.toLowerCase() == 'approved' &&
+                              l.startDate!.year == now.year &&
+                              l.startDate!.month == now.month
+                            ).length;
+                            leaveDaysLeft = 4 - leavesThisMonth;
+                          }
+                          return _InfoCard(
+                            title: 'Leave Days Left',
+                            content: Row(
+                              children: [
+                                const Icon(Icons.beach_access, color: Colors.green, size: 22),
+                                const SizedBox(width: 8),
+                                Text('$leaveDaysLeft', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                const Spacer(),
+                              ],
+                            ),
+                            color: Colors.white,
+                            height: 160,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Pending Tasks Card
+            BlocProvider(
+              create: (_) => getIt<TaskBloc>()..add(const LoadTasks(onlyMyTasks: true)),
+              child: BlocBuilder<TaskBloc, TaskState>(
+                builder: (context, state) {
+                  int pending = 0;
+                  String? nextTaskTitle;
+                  String? nextTaskDue;
+                  int total = 0;
+                  if (state is TaskLoaded) {
+                    final pendingTasks = state.tasks.where((t) => t.status?.toLowerCase() == 'pending').toList();
+                    pending = pendingTasks.length;
+                    total = state.tasks.length;
+                    if (pendingTasks.isNotEmpty) {
+                      nextTaskTitle = pendingTasks.first.title;
+                      if (pendingTasks.first.dueDate != null) {
+                        nextTaskDue = DateFormat('yyyy-MM-dd').format(pendingTasks.first.dueDate!);
+                      }
+                    }
+                  }
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Pending Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(Icons.assignment_late, color: Colors.orange[700], size: 22),
+                                  const SizedBox(width: 8),
+                                  Text('$pending', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                  if (total > 0) ...[
+                                    const SizedBox(width: 12),
+                                    SizedBox(
+                                      width: 60,
+                                      child: LinearProgressIndicator(
+                                        value: total > 0 ? (total - pending) / total : 0,
+                                        minHeight: 8,
+                                        backgroundColor: Colors.grey[200],
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              if (nextTaskTitle != null) ...[
+                                const SizedBox(height: 8),
+                                Text('Next: $nextTaskTitle', style: const TextStyle(fontSize: 14)),
+                                if (nextTaskDue != null)
+                                  Text('Due: $nextTaskDue', style: const TextStyle(fontSize: 13, color: Colors.red)),
+                              ],
+                            ],
+                          ),
+                          const Spacer(),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const EmployeeTasks()),
+                              );
+                            },
+                            child: const Text('View All'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Recent Tasks Header with View All
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Recent Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const EmployeeTasks()),
+                    );
+                  },
+                  child: const Text('View All'),
                 ),
-                const SizedBox(height: 8),
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 2,
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Builder(
-                      builder: (context) {
-                        final activeTasks = tasks.where((t) => (t.status ?? '').toLowerCase() != 'completed').toList();
-                        if (activeTasks.isNotEmpty) {
-                          return Column(
-                            children: activeTasks.take(3).map((task) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+              ],
+            ),
+            const SizedBox(height: 8),
+            BlocProvider(
+              create: (_) => getIt<TaskBloc>()..add(const LoadTasks(onlyMyTasks: true)),
+              child: BlocBuilder<TaskBloc, TaskState>(
+                builder: (context, state) {
+                  if (state is TaskLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is TaskError) {
+                    return Center(child: Text('Error: ${state.error}'));
+                  } else if (state is TaskLoaded && state.tasks.isNotEmpty) {
+                    final tasks = state.tasks.take(3).toList();
+                    return Column(
+                      children: [
+                        for (final task in tasks)
+                          Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 2,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
                               child: Row(
                                 children: [
                                   Expanded(
                                     flex: 2,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(task.title ?? '', style: const TextStyle(fontWeight: FontWeight.w500)),
-                                        if (task.dueDate != null)
-                                          Text(
-                                            'Due: ' + DateFormat('yyyy-MM-dd').format(task.dueDate!),
-                                            style: const TextStyle(fontSize: 13, color: Colors.grey),
-                                          ),
-                                      ],
+                                    child: Text(
+                                      task.title ?? '-',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ),
-                                  Chip(
-                                    label: Text(task.status ?? '', style: const TextStyle(color: Colors.white)),
-                                    backgroundColor: (task.status == 'Pending')
-                                        ? Colors.orange
-                                        : (task.status == 'In Progress')
-                                            ? Colors.blue
-                                            : Colors.green,
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Text(
+                                      task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-',
+                                      style: const TextStyle(fontSize: 13, color: Colors.red),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ],
-                              ),
-                            )).toList(),
-                          );
-                        } else {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Column(
-                                children: [
-                                  Icon(Icons.assignment_turned_in, size: 40, color: Colors.grey),
-                                  SizedBox(height: 8),
-                                  Text('No tasks assigned to you.', style: TextStyle(color: Colors.grey)),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[100] : Colors.green[100],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      task.status ?? '-',
+                                      style: TextStyle(
+                                        color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[800] : Colors.green[800],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Recent Announcements
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const EmployeeAnnouncements()),
-                        );
-                      },
-                      child: const Text('View All'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ChangeNotifierProvider<AnnouncementViewModel>(
-                  create: (_) => getIt<AnnouncementViewModel>()..loadAnnouncements(),
-                  child: Consumer<AnnouncementViewModel>(
-                    builder: (context, vm, _) {
-                      final state = vm.state;
-                      if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state.error != null) {
-                        return Center(child: Text('Error: \\${state.error}'));
-                      } else if (state.announcements.isEmpty) {
-                        return const Center(
-                          child: Column(
-                            children: [
-                              Icon(Icons.campaign, size: 40, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text('No announcements available.', style: TextStyle(color: Colors.grey)),
-                            ],
                           ),
-                        );
-                      } else {
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: state.announcements.take(3).length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final ann = state.announcements[index];
-                            return Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              elevation: 2,
-                              color: Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
+                      ],
+                    );
+                  }
+                  return const Center(child: Text('No recent tasks.'));
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Recent Announcements Header with View All
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const EmployeeAnnouncements()),
+                    );
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ChangeNotifierProvider<AnnouncementViewModel>(
+              create: (_) => getIt<AnnouncementViewModel>()..loadAnnouncements(),
+              child: Consumer<AnnouncementViewModel>(
+                builder: (context, vm, _) {
+                  final state = vm.state;
+                  if (state.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.error != null) {
+                    return Center(child: Text('Error: ${state.error}'));
+                  } else if (state.announcements.isEmpty) {
+                    return const Center(child: Text('No announcements available.'));
+                  }
+                  final announcements = state.announcements.take(5).toList();
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: announcements.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final ann = announcements[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.campaign, color: Colors.orange, size: 28),
+                              const SizedBox(width: 12),
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange[100],
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          padding: const EdgeInsets.all(6),
-                                          child: const Icon(Icons.campaign, color: Colors.orange, size: 20),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                    ),
+                                    Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 4),
                                     Text(
                                       ann.message != null && ann.message!.length > 100
                                           ? ann.message!.substring(0, 100) + '...'
                                           : ann.message ?? '',
                                     ),
+                                    if (ann.message != null && ann.message!.length > 100)
+                                      TextButton(
+                                        onPressed: () {
+                                          // Show full announcement (could use a dialog or new page)
+                                        },
+                                        child: const Text('Read More'),
+                                      ),
                                     const SizedBox(height: 4),
                                     Text(
                                       ann.createdAt != null
@@ -336,18 +429,18 @@ class EmployeeHome extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                            );
-                          },
-                        );
-                      }
+                            ],
+                          ),
+                        ),
+                      );
                     },
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
@@ -375,6 +468,134 @@ class _InfoCard extends StatelessWidget {
               Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               content,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _QuickAction({required this.icon, required this.label, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 90,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 36, color: Colors.black87),
+              const SizedBox(height: 8),
+              Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String value;
+  final String actionLabel;
+  final VoidCallback onAction;
+  final bool isLoading;
+  final String? errorMsg;
+  final Widget? extraContent;
+  final double height;
+  const _DashboardCard({
+    this.icon = Icons.info,
+    this.iconColor = Colors.blue,
+    this.title = '',
+    this.value = '',
+    this.actionLabel = '',
+    this.onAction = _noop,
+    this.isLoading = false,
+    this.errorMsg,
+    this.extraContent,
+    this.height = 110,
+  });
+  const _DashboardCard.loading({this.height = 110})
+      : icon = Icons.hourglass_empty,
+        iconColor = Colors.grey,
+        title = '',
+        value = '',
+        actionLabel = '',
+        onAction = _noop,
+        isLoading = true,
+        errorMsg = null,
+        extraContent = null;
+  factory _DashboardCard.error(String title, String errorMsg, {double height = 110}) => _DashboardCard(
+        icon: Icons.error_outline,
+        iconColor: Colors.red,
+        title: title,
+        value: errorMsg,
+        actionLabel: '',
+        onAction: _noop,
+        isLoading: false,
+        errorMsg: errorMsg,
+        extraContent: null,
+        height: height,
+      );
+  static void _noop() {}
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      elevation: 2,
+      color: Colors.white,
+      child: SizedBox(
+        height: height,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Icon(icon, color: iconColor, size: 32),
+              ),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 6),
+                    isLoading
+                        ? const LinearProgressIndicator(minHeight: 6)
+                        : Text(value, style: TextStyle(fontSize: 15, color: errorMsg != null ? Colors.red : Colors.black87)),
+                    if (extraContent != null) extraContent!,
+                  ],
+                ),
+              ),
+              if (actionLabel.isNotEmpty)
+                TextButton(
+                  onPressed: onAction,
+                  child: Text(actionLabel),
+                ),
             ],
           ),
         ),
