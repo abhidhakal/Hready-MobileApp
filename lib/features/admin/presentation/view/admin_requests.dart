@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../viewmodel/admin_requests_bloc.dart';
-import '../viewmodel/admin_requests_event.dart';
-import '../viewmodel/admin_requests_state.dart';
+import 'package:hready/features/requests/presentation/viewmodel/requests_bloc.dart';
+import 'package:hready/features/requests/presentation/viewmodel/requests_event.dart';
+import 'package:hready/features/requests/presentation/viewmodel/requests_state.dart';
+import 'package:hready/app/service_locator/service_locator.dart';
+import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_case.dart';
+import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
+import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
 
 class AdminRequests extends StatelessWidget {
   const AdminRequests({Key? key}) : super(key: key);
@@ -10,8 +14,12 @@ class AdminRequests extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AdminRequestsBloc()..add(LoadRequests()),
-      child: BlocBuilder<AdminRequestsBloc, AdminRequestsState>(
+      create: (_) => RequestsBloc(
+        getAllRequestsUseCase: getIt<GetAllRequestsUseCase>(),
+        approveRequestUseCase: getIt<ApproveRequestUseCase>(),
+        rejectRequestUseCase: getIt<RejectRequestUseCase>(),
+      )..add(LoadRequests()),
+      child: BlocBuilder<RequestsBloc, RequestsState>(
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(title: const Text('All Employee Requests')),
@@ -107,7 +115,7 @@ class AdminRequests extends StatelessWidget {
                                                       border: OutlineInputBorder(),
                                                       isDense: true,
                                                     ),
-                                                    onChanged: (val) => context.read<AdminRequestsBloc>().add(ActionCommentChanged(r.id, val)),
+                                                    onChanged: (val) => context.read<RequestsBloc>().add(ActionCommentChanged(r.id, val)),
                                                     controller: TextEditingController(text: action?.comment ?? ''),
                                                   ),
                                                 ),
@@ -118,16 +126,16 @@ class AdminRequests extends StatelessWidget {
                                                   ),
                                                   onPressed: () {
                                                     if (action.mode == 'approve') {
-                                                      context.read<AdminRequestsBloc>().add(ApproveRequest(r.id, action.comment));
+                                                      context.read<RequestsBloc>().add(ApproveRequest(r.id, action.comment));
                                                     } else {
-                                                      context.read<AdminRequestsBloc>().add(RejectRequest(r.id, action.comment));
+                                                      context.read<RequestsBloc>().add(RejectRequest(r.id, action.comment));
                                                     }
                                                   },
                                                   child: Text(action.mode == 'approve' ? 'Approve' : 'Reject'),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 TextButton(
-                                                  onPressed: () => context.read<AdminRequestsBloc>().add(ActionModeChanged(r.id, null)),
+                                                  onPressed: () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, null)),
                                                   child: const Text('Cancel'),
                                                 ),
                                               ],
@@ -136,13 +144,13 @@ class AdminRequests extends StatelessWidget {
                                               children: [
                                                 ElevatedButton(
                                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                                                  onPressed: () => context.read<AdminRequestsBloc>().add(ActionModeChanged(r.id, 'approve')),
+                                                  onPressed: () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, 'approve')),
                                                   child: const Text('Approve'),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 ElevatedButton(
                                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                                  onPressed: () => context.read<AdminRequestsBloc>().add(ActionModeChanged(r.id, 'reject')),
+                                                  onPressed: () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, 'reject')),
                                                   child: const Text('Reject'),
                                                 ),
                                               ],

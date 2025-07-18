@@ -82,7 +82,8 @@ import 'package:hready/features/requests/domain/repositories/request_repository.
 import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
-import 'package:hready/features/requests/presentation/viewmodel/admin_requests_viewmodel.dart';
+import 'package:hready/features/requests/domain/use_cases/get_my_requests_use_case.dart';
+import 'package:hready/features/requests/domain/use_cases/submit_request_use_case.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -245,18 +246,18 @@ Future<void> setupLocator() async {
 
   // Requests - Remote Data Source
   getIt.registerLazySingleton<RequestRemoteDataSource>(
-    () => RequestRemoteDataSourceImpl(),
+    () => RequestRemoteDataSourceImpl(getIt<Dio>()),
   );
   // Requests - Repository
   getIt.registerLazySingleton<RequestRepository>(
-    () => RequestRepositoryImpl(getIt<RequestRemoteDataSource>()),
+    () => RequestRepositoryImpl(getIt<Dio>()),
   );
   // Requests - Use Cases
   getIt.registerLazySingleton(() => GetAllRequestsUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => ApproveRequestUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => RejectRequestUseCase(getIt<RequestRepository>()));
-  // Requests - ViewModel
-  getIt.registerFactory(() => AdminRequestsViewModel());
+  getIt.registerLazySingleton(() => GetMyRequestsUseCase(getIt<RequestRepository>()));
+  getIt.registerLazySingleton(() => SubmitRequestUseCase(getIt<RequestRepository>()));
 }
 
 Future<String?> getToken() async {

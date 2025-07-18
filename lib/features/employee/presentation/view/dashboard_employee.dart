@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/employee/presentation/view/employee_announcements.dart';
 import 'package:hready/features/employee/presentation/view/employee_attendance.dart';
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
-import 'package:hready/features/employee/presentation/view/employee_profile.dart';
 import 'package:hready/features/employee/presentation/view/employee_home.dart';
 import 'package:hready/features/employee/presentation/view/employee_tasks.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_event.dart';

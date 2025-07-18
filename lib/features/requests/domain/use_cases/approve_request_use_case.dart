@@ -4,7 +4,7 @@ class ApproveRequestUseCase {
   final RequestRepository repository;
   ApproveRequestUseCase(this.repository);
 
-  Future<void> call(String requestId) async {
-    await repository.approveRequest(requestId);
+  Future<void> call(String requestId, {String? comment}) async {
+    await repository.approveRequest(requestId, comment: comment);
   }
 } 
