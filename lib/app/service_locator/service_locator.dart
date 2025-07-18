@@ -64,6 +64,7 @@ import 'package:hready/features/attendance/domain/use_cases/get_all_attendance_u
 import 'package:hready/features/leaves/data/datasources/remote_datasource/leave_remote_data_source.dart';
 import 'package:hready/features/leaves/data/repositories/leave_remote_repository.dart';
 import 'package:hready/features/leaves/domain/repositories/leave_repository.dart';
+import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
 
 // Employee
 import 'package:hready/features/employee/data/datasources/remote_datasource/employee_remote_data_source.dart';
@@ -73,6 +74,15 @@ import 'package:hready/features/employee/domain/use_cases/add_employee_use_case.
 import 'package:hready/features/employee/domain/use_cases/update_employee_use_case.dart';
 import 'package:hready/features/employee/domain/use_cases/delete_employee_use_case.dart';
 import 'package:hready/features/employee/presentation/view_model/employee_bloc.dart';
+
+// Requests
+import 'package:hready/features/requests/data/datasources/remote_datasource/request_remote_data_source.dart';
+import 'package:hready/features/requests/data/repositories/request_repository_impl.dart';
+import 'package:hready/features/requests/domain/repositories/request_repository.dart';
+import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_case.dart';
+import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
+import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
+import 'package:hready/features/requests/presentation/viewmodel/admin_requests_viewmodel.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -211,10 +221,9 @@ Future<void> setupLocator() async {
 
   // Leaves - Remote Data Source
   getIt.registerLazySingleton(() => LeaveRemoteDataSource(getIt<Dio>()));
-  // Leaves - Repository
   getIt.registerLazySingleton(() => LeaveRemoteRepository(getIt()));
   getIt.registerLazySingleton<LeaveRepository>(() => getIt<LeaveRemoteRepository>());
-  // Leaves - Use Cases
+  getIt.registerFactory(() => LeaveBloc(getIt<LeaveRepository>()));
 
   // Employee - Remote Data Source
   getIt.registerLazySingleton(() => EmployeeRemoteDataSource(getIt<Dio>()));
@@ -233,6 +242,21 @@ Future<void> setupLocator() async {
     updateEmployeeUseCase: getIt(),
     deleteEmployeeUseCase: getIt(),
   ));
+
+  // Requests - Remote Data Source
+  getIt.registerLazySingleton<RequestRemoteDataSource>(
+    () => RequestRemoteDataSourceImpl(),
+  );
+  // Requests - Repository
+  getIt.registerLazySingleton<RequestRepository>(
+    () => RequestRepositoryImpl(getIt<RequestRemoteDataSource>()),
+  );
+  // Requests - Use Cases
+  getIt.registerLazySingleton(() => GetAllRequestsUseCase(getIt<RequestRepository>()));
+  getIt.registerLazySingleton(() => ApproveRequestUseCase(getIt<RequestRepository>()));
+  getIt.registerLazySingleton(() => RejectRequestUseCase(getIt<RequestRepository>()));
+  // Requests - ViewModel
+  getIt.registerFactory(() => AdminRequestsViewModel());
 }
 
 Future<String?> getToken() async {

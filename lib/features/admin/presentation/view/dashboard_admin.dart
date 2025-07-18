@@ -7,6 +7,7 @@ import 'package:hready/features/admin/presentation/view/admin_home.dart';
 import 'package:hready/features/admin/presentation/view/admin_leave.dart';
 import 'package:hready/features/admin/presentation/view/admin_profile.dart';
 import 'package:hready/features/admin/presentation/view/admin_tasks.dart';
+import 'package:hready/features/admin/presentation/view/admin_requests.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_event.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_state.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
@@ -22,6 +23,7 @@ class DashboardAdmin extends StatelessWidget {
     const AdminTasks(),
     const AdminLeave(),
     const AdminAnnouncements(),
+    const AdminRequests(),
     const AdminProfile(),
   ];
 
@@ -87,7 +89,8 @@ class DashboardAdmin extends StatelessWidget {
                     buildDrawerItem(context, Icons.assignment, "Tasks", 3, state.selectedIndex),
                     buildDrawerItem(context, Icons.request_page, "Leave Requests", 4, state.selectedIndex),
                     buildDrawerItem(context, Icons.announcement_outlined, "Announcements", 5, state.selectedIndex),
-                    buildDrawerItem(context, Icons.person_outline, "Profile", 6, state.selectedIndex),
+                    buildDrawerItem(context, Icons.inbox, "Requests", 6, state.selectedIndex),
+                    buildDrawerItem(context, Icons.person_outline, "Profile", 7, state.selectedIndex),
                     const Spacer(),
                     ListTile(
                       leading: const Icon(Icons.logout, color: Colors.grey),

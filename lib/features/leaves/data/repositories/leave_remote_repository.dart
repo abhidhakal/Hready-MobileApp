@@ -95,7 +95,7 @@ class LeaveRemoteRepository implements LeaveRepository {
 
   LeaveEntity _toEntity(LeaveModel m) => LeaveEntity(
     id: m.id,
-    requestedBy: m.requestedBy,
+    requestedBy: m.requestedByName,
     leaveType: m.leaveType,
     startDate: m.startDate,
     endDate: m.endDate,

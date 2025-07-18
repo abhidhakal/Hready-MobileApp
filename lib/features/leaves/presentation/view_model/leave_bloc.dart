@@ -1,0 +1,71 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/leave_entity.dart';
+import '../../domain/repositories/leave_repository.dart';
+
+abstract class LeaveEvent {}
+class LoadLeaves extends LeaveEvent {}
+class CreateLeave extends LeaveEvent {
+  final LeaveEntity leave;
+  CreateLeave(this.leave);
+}
+class ApproveLeave extends LeaveEvent {
+  final String id;
+  ApproveLeave(this.id);
+}
+class RejectLeave extends LeaveEvent {
+  final String id;
+  RejectLeave(this.id);
+}
+
+abstract class LeaveState {}
+class LeaveLoading extends LeaveState {}
+class LeaveLoaded extends LeaveState {
+  final List<LeaveEntity> leaves;
+  LeaveLoaded(this.leaves);
+}
+class LeaveError extends LeaveState {
+  final String error;
+  LeaveError(this.error);
+}
+
+class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
+  final LeaveRepository repository;
+  LeaveBloc(this.repository) : super(LeaveLoading()) {
+    on<LoadLeaves>((event, emit) async {
+      emit(LeaveLoading());
+      try {
+        final leaves = await repository.getAllLeaves();
+        emit(LeaveLoaded(leaves));
+      } catch (e) {
+        emit(LeaveError(e.toString()));
+      }
+    });
+    on<CreateLeave>((event, emit) async {
+      emit(LeaveLoading());
+      try {
+        await repository.createAdminLeave(event.leave);
+        add(LoadLeaves());
+      } catch (e) {
+        emit(LeaveError(e.toString()));
+      }
+    });
+    on<ApproveLeave>((event, emit) async {
+      emit(LeaveLoading());
+      try {
+        await repository.updateLeaveStatus(event.id, 'Approved');
+        add(LoadLeaves());
+      } catch (e) {
+        emit(LeaveError(e.toString()));
+      }
+    });
+    on<RejectLeave>((event, emit) async {
+      emit(LeaveLoading());
+      try {
+        await repository.updateLeaveStatus(event.id, 'Rejected');
+        add(LoadLeaves());
+      } catch (e) {
+        emit(LeaveError(e.toString()));
+      }
+    });
+  }
+} 

@@ -15,11 +15,6 @@ class AdminAnnouncements extends StatelessWidget {
         builder: (context, vm, _) {
           final state = vm.state;
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Announcements'),
-              backgroundColor: Color(0xFFF5F5F5),
-              foregroundColor: Colors.black,
-            ),
             floatingActionButton: FloatingActionButton(
               onPressed: () => _showAnnouncementDialog(context, vm),
               child: const Icon(Icons.add),

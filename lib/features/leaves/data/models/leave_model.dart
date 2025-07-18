@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class LeaveModel extends Equatable {
   final String? id;
-  final String? requestedBy;
+  final dynamic requestedBy; // can be String or Map
   final String? leaveType;
   final DateTime? startDate;
   final DateTime? endDate;
@@ -27,9 +27,16 @@ class LeaveModel extends Equatable {
     this.createdAt,
   });
 
+  String get requestedByName {
+    if (requestedBy is Map && requestedBy['name'] != null) {
+      return requestedBy['name'];
+    }
+    return requestedBy is String ? requestedBy : '-';
+  }
+
   factory LeaveModel.fromJson(Map<String, dynamic> json) => LeaveModel(
         id: json['_id']?.toString(),
-        requestedBy: json['requestedBy'] is Map ? json['requestedBy']['_id'] : json['requestedBy']?.toString(),
+        requestedBy: json['requestedBy'],
         leaveType: json['leaveType'],
         startDate: json['startDate'] != null ? DateTime.tryParse(json['startDate']) : null,
         endDate: json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
@@ -42,7 +49,7 @@ class LeaveModel extends Equatable {
       );
 
   Map<String, dynamic> toJson() => {
-        'requestedBy': requestedBy,
+        'requestedBy': requestedBy is Map ? requestedBy['_id'] : requestedBy,
         'leaveType': leaveType,
         'startDate': startDate?.toIso8601String(),
         'endDate': endDate?.toIso8601String(),

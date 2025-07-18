@@ -6,7 +6,7 @@ class LeaveRemoteDataSource {
   LeaveRemoteDataSource(this.dio);
 
   Future<List<LeaveModel>> getAllLeaves() async {
-    final response = await dio.get('/leaves');
+    final response = await dio.get('/leaves/all');
     return (response.data as List).map((json) => LeaveModel.fromJson(json)).toList();
   }
 
