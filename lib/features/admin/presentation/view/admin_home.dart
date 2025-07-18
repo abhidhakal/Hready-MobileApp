@@ -71,7 +71,7 @@ class AdminHome extends StatelessWidget {
                             content: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: const [
-                                Text('Active Employees: 45'),
+                                Text('Active: 45'),
                                 Text('On Leave: 4'),
                                 Text('Absent: 9'),
                               ],
