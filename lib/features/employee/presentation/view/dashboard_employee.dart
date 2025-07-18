@@ -5,12 +5,22 @@ import 'package:hready/features/employee/presentation/view/employee_attendance.d
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_home.dart';
 import 'package:hready/features/employee/presentation/view/employee_tasks.dart';
+import 'package:hready/features/employee/presentation/view/employee_requests.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_event.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_state.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
+import 'package:shake/shake.dart';
+import 'package:flutter/services.dart';
 
-class DashboardEmployee extends StatelessWidget {
+class DashboardEmployee extends StatefulWidget {
   const DashboardEmployee({super.key});
+
+  @override
+  State<DashboardEmployee> createState() => _DashboardEmployeeState();
+}
+
+class _DashboardEmployeeState extends State<DashboardEmployee> {
+  ShakeDetector? detector;
 
   static final List<Widget> _pages = [
     const EmployeeHome(),
@@ -19,6 +29,37 @@ class DashboardEmployee extends StatelessWidget {
     const EmployeeTasks(),
     const EmployeeAnnouncements(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark, // Black text/icons
+        statusBarBrightness: Brightness.light, // For iOS
+      ),
+    );
+    detector = ShakeDetector.autoStart(
+      shakeThresholdGravity: 3.0, // Increase threshold for harder shake
+      onPhoneShake: (event) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Phone shaked... opening request page')),
+          );
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const EmployeeRequestsPage()),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    detector?.stopListening();
+    super.dispose();
+  }
 
   Widget buildNavItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
     return GestureDetector(

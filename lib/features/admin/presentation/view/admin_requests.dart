@@ -22,7 +22,9 @@ class AdminRequests extends StatelessWidget {
       child: BlocBuilder<RequestsBloc, RequestsState>(
         builder: (context, state) {
           return Scaffold(
-            appBar: AppBar(title: const Text('All Employee Requests')),
+            appBar: AppBar(title: const Text('All Employee Requests'),
+                        backgroundColor: Color(0xFFF5F5F5),
+                        foregroundColor: Colors.black,),
             body: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -102,21 +104,22 @@ class AdminRequests extends StatelessWidget {
                                       padding: const EdgeInsets.only(top: 4.0),
                                       child: Text('Admin: ${r.adminComment}', style: const TextStyle(fontStyle: FontStyle.italic)),
                                     ),
-                                  if (r.status == 'pending')
+                                  if (r.status.toLowerCase() == 'pending')
                                     Padding(
                                       padding: const EdgeInsets.only(top: 12.0),
                                       child: action?.mode != null
                                           ? Row(
                                               children: [
                                                 Expanded(
-                                                  child: TextField(
+                                                  child: TextFormField(
                                                     decoration: const InputDecoration(
                                                       hintText: 'Add a comment (optional)',
                                                       border: OutlineInputBorder(),
                                                       isDense: true,
                                                     ),
+                                                    initialValue: action?.comment ?? '',
                                                     onChanged: (val) => context.read<RequestsBloc>().add(ActionCommentChanged(r.id, val)),
-                                                    controller: TextEditingController(text: action?.comment ?? ''),
+                                                    enabled: !state.isLoading,
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
@@ -124,18 +127,26 @@ class AdminRequests extends StatelessWidget {
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor: action!.mode == 'approve' ? Colors.green : Colors.red,
                                                   ),
-                                                  onPressed: () {
-                                                    if (action.mode == 'approve') {
-                                                      context.read<RequestsBloc>().add(ApproveRequest(r.id, action.comment));
-                                                    } else {
-                                                      context.read<RequestsBloc>().add(RejectRequest(r.id, action.comment));
-                                                    }
-                                                  },
-                                                  child: Text(action.mode == 'approve' ? 'Approve' : 'Reject'),
+                                                  onPressed: state.isLoading
+                                                      ? null
+                                                      : () {
+                                                          if (action.mode == 'approve') {
+                                                            context.read<RequestsBloc>().add(ApproveRequest(r.id, action.comment));
+                                                          } else {
+                                                            context.read<RequestsBloc>().add(RejectRequest(r.id, action.comment));
+                                                          }
+                                                        },
+                                                  child: state.isLoading
+                                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                                      : Text(action.mode == 'approve' ? 'Approve' : 'Reject'),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 TextButton(
-                                                  onPressed: () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, null)),
+                                                  onPressed: state.isLoading
+                                                      ? null
+                                                      : () {
+                                                          context.read<RequestsBloc>().add(ActionModeChanged(r.id, null));
+                                                        },
                                                   child: const Text('Cancel'),
                                                 ),
                                               ],
@@ -144,13 +155,17 @@ class AdminRequests extends StatelessWidget {
                                               children: [
                                                 ElevatedButton(
                                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                                                  onPressed: () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, 'approve')),
+                                                  onPressed: state.isLoading
+                                                      ? null
+                                                      : () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, 'approve')),
                                                   child: const Text('Approve'),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 ElevatedButton(
                                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                                  onPressed: () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, 'reject')),
+                                                  onPressed: state.isLoading
+                                                      ? null
+                                                      : () => context.read<RequestsBloc>().add(ActionModeChanged(r.id, 'reject')),
                                                   child: const Text('Reject'),
                                                 ),
                                               ],

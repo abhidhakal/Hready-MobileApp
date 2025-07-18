@@ -20,6 +20,7 @@ class _AdminEmployeesState extends State<AdminEmployees> {
   final TextEditingController _departmentController = TextEditingController();
   final TextEditingController _positionController = TextEditingController();
   String _status = 'active';
+  bool _showPassword = false;
 
   @override
   void dispose() {
@@ -41,6 +42,7 @@ class _AdminEmployeesState extends State<AdminEmployees> {
     _departmentController.clear();
     _positionController.clear();
     _status = 'active';
+    _showPassword = false;
   }
 
   void _populateForm(EmployeeEntity emp) {
@@ -52,6 +54,7 @@ class _AdminEmployeesState extends State<AdminEmployees> {
     _departmentController.text = emp.department;
     _positionController.text = emp.position;
     _status = emp.status;
+    _showPassword = false;
   }
 
   void _showEmployeeDialog(BuildContext context, {EmployeeEntity? employee}) {
@@ -67,7 +70,7 @@ class _AdminEmployeesState extends State<AdminEmployees> {
         return AlertDialog(
           title: Text(employee == null ? 'Add Employee' : 'Edit Employee'),
           content: SizedBox(
-            width: 500,
+            width: 400,
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -76,39 +79,48 @@ class _AdminEmployeesState extends State<AdminEmployees> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
+                      decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
                       validator: (v) => v == null || v.isEmpty ? 'Name required' : null,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email'),
+                      decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
                       validator: (v) => v == null || v.isEmpty ? 'Email required' : null,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     if (employee == null)
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(labelText: 'Password'),
-                        obscureText: true,
-                        validator: (v) => v == null || v.isEmpty ? 'Password required' : null,
+                      StatefulBuilder(
+                        builder: (context, setState) => TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                              onPressed: () => setState(() => _showPassword = !_showPassword),
+                            ),
+                          ),
+                          obscureText: !_showPassword,
+                          validator: (v) => v == null || v.isEmpty ? 'Password required' : null,
+                        ),
                       ),
-                    if (employee == null) const SizedBox(height: 8),
+                    if (employee == null) const SizedBox(height: 16),
                     TextFormField(
                       controller: _contactNoController,
-                      decoration: const InputDecoration(labelText: 'Contact No'),
+                      decoration: const InputDecoration(labelText: 'Contact No', border: OutlineInputBorder()),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _departmentController,
-                      decoration: const InputDecoration(labelText: 'Department'),
+                      decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder()),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _positionController,
-                      decoration: const InputDecoration(labelText: 'Position'),
+                      decoration: const InputDecoration(labelText: 'Position', border: OutlineInputBorder()),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: _status,
                       items: const [
@@ -116,7 +128,7 @@ class _AdminEmployeesState extends State<AdminEmployees> {
                         DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
                       ],
                       onChanged: (v) => setState(() => _status = v ?? 'active'),
-                      decoration: const InputDecoration(labelText: 'Status'),
+                      decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
                     ),
                   ],
                 ),
@@ -163,6 +175,66 @@ class _AdminEmployeesState extends State<AdminEmployees> {
     );
   }
 
+  Widget _buildEmployeeList(List<EmployeeEntity> employees) {
+    if (employees.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.group_off, size: 80, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text('No employees found.', style: TextStyle(color: Colors.grey[700], fontSize: 18)),
+          ],
+        ),
+      );
+    }
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: employees.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final emp = employees[index];
+        return Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 2,
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue[100],
+              child: Text(
+                emp.name.isNotEmpty ? emp.name[0].toUpperCase() : '?',
+                style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+              ),
+            ),
+            title: Text(emp.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(emp.email, style: const TextStyle(fontSize: 13)),
+                Text('${emp.department} • ${emp.position}', style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                Text('Status: ${emp.status}', style: TextStyle(fontSize: 12, color: emp.status == 'active' ? Colors.green : Colors.red)),
+              ],
+            ),
+            trailing: PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _showEmployeeDialog(context, employee: emp);
+                } else if (value == 'delete') {
+                  context.read<EmployeeBloc>().add(DeleteEmployee(emp.employeeId!));
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit), title: Text('Edit'))),
+                const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete), title: Text('Delete'))),
+              ],
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<EmployeeBloc>(
@@ -184,61 +256,12 @@ class _AdminEmployeesState extends State<AdminEmployees> {
             body: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 2,
-                  color: Colors.white,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columns: const [
-                        DataColumn(label: Text('Name')),
-                        DataColumn(label: Text('Email')),
-                        DataColumn(label: Text('Department')),
-                        DataColumn(label: Text('Position')),
-                        DataColumn(label: Text('Status')),
-                        DataColumn(label: Text('Actions')),
-                      ],
-                      rows: employees.isNotEmpty
-                          ? employees.map((emp) {
-                              return DataRow(cells: [
-                                DataCell(Text(emp.name)),
-                                DataCell(Text(emp.email)),
-                                DataCell(Text(emp.department)),
-                                DataCell(Text(emp.position)),
-                                DataCell(Text(emp.status)),
-                                DataCell(Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: Colors.blue),
-                                      onPressed: () => _showEmployeeDialog(context, employee: emp),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () => context.read<EmployeeBloc>().add(DeleteEmployee(emp.employeeId!)),
-                                    ),
-                                  ],
-                                )),
-                              ]);
-                            }).toList()
-                          : [
-                              const DataRow(cells: [
-                                DataCell(Text('-')),
-                                DataCell(Text('-')),
-                                DataCell(Text('-')),
-                                DataCell(Text('-')),
-                                DataCell(Text('-')),
-                                DataCell(Text('-')),
-                                DataCell(Text('-')),
-                              ]),
-                            ],
-                    ),
-                  ),
-                ),
+                child: _buildEmployeeList(employees),
               ),
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () => _showEmployeeDialog(context),
+              tooltip: 'Add Employee',
               child: const Icon(Icons.add),
             ),
           );

@@ -48,7 +48,11 @@ class RequestModel extends Equatable {
     type: json['type'] as String? ?? '',
     status: json['status'] as String? ?? '',
     message: json['message'] as String? ?? '',
-    createdBy: json['createdBy'] != null ? CreatedByModel.fromJson(json['createdBy']) : null,
+    createdBy: json['createdBy'] is Map<String, dynamic>
+        ? CreatedByModel.fromJson(json['createdBy'])
+        : (json['createdBy'] is String
+            ? CreatedByModel(name: json['createdBy'], email: null)
+            : null),
     createdAt: DateTime.parse(json['createdAt'] as String),
     attachment: json['attachment'] as String?,
     adminComment: json['adminComment'] as String?,

@@ -23,7 +23,7 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
 
   @override
   Future<void> approveRequest(String requestId, {String? comment}) async {
-    await dio.patch('/requests/$requestId/status', data: {
+    await dio.put('/requests/$requestId/status', data: {
       'status': 'approved',
       if (comment != null) 'adminComment': comment,
     });
@@ -31,7 +31,7 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
 
   @override
   Future<void> rejectRequest(String requestId, {String? comment}) async {
-    await dio.patch('/requests/$requestId/status', data: {
+    await dio.put('/requests/$requestId/status', data: {
       'status': 'rejected',
       if (comment != null) 'adminComment': comment,
     });
@@ -40,8 +40,13 @@ class RequestRemoteDataSourceImpl implements RequestRemoteDataSource {
   @override
   Future<List<RequestModel>> getMyRequests() async {
     final response = await dio.get('/requests/my');
-    final data = response.data as List;
-    return data.map((json) => RequestModel.fromJson(json)).toList();
+    print('DIO RESPONSE DATA: ${response.data}');
+    if (response.data is List) {
+      final data = response.data as List;
+      return data.map((json) => RequestModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Unexpected response: ${response.data}');
+    }
   }
 
   @override

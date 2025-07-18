@@ -36,6 +36,7 @@ dependencies:
   mocktail: ^1.0.4
   intl: ^0.20.2
   file_picker: ^10.2.0
+  shake: ^3.0.0
 
 flutter_icons:
   android: true

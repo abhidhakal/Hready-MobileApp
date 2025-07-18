@@ -51,7 +51,7 @@ class AdminHome extends StatelessWidget {
                             icon: const Icon(Icons.edit, color: Color(0xFF042F46)),
                             onPressed: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const AdminProfile()),
+                                MaterialPageRoute(builder: (_) => const AdminProfilePage()),
                               );
                             },
                           ),

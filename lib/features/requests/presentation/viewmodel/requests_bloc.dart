@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/requests/presentation/viewmodel/requests_event.dart';
 import 'package:hready/features/requests/presentation/viewmodel/requests_state.dart';
@@ -43,6 +42,7 @@ class RequestsBloc extends Bloc<RequestsEvent, RequestsState> {
       final requests = await getAllRequestsUseCase();
       emit(state.copyWith(isLoading: false, requests: requests, error: null));
     } catch (e) {
+      print('Fetch all requests error: $e');
       emit(state.copyWith(isLoading: false, error: 'Failed to fetch requests'));
     }
   }
@@ -50,22 +50,32 @@ class RequestsBloc extends Bloc<RequestsEvent, RequestsState> {
   Future<void> _onApproveRequest(ApproveRequest event, Emitter<RequestsState> emit) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      await approveRequestUseCase(event.requestId); // Pass comment if API supports
+      await approveRequestUseCase(event.requestId, comment: event.comment);
       emit(state.copyWith(isLoading: false));
       add(LoadRequests());
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: 'Failed to approve request'));
+      String errorMsg = 'Failed to approve request';
+      if (e is Exception) {
+        errorMsg = e.toString();
+      }
+      print('Approve request error: $e');
+      emit(state.copyWith(isLoading: false, error: errorMsg));
     }
   }
 
   Future<void> _onRejectRequest(RejectRequest event, Emitter<RequestsState> emit) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      await rejectRequestUseCase(event.requestId); // Pass comment if API supports
+      await rejectRequestUseCase(event.requestId, comment: event.comment);
       emit(state.copyWith(isLoading: false));
       add(LoadRequests());
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: 'Failed to reject request'));
+      String errorMsg = 'Failed to reject request';
+      if (e is Exception) {
+        errorMsg = e.toString();
+      }
+      print('Reject request error: $e');
+      emit(state.copyWith(isLoading: false, error: errorMsg));
     }
   }
 
@@ -90,6 +100,7 @@ class RequestsBloc extends Bloc<RequestsEvent, RequestsState> {
       final requests = await getMyRequestsUseCase();
       emit(state.copyWith(isLoading: false, requests: requests, error: null));
     } catch (e) {
+      print('Fetch my requests error: $e');
       emit(state.copyWith(isLoading: false, error: 'Failed to fetch requests'));
     }
   }

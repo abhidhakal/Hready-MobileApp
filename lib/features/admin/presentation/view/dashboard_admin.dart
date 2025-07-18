@@ -12,6 +12,8 @@ import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_eve
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_state.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
+import 'package:hive/hive.dart';
+import 'package:hready/features/auth/data/models/user_model.dart';
 
 class DashboardAdmin extends StatelessWidget {
   const DashboardAdmin({super.key});
@@ -24,7 +26,7 @@ class DashboardAdmin extends StatelessWidget {
     const AdminLeave(),
     const AdminAnnouncements(),
     const AdminRequests(),
-    const AdminProfile(),
+    const AdminProfilePage(),
   ];
 
   Widget buildDrawerItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
@@ -95,7 +97,9 @@ class DashboardAdmin extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.logout, color: Colors.grey),
                       title: const Text("Logout", style: TextStyle(color: Colors.grey)),
-                      onTap: () {
+                      onTap: () async {
+                        final userBox = Hive.box<UserHiveModel>('userBox');
+                        await userBox.delete('current_user');
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const LoginPage()),
                           (route) => false,

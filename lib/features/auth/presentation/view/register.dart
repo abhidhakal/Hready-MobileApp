@@ -105,8 +105,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                        if (value == null || value.length < 5) {
+                          return 'Password must be at least 5 characters';
                         }
                         return null;
                       },
