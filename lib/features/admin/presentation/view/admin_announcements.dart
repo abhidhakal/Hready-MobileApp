@@ -17,14 +17,12 @@ class AdminAnnouncements extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Announcements'),
-              backgroundColor: Colors.white,
+              backgroundColor: Color(0xFFF5F5F5),
               foregroundColor: Colors.black,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _showAnnouncementDialog(context, vm),
-                ),
-              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => _showAnnouncementDialog(context, vm),
+              child: const Icon(Icons.add),
             ),
             body: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -34,27 +32,34 @@ class AdminAnnouncements extends StatelessWidget {
                         itemCount: state.announcements.length,
                         itemBuilder: (context, index) {
                           final ann = state.announcements[index];
-                          return ListTile(
-                            title: Text(ann.title ?? ''),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(ann.message ?? ''),
-                                Text('Audience: ${ann.audience ?? 'all'}', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _showAnnouncementDialog(context, vm, announcement: ann),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () => vm.deleteAnnouncement(ann.id ?? ''),
-                                ),
-                              ],
+                          return Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: ListTile(
+                              title: Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  Text(ann.message ?? ''),
+                                  const SizedBox(height: 8),
+                                  Text('Audience: ${ann.audience ?? 'all'}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                ],
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () => _showAnnouncementDialog(context, vm, announcement: ann),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () => vm.deleteAnnouncement(ann.id ?? ''),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -74,7 +79,7 @@ class AdminAnnouncements extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text(announcement == null ? 'Add Announcement' : 'Edit Announcement'),
         content: SizedBox(
-          width: 400, // Make dialog wider
+          width: 500,
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(8.0),

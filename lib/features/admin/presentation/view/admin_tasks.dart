@@ -82,114 +82,6 @@ class _AdminTasksState extends State<AdminTasks> {
                         color: Colors.white,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(_editingTaskId == null ? 'Add Task' : 'Edit Task', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _titleController,
-                                  decoration: const InputDecoration(labelText: 'Task Title'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Title required' : null,
-                                ),
-                                const SizedBox(height: 12),
-                                TextFormField(
-                                  controller: _descriptionController,
-                                  decoration: const InputDecoration(labelText: 'Description'),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: InputDatePickerFormField(
-                                        initialDate: _dueDate ?? DateTime.now(),
-                                        firstDate: DateTime(2020),
-                                        lastDate: DateTime(2100),
-                                        fieldLabelText: 'Due Date',
-                                        onDateSubmitted: (date) => setState(() => _dueDate = date),
-                                        onDateSaved: (date) => setState(() => _dueDate = date),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                DropdownButtonFormField<String>(
-                                  value: _assignedTo,
-                                  items: [
-                                    const DropdownMenuItem(value: null, child: Text('Assign to Employee')),
-                                    ...users.map((u) => DropdownMenuItem(
-                                          value: u.userId,
-                                          child: Text('${u.name} (${u.department ?? 'N/A'})'),
-                                        )),
-                                  ],
-                                  onChanged: (v) => setState(() => _assignedTo = v),
-                                  decoration: const InputDecoration(labelText: 'Employee'),
-                                ),
-                                const SizedBox(height: 12),
-                                TextFormField(
-                                  decoration: const InputDecoration(labelText: 'Or Assign to Department'),
-                                  initialValue: _assignedDepartment,
-                                  onChanged: (v) => setState(() => _assignedDepartment = v),
-                                ),
-                                const SizedBox(height: 12),
-                                DropdownButtonFormField<String>(
-                                  value: _status,
-                                  items: const [
-                                    DropdownMenuItem(value: 'Pending', child: Text('Pending')),
-                                    DropdownMenuItem(value: 'In Progress', child: Text('In Progress')),
-                                    DropdownMenuItem(value: 'Completed', child: Text('Completed')),
-                                  ],
-                                  onChanged: (v) => setState(() => _status = v ?? 'Pending'),
-                                  decoration: const InputDecoration(labelText: 'Status'),
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        if (_formKey.currentState?.validate() ?? false) {
-                                          final assignedUser = users.firstWhereOrNull((u) => u.userId == _assignedTo);
-                                          final entity = TaskEntity(
-                                            id: _editingTaskId,
-                                            title: _titleController.text.trim(),
-                                            description: _descriptionController.text.trim(),
-                                            dueDate: _dueDate,
-                                            assignedTo: assignedUser,
-                                            assignedDepartment: _assignedDepartment,
-                                            status: _status,
-                                          );
-                                          if (_editingTaskId == null) {
-                                            context.read<TaskBloc>().add(AddTask(entity));
-                                          } else {
-                                            context.read<TaskBloc>().add(UpdateTask(_editingTaskId!, entity));
-                                          }
-                                          _resetForm();
-                                        }
-                                      },
-                                      child: Text(_editingTaskId == null ? 'Add Task' : 'Update Task'),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    if (_editingTaskId != null)
-                                      TextButton(
-                                        onPressed: _resetForm,
-                                        child: const Text('Cancel'),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 2,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -236,6 +128,123 @@ class _AdminTasksState extends State<AdminTasks> {
                     ],
                   ),
                 ),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  _resetForm(); // Reset form for new task
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(_editingTaskId == null ? 'Add Task' : 'Edit Task'),
+                        content: SizedBox(
+                          width: 500,
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextFormField(
+                                  controller: _titleController,
+                                  decoration: const InputDecoration(labelText: 'Task Title'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Title required' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _descriptionController,
+                                  decoration: const InputDecoration(labelText: 'Description'),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: InputDatePickerFormField(
+                                        initialDate: _dueDate ?? DateTime.now(),
+                                        firstDate: DateTime(2020),
+                                        lastDate: DateTime(2100),
+                                        fieldLabelText: 'Due Date',
+                                        onDateSubmitted: (date) => setState(() => _dueDate = date),
+                                        onDateSaved: (date) => setState(() => _dueDate = date),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return DropdownButtonFormField<String>(
+                                      isExpanded: true,
+                                      value: _assignedTo,
+                                      items: [
+                                        const DropdownMenuItem(value: null, child: Text('Assign to Employee')),
+                                        ...users.map((u) => DropdownMenuItem(
+                                              value: u.userId,
+                                              child: Text('${u.name} (${u.department ?? 'N/A'})'),
+                                            )),
+                                      ],
+                                      onChanged: (v) => setState(() => _assignedTo = v),
+                                      decoration: const InputDecoration(labelText: 'Employee'),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  decoration: const InputDecoration(labelText: 'Or Assign to Department'),
+                                  initialValue: _assignedDepartment,
+                                  onChanged: (v) => setState(() => _assignedDepartment = v),
+                                ),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
+                                  value: _status,
+                                  items: const [
+                                    DropdownMenuItem(value: 'Pending', child: Text('Pending')),
+                                    DropdownMenuItem(value: 'In Progress', child: Text('In Progress')),
+                                    DropdownMenuItem(value: 'Completed', child: Text('Completed')),
+                                  ],
+                                  onChanged: (v) => setState(() => _status = v ?? 'Pending'),
+                                  decoration: const InputDecoration(labelText: 'Status'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              if (_formKey.currentState?.validate() ?? false) {
+                                final assignedUser = users.firstWhereOrNull((u) => u.userId == _assignedTo);
+                                final entity = TaskEntity(
+                                  id: _editingTaskId,
+                                  title: _titleController.text.trim(),
+                                  description: _descriptionController.text.trim(),
+                                  dueDate: _dueDate,
+                                  assignedTo: assignedUser,
+                                  assignedDepartment: _assignedDepartment,
+                                  status: _status,
+                                );
+                                if (_editingTaskId == null) {
+                                  context.read<TaskBloc>().add(AddTask(entity));
+                                } else {
+                                  context.read<TaskBloc>().add(UpdateTask(_editingTaskId!, entity));
+                                }
+                                Navigator.of(context).pop(); // Close dialog
+                              }
+                            },
+                            child: Text(_editingTaskId == null ? 'Add Task' : 'Update Task'),
+                          ),
+                          if (_editingTaskId != null)
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close dialog
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Icon(Icons.add),
               ),
             );
           }
