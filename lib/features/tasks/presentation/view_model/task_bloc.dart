@@ -7,6 +7,7 @@ import 'package:hready/features/tasks/domain/use_cases/create_task_use_case.dart
 import 'package:hready/features/tasks/domain/use_cases/update_task_use_case.dart';
 import 'package:hready/features/tasks/domain/use_cases/delete_task_use_case.dart';
 import 'package:hready/features/tasks/domain/use_cases/get_all_users_use_case.dart';
+import 'package:hready/features/tasks/domain/use_cases/update_my_task_status_use_case.dart';
 import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
@@ -16,6 +17,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final UpdateTaskUseCase updateTaskUseCase;
   final DeleteTaskUseCase deleteTaskUseCase;
   final GetAllUsersUseCase getAllUsersUseCase;
+  final UpdateMyTaskStatusUseCase updateMyTaskStatusUseCase;
 
   TaskBloc({
     required this.getAllTasksUseCase,
@@ -24,11 +26,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     required this.updateTaskUseCase,
     required this.deleteTaskUseCase,
     required this.getAllUsersUseCase,
+    required this.updateMyTaskStatusUseCase,
   }) : super(TaskInitial()) {
     on<LoadTasks>(_onLoadTasks);
     on<AddTask>(_onAddTask);
     on<UpdateTask>(_onUpdateTask);
     on<DeleteTask>(_onDeleteTask);
+    on<UpdateMyTaskStatus>(_onUpdateMyTaskStatus);
   }
 
   Future<void> _onLoadTasks(LoadTasks event, Emitter<TaskState> emit) async {
@@ -71,6 +75,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       await deleteTaskUseCase(event.id);
       add(const LoadTasks());
+    } catch (e) {
+      emit(TaskError(e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateMyTaskStatus(UpdateMyTaskStatus event, Emitter<TaskState> emit) async {
+    emit(TaskLoading());
+    try {
+      await updateMyTaskStatusUseCase(event.id, event.status);
+      add(const LoadTasks(onlyMyTasks: true));
     } catch (e) {
       emit(TaskError(e.toString()));
     }

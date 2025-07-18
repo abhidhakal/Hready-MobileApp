@@ -34,4 +34,12 @@ class DeleteTask extends TaskEvent {
   const DeleteTask(this.id);
   @override
   List<Object?> get props => [id];
+}
+
+class UpdateMyTaskStatus extends TaskEvent {
+  final String id;
+  final String status;
+  const UpdateMyTaskStatus(this.id, this.status);
+  @override
+  List<Object?> get props => [id, status];
 } 

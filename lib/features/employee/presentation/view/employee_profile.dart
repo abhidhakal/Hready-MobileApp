@@ -4,14 +4,26 @@ import 'package:hready/features/auth/presentation/view/login.dart';
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
 
+  // Helper to resolve profile picture URL
+  String _resolveProfilePicture(String? picture) {
+    if (picture == null || picture.isEmpty) return '';
+    if (picture.startsWith('/uploads/')) {
+      return 'http://192.168.18.175:3000$picture'; // <-- Use your API base URL
+    }
+    if (picture.startsWith('http')) return picture;
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
+    // TODO: Replace with actual user data from state/provider
     final userData = {
       'Name': 'John Doe',
       'Email': 'john.doe@example.com',
       'Position': 'Software Engineer',
       'Phone': '+977 9865206747',
     };
+    final profilePicture = null; // TODO: Replace with actual user profile picture
 
     return Scaffold(
       // appBar: AppBar(
@@ -29,7 +41,9 @@ class EmployeeProfile extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundImage: AssetImage('assets/images/profile.webp'),
+                  backgroundImage: (profilePicture != null && profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
+                      ? NetworkImage(_resolveProfilePicture(profilePicture)) as ImageProvider
+                      : const AssetImage('assets/images/profile.webp'),
                 ),
               ),
               const SizedBox(height: 24),

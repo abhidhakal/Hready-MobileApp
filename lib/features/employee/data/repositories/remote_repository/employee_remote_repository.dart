@@ -56,8 +56,22 @@ class EmployeeRemoteRepository implements IEmployeeRepository {
 
   @override
   Future<Either<Failure, EmployeeEntity?>> getEmployee() async {
-    // Not implemented for remote
-    throw UnimplementedError();
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/employees/me'),
+        headers: _headers,
+      );
+      print('EMPLOYEE PROFILE RESPONSE: ' + response.body);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final employee = EmployeeModel.fromJson(data);
+        return Right(employee);
+      } else {
+        return Left(RemoteDataBaseFailure(message: response.body));
+      }
+    } catch (e) {
+      return Left(RemoteDataBaseFailure(message: e.toString()));
+    }
   }
 
   @override

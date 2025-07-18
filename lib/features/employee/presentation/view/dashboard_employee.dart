@@ -33,15 +33,12 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark, // Black text/icons
-        statusBarBrightness: Brightness.light, // For iOS
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final bloc = context.read<EmployeeDashboardViewModel>();
+      bloc.add(LoadEmployeeDashboard());
+    });
     detector = ShakeDetector.autoStart(
-      shakeThresholdGravity: 3.0, // Increase threshold for harder shake
+      shakeThresholdGravity: 4.0, // Increase threshold for harder shake
       onPhoneShake: (event) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

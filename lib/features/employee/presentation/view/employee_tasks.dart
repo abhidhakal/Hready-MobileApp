@@ -10,6 +10,54 @@ import 'package:hready/app/service_locator/service_locator.dart';
 class EmployeeTasks extends StatelessWidget {
   const EmployeeTasks({super.key});
 
+  Widget _buildStatusChip(String status) {
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'pending':
+        color = Colors.orange;
+        break;
+      case 'in progress':
+        color = Colors.blue;
+        break;
+      case 'completed':
+        color = Colors.green;
+        break;
+      default:
+        color = Colors.grey;
+    }
+    return Chip(
+      label: Text(status, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      backgroundColor: color,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+    );
+  }
+
+  Widget _buildStatusMenu(BuildContext context, TaskEntity task) {
+    if (task.id == null) {
+      return _buildStatusChip(task.status ?? 'Pending');
+    }
+    final status = (task.status ?? 'Pending').toLowerCase();
+    List<String> nextStatuses = [];
+    if (status == 'pending') {
+      nextStatuses = ['In Progress'];
+    } else if (status == 'in progress') {
+      nextStatuses = ['Completed'];
+    }
+    if (nextStatuses.isEmpty) {
+      return _buildStatusChip(task.status ?? 'Pending');
+    }
+    return PopupMenuButton<String>(
+      tooltip: 'Change status',
+      onSelected: (selected) {
+        context.read<TaskBloc>().add(UpdateMyTaskStatus(task.id!, selected));
+      },
+      itemBuilder: (context) => nextStatuses
+          .map((s) => PopupMenuItem<String>(value: s, child: Text('Mark as $s')))
+          .toList(),
+      child: _buildStatusChip(task.status ?? 'Pending'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<TaskBloc>(
@@ -25,8 +73,15 @@ class EmployeeTasks extends StatelessWidget {
             return Scaffold(
               body: Padding(
                 padding: const EdgeInsets.all(16),
-                child: myTasks.isNotEmpty
-                    ? ListView.separated(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    const Text('Tasks', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 16),
+                    Expanded(
+                      child: myTasks.isNotEmpty
+                          ? ListView.separated(
                         itemCount: myTasks.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
@@ -42,47 +97,24 @@ class EmployeeTasks extends StatelessWidget {
                                 children: [
                                   Text(task.title ?? '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                   const SizedBox(height: 8),
-                                  Text(task.description ?? '-', style: const TextStyle(fontSize: 16)),
-                                  const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      const Icon(Icons.calendar_today, size: 16),
+                                      const Icon(Icons.calendar_today, size: 16, color: Colors.red),
                                       const SizedBox(width: 4),
                                       Text(
                                         task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-',
-                                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.red),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
+                                  if (task.description != null && task.description!.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Text(task.description!, style: const TextStyle(fontSize: 15)),
+                                  ],
+                                  const SizedBox(height: 12),
                                   Row(
                                     children: [
-                                      const Text('Status:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      const SizedBox(width: 8),
-                                      DropdownButton<String>(
-                                        value: task.status ?? 'Pending',
-                                        items: const [
-                                          DropdownMenuItem(value: 'Pending', child: Text('Pending')),
-                                          DropdownMenuItem(value: 'In Progress', child: Text('In Progress')),
-                                          DropdownMenuItem(value: 'Completed', child: Text('Completed')),
-                                        ],
-                                        onChanged: (newStatus) {
-                                          if (newStatus != null && newStatus != task.status) {
-                                            final updatedTask = TaskEntity(
-                                              id: task.id,
-                                              title: task.title,
-                                              description: task.description,
-                                              dueDate: task.dueDate,
-                                              assignedTo: task.assignedTo,
-                                              assignedDepartment: task.assignedDepartment,
-                                              status: newStatus,
-                                              createdBy: task.createdBy,
-                                              createdAt: task.createdAt,
-                                            );
-                                            context.read<TaskBloc>().add(UpdateTask(task.id!, updatedTask));
-                                          }
-                                        },
-                                      ),
+                                      _buildStatusMenu(context, task),
                                     ],
                                   ),
                                 ],
@@ -91,7 +123,19 @@ class EmployeeTasks extends StatelessWidget {
                           );
                         },
                       )
-                    : const Center(child: Text('No tasks assigned to you.')),
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.assignment_turned_in, size: 80, color: Colors.grey),
+                                  SizedBox(height: 16),
+                                  Text('No tasks assigned to you.', style: TextStyle(color: Colors.grey, fontSize: 18)),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ),
             );
           }

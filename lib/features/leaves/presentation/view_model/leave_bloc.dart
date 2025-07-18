@@ -16,6 +16,11 @@ class RejectLeave extends LeaveEvent {
   final String id;
   RejectLeave(this.id);
 }
+class LoadMyLeaves extends LeaveEvent {}
+class CreateMyLeave extends LeaveEvent {
+  final LeaveEntity leave;
+  CreateMyLeave(this.leave);
+}
 
 abstract class LeaveState {}
 class LeaveLoading extends LeaveState {}
@@ -63,6 +68,24 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       try {
         await repository.updateLeaveStatus(event.id, 'Rejected');
         add(LoadLeaves());
+      } catch (e) {
+        emit(LeaveError(e.toString()));
+      }
+    });
+    on<LoadMyLeaves>((event, emit) async {
+      emit(LeaveLoading());
+      try {
+        final leaves = await repository.getMyLeaves();
+        emit(LeaveLoaded(leaves));
+      } catch (e) {
+        emit(LeaveError(e.toString()));
+      }
+    });
+    on<CreateMyLeave>((event, emit) async {
+      emit(LeaveLoading());
+      try {
+        await repository.createLeave(event.leave);
+        add(LoadMyLeaves());
       } catch (e) {
         emit(LeaveError(e.toString()));
       }

@@ -30,7 +30,10 @@ class LeaveRemoteDataSource {
   }
 
   Future<List<LeaveModel>> getMyLeaves() async {
-    final response = await dio.get('/leaves/my');
+    final options = Options();
+    print('DIO TOKEN (getMyLeaves): ' + (dio.options.headers['Authorization']?.toString() ?? 'NO TOKEN'));
+    final response = await dio.get('/leaves', options: options);
+    print('DIO RESPONSE (getMyLeaves): ' + response.data.toString());
     return (response.data as List).map((json) => LeaveModel.fromJson(json)).toList();
   }
 

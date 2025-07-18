@@ -83,7 +83,7 @@ class EmployeeAttendance extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.timer, size: 18, color: Colors.orange),
+                          const Icon(Icons.timer, size: 18, color: Colors.black),
                           const SizedBox(width: 8),
                           Text('Total Hours: ', style: const TextStyle(fontWeight: FontWeight.bold)),
                           (attendance.totalHours != null && attendance.checkInTime != null && attendance.checkOutTime != null)
@@ -146,15 +146,18 @@ class EmployeeAttendance extends StatelessWidget {
             final attendance = state.attendance;
             final todayStatus = state.todayStatus;
             return Scaffold(
-              appBar: AppBar(
-                title: const Text('My Attendance'),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-              ),
               body: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: _buildAttendanceCard(context, attendance, todayStatus),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      const Text('Attendance', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 16),
+                      _buildAttendanceCard(context, attendance, todayStatus),
+                    ],
+                  ),
                 ),
               ),
             );

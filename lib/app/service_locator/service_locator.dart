@@ -49,6 +49,7 @@ import 'package:hready/features/tasks/presentation/view_model/task_view_model.da
 import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
 import 'package:hready/features/tasks/domain/use_cases/get_all_users_use_case.dart';
+import 'package:hready/features/tasks/domain/use_cases/update_my_task_status_use_case.dart';
 
 // Attendance
 import 'package:hready/features/attendance/data/datasources/remote_datasource/attendance_remote_data_source.dart';
@@ -65,6 +66,7 @@ import 'package:hready/features/leaves/data/datasources/remote_datasource/leave_
 import 'package:hready/features/leaves/data/repositories/leave_remote_repository.dart';
 import 'package:hready/features/leaves/domain/repositories/leave_repository.dart';
 import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
+import 'package:hready/features/leaves/domain/use_cases/get_my_leaves_use_case.dart';
 
 // Employee
 import 'package:hready/features/employee/data/datasources/remote_datasource/employee_remote_data_source.dart';
@@ -74,6 +76,7 @@ import 'package:hready/features/employee/domain/use_cases/add_employee_use_case.
 import 'package:hready/features/employee/domain/use_cases/update_employee_use_case.dart';
 import 'package:hready/features/employee/domain/use_cases/delete_employee_use_case.dart';
 import 'package:hready/features/employee/presentation/view_model/employee_bloc.dart';
+import 'package:hready/features/employee/domain/use_cases/get_employee_profile_use_case.dart';
 
 // Requests
 import 'package:hready/features/requests/data/datasources/remote_datasource/request_remote_data_source.dart';
@@ -187,6 +190,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => DeleteTaskUseCase(getIt<TaskRepository>()));
   getIt.registerLazySingleton(() => GetAllUsersUseCase(getIt<IUserRemoteDatasource>()));
   getIt.registerLazySingleton(() => GetMyTasksUseCase(getIt<TaskRepository>()));
+  getIt.registerLazySingleton(() => UpdateMyTaskStatusUseCase(getIt<TaskRepository>()));
   // Tasks - ViewModel
   getIt.registerFactory(() => TaskViewModel(
     getAllTasksUseCase: getIt(),
@@ -203,6 +207,7 @@ Future<void> setupLocator() async {
     updateTaskUseCase: getIt(),
     deleteTaskUseCase: getIt(),
     getAllUsersUseCase: getIt(),
+    updateMyTaskStatusUseCase: getIt(),
   ));
 
   // Attendance - Remote Data Source
@@ -225,6 +230,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => LeaveRemoteRepository(getIt()));
   getIt.registerLazySingleton<LeaveRepository>(() => getIt<LeaveRemoteRepository>());
   getIt.registerFactory(() => LeaveBloc(getIt<LeaveRepository>()));
+  getIt.registerLazySingleton(() => GetMyLeavesUseCase(getIt<LeaveRepository>()));
 
   // Employee - Remote Data Source
   getIt.registerLazySingleton(() => EmployeeRemoteDataSource(getIt<Dio>()));
@@ -237,6 +243,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => AddEmployeeUseCase(getIt<IEmployeeRepository>()));
   getIt.registerLazySingleton(() => UpdateEmployeeUseCase(getIt<IEmployeeRepository>()));
   getIt.registerLazySingleton(() => DeleteEmployeeUseCase(getIt<IEmployeeRepository>()));
+  getIt.registerLazySingleton(() => GetEmployeeProfileUseCase(getIt<IEmployeeRepository>()));
   getIt.registerFactory(() => EmployeeBloc(
     getAllEmployeesUseCase: getIt(),
     addEmployeeUseCase: getIt(),
