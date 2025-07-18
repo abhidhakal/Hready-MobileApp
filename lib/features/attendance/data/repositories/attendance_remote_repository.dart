@@ -71,5 +71,6 @@ class AttendanceRemoteRepository implements AttendanceRepository {
     checkOutTime: m.checkOutTime,
     date: m.date,
     status: m.status,
+    totalHours: m.totalHours,
   );
 } 

@@ -7,7 +7,6 @@ import 'package:hready/features/tasks/domain/use_cases/create_task_use_case.dart
 import 'package:hready/features/tasks/domain/use_cases/update_task_use_case.dart';
 import 'package:hready/features/tasks/domain/use_cases/delete_task_use_case.dart';
 import 'package:hready/features/tasks/domain/use_cases/get_all_users_use_case.dart';
-import 'package:hready/features/tasks/domain/entities/task_entity.dart';
 import 'package:hready/features/auth/domain/entities/user_entity.dart';
 
 class TaskBloc extends Bloc<TaskEvent, TaskState> {

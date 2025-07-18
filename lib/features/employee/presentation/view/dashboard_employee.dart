@@ -19,7 +19,6 @@ class DashboardEmployee extends StatelessWidget {
     const EmployeeAttendance(),
     const EmployeeTasks(),
     const EmployeeAnnouncements(),
-    const EmployeeProfile(),
   ];
 
   Widget buildNavItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
@@ -76,7 +75,6 @@ class DashboardEmployee extends StatelessWidget {
                       buildNavItem(context, Icons.fingerprint, "Attendance", 2, state.selectedIndex),
                       buildNavItem(context, Icons.assignment_outlined, "Tasks", 3, state.selectedIndex),
                       buildNavItem(context, Icons.announcement_outlined, "News", 4, state.selectedIndex),
-                      buildNavItem(context, Icons.person_outline, "Profile", 5, state.selectedIndex),
                     ],
                   ),
                 ),

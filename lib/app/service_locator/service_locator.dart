@@ -17,6 +17,7 @@ import 'package:hready/features/auth/data/models/user_model.dart';
 
 // Admin Dashboard
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
+import 'package:hready/features/employee/data/repositories/remote_repository/employee_remote_repository.dart';
 
 // Employee Dashboard
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
@@ -54,11 +55,24 @@ import 'package:hready/features/attendance/data/datasources/remote_datasource/at
 import 'package:hready/features/attendance/data/repositories/attendance_remote_repository.dart';
 import 'package:hready/features/attendance/domain/repositories/attendance_repository.dart';
 import 'package:hready/features/attendance/domain/use_cases/get_my_attendance_use_case.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_bloc.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
+import 'package:hready/features/attendance/domain/use_cases/mark_attendance_use_case.dart';
+import 'package:hready/features/attendance/domain/use_cases/get_all_attendance_use_case.dart';
 
 // Leaves
 import 'package:hready/features/leaves/data/datasources/remote_datasource/leave_remote_data_source.dart';
 import 'package:hready/features/leaves/data/repositories/leave_remote_repository.dart';
 import 'package:hready/features/leaves/domain/repositories/leave_repository.dart';
+
+// Employee
+import 'package:hready/features/employee/data/datasources/remote_datasource/employee_remote_data_source.dart';
+import 'package:hready/features/employee/domain/repositories/employee_repository.dart';
+import 'package:hready/features/employee/domain/use_cases/get_all_employees_use_case.dart';
+import 'package:hready/features/employee/domain/use_cases/add_employee_use_case.dart';
+import 'package:hready/features/employee/domain/use_cases/update_employee_use_case.dart';
+import 'package:hready/features/employee/domain/use_cases/delete_employee_use_case.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -68,7 +82,7 @@ Future<void> setupLocator() async {
 
   // Core - ApiService with getToken from Hive
   getIt.registerLazySingleton(() => ApiService(
-        'http://192.168.18.178:3000',
+        'http://192.168.18.175:3000',
         getToken: () async {
           final model = userBox.get('current_user');
           return model?.token;
@@ -109,7 +123,7 @@ Future<void> setupLocator() async {
 
   // Register Dio for API calls
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.178:3000/api'));
+    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.175:3000/api'));
     // Optionally add an interceptor to always add the token
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -187,6 +201,13 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<AttendanceRepository>(() => getIt<AttendanceRemoteRepository>());
   // Attendance - Use Cases
   getIt.registerLazySingleton(() => GetMyAttendanceUseCase(getIt<AttendanceRepository>()));
+  getIt.registerLazySingleton(() => MarkAttendanceUseCase(getIt<AttendanceRepository>()));
+  getIt.registerLazySingleton(() => GetAllAttendanceUseCase(getIt<AttendanceRepository>()));
+  getIt.registerFactory(() => AttendanceBloc(
+    getMyAttendanceUseCase: getIt(),
+    markAttendanceUseCase: getIt(),
+    getAllAttendanceUseCase: getIt(),
+  ));
 
   // Leaves - Remote Data Source
   getIt.registerLazySingleton(() => LeaveRemoteDataSource(getIt<Dio>()));
@@ -194,6 +215,24 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => LeaveRemoteRepository(getIt()));
   getIt.registerLazySingleton<LeaveRepository>(() => getIt<LeaveRemoteRepository>());
   // Leaves - Use Cases
+
+  // Employee - Remote Data Source
+  getIt.registerLazySingleton(() => EmployeeRemoteDataSource(getIt<Dio>()));
+  final employeeToken = await getToken() ?? '';
+  getIt.registerLazySingleton<IEmployeeRepository>(() => EmployeeRemoteRepository(
+    baseUrl: 'http://192.168.18.175:3000/api',
+    token: employeeToken,
+  ));
+  getIt.registerLazySingleton(() => GetAllEmployeesUseCase(getIt<IEmployeeRepository>()));
+  getIt.registerLazySingleton(() => AddEmployeeUseCase(getIt<IEmployeeRepository>()));
+  getIt.registerLazySingleton(() => UpdateEmployeeUseCase(getIt<IEmployeeRepository>()));
+  getIt.registerLazySingleton(() => DeleteEmployeeUseCase(getIt<IEmployeeRepository>()));
+  getIt.registerFactory(() => EmployeeBloc(
+    getAllEmployeesUseCase: getIt(),
+    addEmployeeUseCase: getIt(),
+    updateEmployeeUseCase: getIt(),
+    deleteEmployeeUseCase: getIt(),
+  ));
 }
 
 Future<String?> getToken() async {

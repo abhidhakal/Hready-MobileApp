@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
 import 'package:intl/intl.dart';
+import 'package:hready/features/admin/presentation/view/admin_profile.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
@@ -48,7 +49,11 @@ class AdminHome extends StatelessWidget {
                           ),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Color(0xFF042F46)),
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const AdminProfile()),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -108,7 +113,7 @@ class AdminHome extends StatelessWidget {
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () {},
-                            child: const Text('Review Now'),
+                            child: const Text('Review'),
                           ),
                         ],
                       ),

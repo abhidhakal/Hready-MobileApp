@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
 import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_state.dart';
 import 'package:intl/intl.dart';
+import 'package:hready/features/employee/presentation/view/employee_profile.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
@@ -67,7 +68,9 @@ class EmployeeHome extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.edit, color: Color(0xFF042F46)),
                         onPressed: () {
-                          // Navigate to profile edit
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const EmployeeProfile()),
+                          );
                         },
                       ),
                     ],
