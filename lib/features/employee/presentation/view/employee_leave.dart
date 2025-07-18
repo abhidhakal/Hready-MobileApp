@@ -6,6 +6,7 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class EmployeeLeave extends StatefulWidget {
   const EmployeeLeave({super.key});
@@ -56,7 +57,7 @@ class _EmployeeLeaveState extends State<EmployeeLeave> {
         listener: (context, state) {
           if (state is LeaveError) {
             setState(() => _loading = false);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
+            showCommonSnackbar(context, state.error);
           } else if (state is LeaveLoaded) {
             setState(() => _loading = false);
             // Optionally clear form
@@ -176,14 +177,19 @@ class _EmployeeLeaveState extends State<EmployeeLeave> {
             leaveRecordsWidget = const SizedBox.shrink();
           }
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('Leave'),
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black,
+              centerTitle: false,
+              elevation: 0,
+            ),
             body: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Request Leave', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 2,

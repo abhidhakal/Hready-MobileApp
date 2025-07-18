@@ -66,50 +66,70 @@ class EmployeeTasks extends StatelessWidget {
       child: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state is TaskLoading) {
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) => Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 2,
-                  child: ListTile(
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+            return Column(
+              children: [
+                const SizedBox(height: 24),
+                Expanded(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 5,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(height: 20, width: 120, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 6)),
+                                    Container(height: 16, width: 180, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 6)),
+                                    Container(height: 14, width: 80, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 6)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    title: Container(height: 16, width: 120, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(height: 12, width: 180, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
-                        Container(height: 12, width: 80, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
-                      ],
                     ),
                   ),
                 ),
-              ),
+              ],
             );
           } else if (state is TaskError) {
             return Center(child: Text('Error: ${state.error}'));
           } else if (state is TaskLoaded) {
             final myTasks = state.tasks;
             return Scaffold(
+              appBar: AppBar(
+                title: const Text('Tasks'),
+                backgroundColor: const Color(0xFFF5F5F5),
+                foregroundColor: Colors.black,
+                centerTitle: false,
+                elevation: 0,
+              ),
               body: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
-                    const Text('Tasks', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     SizedBox(height: 16),
                     Expanded(
                       child: myTasks.isNotEmpty

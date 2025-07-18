@@ -89,7 +89,7 @@ class EmployeeHome extends StatelessWidget {
                   }
                   final name = state.name.isNotEmpty ? state.name : 'Employee';
                   final firstName = name.split(' ').first;
-                  final position = state.role.isNotEmpty ? state.role : 'Employee';
+                  final position = state.position.isNotEmpty ? state.position : 'Employee';
                   final profilePicture = state.profilePicture;
                   return BlocProvider(
                     create: (_) => getIt<AttendanceBloc>()..add(LoadTodayAttendance()),
@@ -173,394 +173,392 @@ class EmployeeHome extends StatelessWidget {
                 children: [
                   Expanded(
                     child: BlocProvider(
-                      create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
-                      child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
-                        builder: (context, state) {
-                          final position = state.role.isNotEmpty ? state.role : 'Employee';
-                          return _InfoCard(
-                            title: 'Position',
-                            content: Row(
-                              children: [
-                                const SizedBox(width: 10),
-                                Text(position, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                            color: Colors.white,
-                            height: 160,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: BlocProvider(
-                      create: (_) => getIt<LeaveBloc>()..add(LoadMyLeaves()),
-                      child: BlocBuilder<LeaveBloc, LeaveState>(
-                        builder: (context, state) {
-                          int leaveDaysLeft = 4;
-                          if (state is LeaveLoaded) {
-                            final now = DateTime.now();
-                            final leavesThisMonth = state.leaves.where((l) =>
-                              l.startDate != null &&
-                              l.status != null &&
-                              l.status!.toLowerCase() == 'approved' &&
-                              l.startDate!.year == now.year &&
-                              l.startDate!.month == now.month
-                            ).length;
-                            leaveDaysLeft = 4 - leavesThisMonth;
-                          }
-                          return _InfoCard(
-                            title: 'Leave Days Left',
-                            content: Row(
-                              children: [
-                                const Icon(Icons.beach_access, color: Colors.green, size: 22),
-                                const SizedBox(width: 8),
-                                Text('$leaveDaysLeft', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                                const Spacer(),
-                              ],
-                            ),
-                            color: Colors.white,
-                            height: 160,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Pending Tasks Card
-            BlocProvider(
-              create: (_) => getIt<TaskBloc>()..add(const LoadTasks(onlyMyTasks: true)),
-              child: BlocBuilder<TaskBloc, TaskState>(
-                builder: (context, state) {
-                  int pending = 0;
-                  String? nextTaskTitle;
-                  String? nextTaskDue;
-                  int total = 0;
-                  if (state is TaskLoaded) {
-                    final pendingTasks = state.tasks.where((t) => t.status?.toLowerCase() == 'pending').toList();
-                    pending = pendingTasks.length;
-                    total = state.tasks.length;
-                    if (pendingTasks.isNotEmpty) {
-                      nextTaskTitle = pendingTasks.first.title;
-                      if (pendingTasks.first.dueDate != null) {
-                        nextTaskDue = DateFormat('yyyy-MM-dd').format(pendingTasks.first.dueDate!);
-                      }
-                    }
-                  }
-                  return Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 2,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Pending Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              Row(
+                        create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
+                        child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
+                          builder: (context, state) {
+                            final position = state.position.isNotEmpty ? state.position : 'Employee';
+                            return _InfoCard(
+                              title: 'Position',
+                              content: Row(
                                 children: [
-                                  Icon(Icons.assignment_late, color: Colors.orange[700], size: 22),
-                                  const SizedBox(width: 8),
-                                  Text('$pending', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                                  if (total > 0) ...[
-                                    const SizedBox(width: 12),
-                                    SizedBox(
-                                      width: 60,
-                                      child: LinearProgressIndicator(
-                                        value: total > 0 ? (total - pending) / total : 0,
-                                        minHeight: 8,
-                                        backgroundColor: Colors.grey[200],
-                                        color: Colors.green,
-                                      ),
-                                    ),
-                                  ],
+                                  const SizedBox(width: 10),
+                                  Text(position, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                                 ],
                               ),
-                              if (nextTaskTitle != null) ...[
-                                const SizedBox(height: 8),
-                                Text('Next: $nextTaskTitle', style: const TextStyle(fontSize: 14)),
-                                if (nextTaskDue != null)
-                                  Text('Due: $nextTaskDue', style: const TextStyle(fontSize: 13, color: Colors.red)),
-                              ],
-                            ],
-                          ),
-                          const Spacer(),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const EmployeeTasks()),
-                              );
-                            },
-                            child: const Text('View All'),
-                          ),
-                        ],
+                              color: Colors.white,
+                              height: 160,
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Recent Tasks Header with View All
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Recent Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const EmployeeTasks()),
-                    );
-                  },
-                  child: const Text('View All'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: BlocProvider(
+                        create: (_) => getIt<LeaveBloc>()..add(LoadMyLeaves()),
+                        child: BlocBuilder<LeaveBloc, LeaveState>(
+                          builder: (context, state) {
+                            int leaveDaysLeft = 4;
+                            if (state is LeaveLoaded) {
+                              final now = DateTime.now();
+                              final leavesThisMonth = state.leaves.where((l) =>
+                                l.startDate != null &&
+                                l.status != null &&
+                                l.status!.toLowerCase() == 'approved' &&
+                                l.startDate!.year == now.year &&
+                                l.startDate!.month == now.month
+                              ).length;
+                              leaveDaysLeft = 4 - leavesThisMonth;
+                            }
+                            return _InfoCard(
+                              title: 'Leave Days Left',
+                              content: Row(
+                                children: [
+                                  Text('$leaveDaysLeft', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                  const Spacer(),
+                                ],
+                              ),
+                              color: Colors.white,
+                              height: 160,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            BlocProvider(
-              create: (_) => getIt<TaskBloc>()..add(const LoadTasks(onlyMyTasks: true)),
-              child: BlocBuilder<TaskBloc, TaskState>(
-                builder: (context, state) {
-                  if (state is TaskLoading) {
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 2,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 20,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 10),
-                              Container(
-                                width: 100,
-                                height: 20,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
+              ),
+              const SizedBox(height: 24),
+              // Pending Tasks Card
+              BlocProvider(
+                create: (_) => getIt<TaskBloc>()..add(const LoadTasks(onlyMyTasks: true)),
+                child: BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, state) {
+                    int pending = 0;
+                    String? nextTaskTitle;
+                    String? nextTaskDue;
+                    int total = 0;
+                    if (state is TaskLoaded) {
+                      final pendingTasks = state.tasks.where((t) => t.status?.toLowerCase() == 'pending').toList();
+                      pending = pendingTasks.length;
+                      total = state.tasks.length;
+                      if (pendingTasks.isNotEmpty) {
+                        nextTaskTitle = pendingTasks.first.title;
+                        if (pendingTasks.first.dueDate != null) {
+                          nextTaskDue = DateFormat('yyyy-MM-dd').format(pendingTasks.first.dueDate!);
+                        }
+                      }
+                    }
+                    return Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 2,
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Pending Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.assignment_late, color: Colors.orange[700], size: 22),
+                                    const SizedBox(width: 8),
+                                    Text('$pending', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                    if (total > 0) ...[
+                                      const SizedBox(width: 12),
+                                      SizedBox(
+                                        width: 60,
+                                        child: LinearProgressIndicator(
+                                          value: total > 0 ? (total - pending) / total : 0,
+                                          minHeight: 8,
+                                          backgroundColor: Colors.grey[200],
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                if (nextTaskTitle != null) ...[
+                                  const SizedBox(height: 8),
+                                  Text('Title: $nextTaskTitle', style: const TextStyle(fontSize: 14)),
+                                  if (nextTaskDue != null)
+                                    Text('Due: $nextTaskDue', style: const TextStyle(fontSize: 13, color: Colors.red)),
+                                ],
+                              ],
+                            ),
+                            const Spacer(),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const EmployeeTasks()),
+                                );
+                              },
+                              child: const Text('View All'),
+                            ),
+                          ],
                         ),
                       ),
                     );
-                  } else if (state is TaskError) {
-                    return Center(child: Text('Error: ${state.error}'));
-                  } else if (state is TaskLoaded && state.tasks.isNotEmpty) {
-                    final tasks = state.tasks.take(3).toList();
-                    return Column(
-                      children: [
-                        for (final task in tasks)
-                          Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 2,
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      task.title ?? '-',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-',
-                                      style: const TextStyle(fontSize: 13, color: Colors.red),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[100] : Colors.green[100],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      task.status ?? '-',
-                                      style: TextStyle(
-                                        color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[800] : Colors.green[800],
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Recent Tasks Header with View All
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Recent Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const EmployeeTasks()),
+                      );
+                    },
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              BlocProvider(
+                create: (_) => getIt<TaskBloc>()..add(const LoadTasks(onlyMyTasks: true)),
+                child: BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, state) {
+                    if (state is TaskLoading) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 2,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 20,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 10),
+                                Container(
+                                  width: 100,
+                                  height: 20,
+                                  color: Colors.white,
+                                ),
+                              ],
                             ),
                           ),
-                      ],
-                    );
-                  }
-                  return const Center(child: Text('No recent tasks.'));
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Recent Announcements Header with View All
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const EmployeeAnnouncements()),
-                    );
-                  },
-                  child: const Text('View All'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            ChangeNotifierProvider<AnnouncementViewModel>(
-              create: (_) => getIt<AnnouncementViewModel>()..loadAnnouncements(),
-              child: Consumer<AnnouncementViewModel>(
-                builder: (context, vm, _) {
-                  final state = vm.state;
-                  if (state.isLoading) {
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 5,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          return Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 2,
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 20,
-                                          width: 150,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Container(
-                                          height: 15,
-                                          width: 200,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Container(
-                                          height: 15,
-                                          width: 100,
-                                          color: Colors.white,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  } else if (state.error != null) {
-                    return Center(child: Text('Error: ${state.error}'));
-                  } else if (state.announcements.isEmpty) {
-                    return const Center(child: Text('No announcements available.'));
-                  }
-                  final announcements = state.announcements.take(5).toList();
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: announcements.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final ann = announcements[index];
-                      return Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 2,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.campaign, color: Colors.orange, size: 28),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      );
+                    } else if (state is TaskError) {
+                      return Center(child: Text('Error: ${state.error}'));
+                    } else if (state is TaskLoaded && state.tasks.isNotEmpty) {
+                      final tasks = state.tasks.take(3).toList();
+                      return Column(
+                        children: [
+                          for (final task in tasks)
+                            Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 2,
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
                                   children: [
-                                    Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      ann.message != null && ann.message!.length > 100
-                                          ? ann.message!.substring(0, 100) + '...'
-                                          : ann.message ?? '',
-                                    ),
-                                    if (ann.message != null && ann.message!.length > 100)
-                                      TextButton(
-                                        onPressed: () {
-                                          // Show full announcement (could use a dialog or new page)
-                                        },
-                                        child: const Text('Read More'),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        task.title ?? '-',
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                       ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      ann.createdAt != null
-                                          ? DateFormat('yyyy-MM-dd').format(ann.createdAt!)
-                                          : '',
-                                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Text(
+                                        task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-',
+                                        style: const TextStyle(fontSize: 13, color: Colors.red),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[100] : Colors.green[100],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        task.status ?? '-',
+                                        style: TextStyle(
+                                          color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[800] : Colors.green[800],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                        ],
+                      );
+                    }
+                    return const Center(child: Text('No recent tasks.'));
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Recent Announcements Header with View All
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const EmployeeAnnouncements()),
                       );
                     },
-                  );
-                },
+                    child: const Text('View All'),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              ChangeNotifierProvider<AnnouncementViewModel>(
+                create: (_) => getIt<AnnouncementViewModel>()..loadAnnouncements(),
+                child: Consumer<AnnouncementViewModel>(
+                  builder: (context, vm, _) {
+                    final state = vm.state;
+                    if (state.isLoading) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: 5,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            return Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 2,
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            height: 20,
+                                            width: 150,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Container(
+                                            height: 15,
+                                            width: 200,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Container(
+                                            height: 15,
+                                            width: 100,
+                                            color: Colors.white,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    } else if (state.error != null) {
+                      return Center(child: Text('Error: ${state.error}'));
+                    } else if (state.announcements.isEmpty) {
+                      return const Center(child: Text('No announcements available.'));
+                    }
+                    final announcements = state.announcements.take(5).toList();
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: announcements.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final ann = announcements[index];
+                        return Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 2,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.campaign, color: Colors.orange, size: 28),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        ann.message != null && ann.message!.length > 100
+                                            ? ann.message!.substring(0, 100) + '...'
+                                            : ann.message ?? '',
+                                      ),
+                                      if (ann.message != null && ann.message!.length > 100)
+                                        TextButton(
+                                          onPressed: () {
+                                            // Show full announcement (could use a dialog or new page)
+                                          },
+                                          child: const Text('Read More'),
+                                        ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        ann.createdAt != null
+                                            ? DateFormat('yyyy-MM-dd').format(ann.createdAt!)
+                                            : '',
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 }

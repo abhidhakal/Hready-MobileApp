@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
@@ -131,26 +132,21 @@ class EmployeeProfile extends StatelessWidget {
             previous.success != current.success || previous.error != current.error,
         listener: (context, state) {
           if (state.success.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.success),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            showCommonSnackbar(context, state.success);
           } else if (state.error.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            showCommonSnackbar(context, state.error);
           }
         },
         child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
           builder: (context, state) {
             return Scaffold(
+              appBar: AppBar(
+                title: const Text('Profile'),
+                backgroundColor: const Color(0xFFF5F5F5),
+                foregroundColor: Colors.black,
+                centerTitle: false,
+                elevation: 0,
+              ),
               body: state.isLoading
                   ? Center(
                       child: Shimmer.fromColors(

@@ -29,6 +29,7 @@ class EmployeeProfileBloc extends Bloc<EmployeeProfileEvent, EmployeeProfileStat
         contactNo: res.data['contactNo'] ?? '',
         profilePicture: res.data['profilePicture'] ?? '',
         role: res.data['role'] ?? 'employee',
+        position: res.data['position'] ?? '',
       ));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: 'Failed to load profile'));

@@ -10,6 +10,7 @@ import 'package:hready/features/requests/domain/use_cases/approve_request_use_ca
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class EmployeeRequestsPage extends StatelessWidget {
   const EmployeeRequestsPage({Key? key}) : super(key: key);
@@ -25,6 +26,13 @@ class EmployeeRequestsPage extends StatelessWidget {
       child: BlocBuilder<RequestsBloc, RequestsState>(
         builder: (context, state) {
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('Requests & Reports'),
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black,
+              centerTitle: false,
+              elevation: 0,
+            ),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
                 showDialog(
@@ -153,8 +161,6 @@ class EmployeeRequestsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 8),
-                      const Text('Requests & Reports', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 18),
                       const Divider(height: 1, thickness: 1),
                       const SizedBox(height: 24),
                       const Text('My Requests', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),

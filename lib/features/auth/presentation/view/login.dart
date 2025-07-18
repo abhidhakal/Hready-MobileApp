@@ -6,6 +6,7 @@ import 'package:hready/features/auth/presentation/viewmodel/auth_state.dart';
 import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
 import 'package:hready/features/admin/presentation/view/dashboard_admin.dart';
 import 'package:hready/features/employee/presentation/view/dashboard_employee.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -40,9 +41,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               }
             } else if (state is AuthFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              showCommonSnackbar(context, state.message);
             }
           },
           child: Padding(
@@ -52,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/light.webp', height: 100),
+                  Image.asset('assets/images/primary_transparent.webp', height: 100),
                   const SizedBox(height: 24),
                   const Text(
                     "Welcome to HReady!",
@@ -119,15 +118,15 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  SafeArea(
-                    child: TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const RegisterPage()),
-                      ),
-                      child: const Text("Don't have an account? Register here"),
-                    ),
-                  )
+                  // SafeArea(
+                  //   child: TextButton(
+                  //     onPressed: () => Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(builder: (_) => const RegisterPage()),
+                  //     ),
+                  //     child: const Text("Don't have an account? Register here"),
+                  //   ),
+                  // )
                 ],
               ),
             ),

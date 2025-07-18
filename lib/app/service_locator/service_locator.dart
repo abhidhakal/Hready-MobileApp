@@ -47,7 +47,6 @@ import 'package:hready/features/tasks/domain/use_cases/update_task_use_case.dart
 import 'package:hready/features/tasks/domain/use_cases/delete_task_use_case.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_view_model.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
-import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
 import 'package:hready/features/tasks/domain/use_cases/get_all_users_use_case.dart';
 import 'package:hready/features/tasks/domain/use_cases/update_my_task_status_use_case.dart';
 
@@ -57,7 +56,6 @@ import 'package:hready/features/attendance/data/repositories/attendance_remote_r
 import 'package:hready/features/attendance/domain/repositories/attendance_repository.dart';
 import 'package:hready/features/attendance/domain/use_cases/get_my_attendance_use_case.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_bloc.dart';
-import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
 import 'package:hready/features/attendance/domain/use_cases/mark_attendance_use_case.dart';
 import 'package:hready/features/attendance/domain/use_cases/get_all_attendance_use_case.dart';
 

@@ -7,6 +7,8 @@ import 'package:hready/features/tasks/presentation/view_model/task_state.dart';
 import 'package:hready/features/tasks/domain/entities/task_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class AdminTasks extends StatefulWidget {
   const AdminTasks({Key? key}) : super(key: key);
@@ -226,7 +228,52 @@ class _AdminTasksState extends State<AdminTasks> {
       child: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state is TaskLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Tasks'),
+                backgroundColor: const Color(0xFFF5F5F5),
+                foregroundColor: Colors.black,
+                centerTitle: false,
+              ),
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 4,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          title: Container(height: 16, width: 120, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(height: 12, width: 180, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                              Container(height: 12, width: 80, color: Colors.white, margin: const EdgeInsets.symmetric(vertical: 4)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
           } else if (state is TaskError) {
             return Center(child: Text('Error: ${state.error}'));
           } else if (state is TaskLoaded) {

@@ -4,6 +4,7 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
 import 'package:hready/features/announcements/domain/entities/announcement_entity.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class AdminAnnouncements extends StatelessWidget {
   const AdminAnnouncements({Key? key}) : super(key: key);
@@ -42,28 +43,17 @@ class AdminAnnouncements extends StatelessWidget {
                               baseColor: Colors.grey[300]!,
                               highlightColor: Colors.grey[100]!,
                               child: Card(
-                                margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                elevation: 3,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 2,
+                                margin: const EdgeInsets.symmetric(vertical: 10),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(18.0),
+                                  padding: const EdgeInsets.all(18),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 36,
-                                            height: 36,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(18),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Container(height: 18, width: 120, color: Colors.white),
-                                        ],
-                                      ),
+                                      Container(height: 18, width: 120, color: Colors.white),
+                                      const SizedBox(height: 10),
+                                      Container(height: 14, width: 80, color: Colors.white),
                                       const SizedBox(height: 10),
                                       Container(height: 12, width: 180, color: Colors.white),
                                     ],

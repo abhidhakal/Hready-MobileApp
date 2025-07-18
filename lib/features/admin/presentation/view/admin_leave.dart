@@ -5,6 +5,8 @@ import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
 import 'package:hready/features/leaves/domain/entities/leave_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class AdminLeave extends StatefulWidget {
   const AdminLeave({Key? key}) : super(key: key);
@@ -20,6 +22,8 @@ class _AdminLeaveState extends State<AdminLeave> {
   DateTime? endDate;
   String reason = '';
   bool halfDay = false;
+  String? _attachmentPath;
+  bool _loading = false;
 
   void _resetForm() {
     leaveType = '';
@@ -27,6 +31,16 @@ class _AdminLeaveState extends State<AdminLeave> {
     endDate = null;
     reason = '';
     halfDay = false;
+    _attachmentPath = null;
+  }
+
+  void _pickAttachment() async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _attachmentPath = result.files.single.path;
+      });
+    }
   }
 
   void _showLeaveFormDialog(BuildContext context) {
@@ -34,117 +48,144 @@ class _AdminLeaveState extends State<AdminLeave> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Row(
-            children: const [
-              Icon(Icons.beach_access, color: Colors.green),
-              SizedBox(width: 8),
-              Text('Request Leave for Myself'),
-            ],
-          ),
-          content: SizedBox(
-            width: 500,
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Leave Type', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: leaveType.isEmpty ? null : leaveType,
-                      items: const [
-                        DropdownMenuItem(value: 'Casual', child: Text('Casual')),
-                        DropdownMenuItem(value: 'Sick', child: Text('Sick')),
-                        DropdownMenuItem(value: 'Emergency', child: Text('Emergency')),
-                        DropdownMenuItem(value: 'Annual', child: Text('Annual')),
-                        DropdownMenuItem(value: 'Other', child: Text('Other')),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Row(
+                children: const [
+                  Text('Request Leave for Myself'),
+                ],
+              ),
+              content: SizedBox(
+                width: 500,
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: leaveType.isEmpty ? null : leaveType,
+                          items: const [
+                            DropdownMenuItem(value: 'Casual', child: Text('Casual')),
+                            DropdownMenuItem(value: 'Sick', child: Text('Sick')),
+                            DropdownMenuItem(value: 'Emergency', child: Text('Emergency')),
+                            DropdownMenuItem(value: 'Annual', child: Text('Annual')),
+                            DropdownMenuItem(value: 'Other', child: Text('Other')),
+                          ],
+                          onChanged: (v) => setState(() => leaveType = v ?? ''),
+                          decoration: const InputDecoration(labelText: 'Leave Type', border: OutlineInputBorder()),
+                          validator: (v) => v == null || v.isEmpty ? 'Select leave type' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: startDate ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2100),
+                                  );
+                                  if (picked != null) setState(() => startDate = picked);
+                                },
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(labelText: 'Start Date', border: OutlineInputBorder()),
+                                  child: Text(startDate != null ? DateFormat('yyyy-MM-dd').format(startDate!) : 'Select'),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: endDate ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2100),
+                                  );
+                                  if (picked != null) setState(() => endDate = picked);
+                                },
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(labelText: 'End Date', border: OutlineInputBorder()),
+                                  child: Text(endDate != null ? DateFormat('yyyy-MM-dd').format(endDate!) : 'Select'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          decoration: const InputDecoration(labelText: 'Reason', border: OutlineInputBorder()),
+                          maxLines: 2,
+                          onChanged: (v) => setState(() => reason = v),
+                          validator: (v) => v == null || v.isEmpty ? 'Reason required' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Checkbox(value: halfDay, onChanged: (v) => setState(() => halfDay = v ?? false)),
+                            const Text('Half Day'),
+                            const Spacer(),
+                            TextButton.icon(
+                              onPressed: _pickAttachment,
+                              icon: const Icon(Icons.attach_file),
+                              label: Text(_attachmentPath != null ? 'Change File' : 'Attach File'),
+                            ),
+                            if (_attachmentPath != null)
+                              const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                          ],
+                        ),
                       ],
-                      onChanged: (v) => setState(() => leaveType = v ?? ''),
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
-                      validator: (v) => v == null || v.isEmpty ? 'Select leave type' : null,
                     ),
-                    const SizedBox(height: 16),
-                    const Text('Start Date', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: startDate ?? DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null) setState(() => startDate = picked);
-                      },
-                      child: InputDecorator(
-                        decoration: const InputDecoration(border: OutlineInputBorder()),
-                        child: Text(startDate != null ? DateFormat('yyyy-MM-dd').format(startDate!) : 'Select'),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('End Date', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: endDate ?? DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null) setState(() => endDate = picked);
-                      },
-                      child: InputDecorator(
-                        decoration: const InputDecoration(border: OutlineInputBorder()),
-                        child: Text(endDate != null ? DateFormat('yyyy-MM-dd').format(endDate!) : 'Select'),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Reason', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
-                      onChanged: (v) => setState(() => reason = v),
-                      validator: (v) => v == null || v.isEmpty ? 'Reason required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    CheckboxListTile(
-                      value: halfDay,
-                      onChanged: (v) => setState(() => halfDay = v ?? false),
-                      title: const Text('Half Day'),
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
-                  final leave = LeaveEntity(
-                    leaveType: leaveType,
-                    startDate: startDate,
-                    endDate: endDate,
-                    reason: reason,
-                    halfDay: halfDay,
-                    status: 'Pending',
-                  );
-                  context.read<LeaveBloc>().add(CreateLeave(leave));
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Submit Leave'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                  child: SizedBox(
+                    width: 140,
+                    child: ElevatedButton(
+                      onPressed: _loading
+                          ? null
+                          : () {
+                              if (_formKey.currentState?.validate() ?? false) {
+                                setState(() => _loading = true);
+                                final leave = LeaveEntity(
+                                  leaveType: leaveType,
+                                  startDate: startDate,
+                                  endDate: endDate,
+                                  reason: reason,
+                                  halfDay: halfDay,
+                                  attachment: _attachmentPath,
+                                  status: 'Pending',
+                                );
+                                context.read<LeaveBloc>().add(CreateLeave(leave));
+                                Navigator.of(context).pop();
+                                setState(() => _loading = false);
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF042F46),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                      child: Text(_loading ? 'Submitting...' : 'Submit Leave'),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -185,9 +226,9 @@ class _AdminLeaveState extends State<AdminLeave> {
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
                       child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
                         margin: const EdgeInsets.symmetric(vertical: 10),
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         child: Padding(
                           padding: const EdgeInsets.all(18),
                           child: Column(

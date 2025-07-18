@@ -12,6 +12,7 @@ class EmployeeProfileState extends Equatable {
   final bool showPasswordModal;
   final String error;
   final String success;
+  final String position;
 
   // Password fields (for modal)
   final String currentPassword;
@@ -33,6 +34,7 @@ class EmployeeProfileState extends Equatable {
     this.showPasswordModal = false,
     this.error = '',
     this.success = '',
+    this.position = '',
     this.currentPassword = '',
     this.newPassword = '',
     this.confirmPassword = '',
@@ -53,6 +55,7 @@ class EmployeeProfileState extends Equatable {
     bool? showPasswordModal,
     String? error,
     String? success,
+    String? position,
     String? currentPassword,
     String? newPassword,
     String? confirmPassword,
@@ -72,6 +75,7 @@ class EmployeeProfileState extends Equatable {
       showPasswordModal: showPasswordModal ?? this.showPasswordModal,
       error: error ?? '',
       success: success ?? '',
+      position: position ?? this.position,
       currentPassword: currentPassword ?? this.currentPassword,
       newPassword: newPassword ?? this.newPassword,
       confirmPassword: confirmPassword ?? this.confirmPassword,
@@ -84,6 +88,7 @@ class EmployeeProfileState extends Equatable {
   @override
   List<Object?> get props => [
     name, email, contactNo, profilePicture, role, isEditing, isLoading, isUploading, showPasswordModal, error, success,
+    position,
     currentPassword, newPassword, confirmPassword, showCurrent, showNew, showConfirm
   ];
 } 

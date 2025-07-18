@@ -16,13 +16,19 @@ class EmployeeAnnouncements extends StatelessWidget {
         builder: (context, vm, _) {
           final state = vm.state;
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('Announcements'),
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black,
+              centerTitle: false,
+              elevation: 0,
+            ),
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Announcements', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     SizedBox(height: 16),
                     state.isLoading
                         ? ListView.separated(
