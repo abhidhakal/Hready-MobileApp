@@ -6,7 +6,8 @@ import 'package:hready/features/leaves/domain/entities/leave_entity.dart';
 import 'package:intl/intl.dart';
 
 class AdminLeave extends StatefulWidget {
-  const AdminLeave({super.key});
+  final bool showAppBar;
+  const AdminLeave({this.showAppBar = false, Key? key}) : super(key: key);
 
   @override
   State<AdminLeave> createState() => _AdminLeaveState();
@@ -158,92 +159,92 @@ class _AdminLeaveState extends State<AdminLeave> {
       child: BlocBuilder<LeaveBloc, LeaveState>(
         builder: (context, state) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('All Leave Requests'),
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-            ),
+            appBar: widget.showAppBar ? AppBar(title: const Text('All Leave Requests')) : null,
             body: state is LeaveLoading
                 ? const Center(child: CircularProgressIndicator())
                 : state is LeaveError
                     ? Center(child: Text('Error: ${state.error}'))
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (state is LeaveLoaded && state.leaves.isNotEmpty)
-                              ...state.leaves.map((leave) => Card(
-                                margin: const EdgeInsets.symmetric(vertical: 10),
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(18),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          // 1. Remove the 'Employee' label and just show the name
-                                          Text(leave.requestedBy ?? '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-                                          Chip(
-                                            label: Text(leave.status ?? '-'),
-                                            backgroundColor: _statusColor(leave.status),
-                                            labelStyle: const TextStyle(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                      const Divider(height: 20),
-                                      Row(
-                                        children: [
-                                          Expanded(child: Text('Type: ${leave.leaveType ?? '-'}')),
-                                          Expanded(child: Text('Half Day: ${leave.halfDay == true ? 'Yes' : 'No'}')),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          Expanded(child: Text('Start: ${leave.startDate != null ? DateFormat('yyyy-MM-dd').format(leave.startDate!) : '-'}')),
-                                          Expanded(child: Text('End: ${leave.endDate != null ? DateFormat('yyyy-MM-dd').format(leave.endDate!) : '-'}')),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text('Reason:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      Text(leave.reason ?? '-'),
-                                      const SizedBox(height: 6),
-                                      if (leave.attachment != null)
-                                        TextButton(
-                                          onPressed: () {
-                                            // TODO: Open/download attachment
-                                          },
-                                          child: const Text('View Attachment'),
-                                        ),
-                                      const SizedBox(height: 10),
-                                      if ((leave.status ?? '').toLowerCase() == 'pending')
+                    : SafeArea(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!widget.showAppBar) const Text('All Leave Requests', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                              if (!widget.showAppBar) const SizedBox(height: 18),
+                              if (state is LeaveLoaded && state.leaves.isNotEmpty)
+                                ...state.leaves.map((leave) => Card(
+                                  margin: const EdgeInsets.symmetric(vertical: 10),
+                                  elevation: 3,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(18),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            ElevatedButton(
-                                              onPressed: () => context.read<LeaveBloc>().add(ApproveLeave(leave.id!)),
-                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                                              child: const Text('Approve'),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            ElevatedButton(
-                                              onPressed: () => context.read<LeaveBloc>().add(RejectLeave(leave.id!)),
-                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                              child: const Text('Reject'),
+                                            // 1. Remove the 'Employee' label and just show the name
+                                            Text(leave.requestedBy ?? '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+                                            Chip(
+                                              label: Text(leave.status ?? '-'),
+                                              backgroundColor: _statusColor(leave.status),
+                                              labelStyle: const TextStyle(color: Colors.white),
                                             ),
                                           ],
                                         ),
-                                    ],
+                                        const Divider(height: 20),
+                                        Row(
+                                          children: [
+                                            Expanded(child: Text('Type: ${leave.leaveType ?? '-'}')),
+                                            Expanded(child: Text('Half Day: ${leave.halfDay == true ? 'Yes' : 'No'}')),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Row(
+                                          children: [
+                                            Expanded(child: Text('Start: ${leave.startDate != null ? DateFormat('yyyy-MM-dd').format(leave.startDate!) : '-'}')),
+                                            Expanded(child: Text('End: ${leave.endDate != null ? DateFormat('yyyy-MM-dd').format(leave.endDate!) : '-'}')),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text('Reason:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        Text(leave.reason ?? '-'),
+                                        const SizedBox(height: 6),
+                                        if (leave.attachment != null)
+                                          TextButton(
+                                            onPressed: () {
+                                              // TODO: Open/download attachment
+                                            },
+                                            child: const Text('View Attachment'),
+                                          ),
+                                        const SizedBox(height: 10),
+                                        if ((leave.status ?? '').toLowerCase() == 'pending')
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              ElevatedButton(
+                                                onPressed: () => context.read<LeaveBloc>().add(ApproveLeave(leave.id!)),
+                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                                child: const Text('Approve'),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              ElevatedButton(
+                                                onPressed: () => context.read<LeaveBloc>().add(RejectLeave(leave.id!)),
+                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                                child: const Text('Reject'),
+                                              ),
+                                            ],
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              )),
-                            if (state is LeaveLoaded && state.leaves.isEmpty)
-                              const Center(child: Text('No leave requests found.')),
-                          ],
+                                )),
+                              if (state is LeaveLoaded && state.leaves.isEmpty)
+                                const Center(child: Text('No leave requests found.')),
+                            ],
+                          ),
                         ),
                       ),
             floatingActionButton: FloatingActionButton(

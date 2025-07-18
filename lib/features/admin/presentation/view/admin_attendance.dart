@@ -7,7 +7,7 @@ import 'package:hready/features/attendance/presentation/view_model/attendance_st
 import 'package:intl/intl.dart';
 
 class AdminAttendance extends StatelessWidget {
-  const AdminAttendance({super.key});
+  const AdminAttendance({Key? key}) : super(key: key);
 
   Widget _buildStatusChip(String status) {
     Color color;
@@ -215,38 +215,38 @@ class AdminAttendance extends StatelessWidget {
       create: (_) => getIt<AttendanceBloc>()..add(LoadAllAttendance()),
       child: BlocBuilder<AttendanceBloc, AttendanceState>(
         builder: (context, state) {
-          if (state is AttendanceLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is AttendanceError) {
-            return Center(child: Text('Error: ${state.error}'));
-          } else if (state is AdminAttendanceLoaded) {
-            final myRecord = state.myRecord;
-            final todayStatus = state.todayStatus;
-            final allRecords = state.allRecords;
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Attendance Management'),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
+          return Scaffold(
+            appBar: AppBar(title: const Text('Attendance Management')),
+            body: SafeArea(
+              child: Builder(
+                builder: (context) {
+                  if (state is AttendanceLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is AttendanceError) {
+                    return Center(child: Text('Error: ${state.error}'));
+                  } else if (state is AdminAttendanceLoaded) {
+                    final myRecord = state.myRecord;
+                    final todayStatus = state.todayStatus;
+                    final allRecords = state.allRecords;
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMyAttendanceCard(context, myRecord, todayStatus),
+                          const SizedBox(height: 32),
+                          Text('Employee Attendance Records', style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 12),
+                          _buildEmployeeAttendanceList(allRecords),
+                        ],
+                      ),
+                    );
+                  }
+                  return const Center(child: Text('No data available.'));
+                },
               ),
-              body: SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildMyAttendanceCard(context, myRecord, todayStatus),
-                      const SizedBox(height: 32),
-                      Text('Employee Attendance Records', style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      _buildEmployeeAttendanceList(allRecords),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
+            ),
+          );
         },
       ),
     );

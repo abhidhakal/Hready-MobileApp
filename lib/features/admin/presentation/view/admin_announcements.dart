@@ -5,7 +5,7 @@ import 'package:hready/features/announcements/presentation/view_model/announceme
 import 'package:hready/features/announcements/domain/entities/announcement_entity.dart';
 
 class AdminAnnouncements extends StatelessWidget {
-  const AdminAnnouncements({super.key});
+  const AdminAnnouncements({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,46 +19,131 @@ class AdminAnnouncements extends StatelessWidget {
               onPressed: () => _showAnnouncementDialog(context, vm),
               child: const Icon(Icons.add),
             ),
-            body: state.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : state.error != null
-                    ? Center(child: Text('Error: ${state.error}'))
-                    : ListView.builder(
-                        itemCount: state.announcements.length,
-                        itemBuilder: (context, index) {
-                          final ann = state.announcements[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            child: ListTile(
-                              title: Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  Text(ann.message ?? ''),
-                                  const SizedBox(height: 8),
-                                  Text('Audience: ${ann.audience ?? 'all'}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () => _showAnnouncementDialog(context, vm, announcement: ann),
+            appBar: AppBar(title: const Text('Announcements')),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    state.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : state.error != null
+                            ? Center(child: Text('Error: ${state.error}'))
+                            : state.announcements.isEmpty
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      SizedBox(height: 60),
+                                      Icon(Icons.campaign, size: 80, color: Colors.grey),
+                                      SizedBox(height: 16),
+                                      Text('No announcements yet!', style: TextStyle(color: Colors.grey, fontSize: 18)),
+                                    ],
+                                  )
+                                : ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: state.announcements.length,
+                                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                    itemBuilder: (context, index) {
+                                      final ann = state.announcements[index];
+                                      final isLong = (ann.message?.length ?? 0) > 120;
+                                      return Card(
+                                        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                        elevation: 3,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(18.0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.orange[100],
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    padding: const EdgeInsets.all(8),
+                                                    child: const Icon(Icons.campaign, color: Colors.orange, size: 28),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Text(
+                                                      ann.title ?? '',
+                                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: Colors.black87),
+                                                      maxLines: 2,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                                                    onPressed: () => _showAnnouncementDialog(context, vm, announcement: ann),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                                    onPressed: () => vm.deleteAnnouncement(ann.id ?? ''),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  Chip(
+                                                    label: Text(
+                                                      ann.audience ?? 'all',
+                                                      style: const TextStyle(fontSize: 12, color: Colors.white),
+                                                    ),
+                                                    backgroundColor: Colors.blueGrey,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  if (ann.createdAt != null)
+                                                    Chip(
+                                                      label: Text(
+                                                        '${ann.createdAt!.year}-${ann.createdAt!.month.toString().padLeft(2, '0')}-${ann.createdAt!.day.toString().padLeft(2, '0')}',
+                                                        style: const TextStyle(fontSize: 12, color: Colors.white),
+                                                      ),
+                                                      backgroundColor: Colors.teal,
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                    ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                isLong ? (ann.message!.substring(0, 120) + '...') : (ann.message ?? ''),
+                                                style: const TextStyle(fontSize: 15),
+                                              ),
+                                              if (isLong)
+                                                TextButton(
+                                                  onPressed: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) => AlertDialog(
+                                                        title: Text(ann.title ?? ''),
+                                                        content: Text(ann.message ?? ''),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () => Navigator.pop(context),
+                                                            child: const Text('Close'),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: const Text('Read More'),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => vm.deleteAnnouncement(ann.id ?? ''),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                  ],
+                ),
+              ),
+            ),
           );
         },
       ),
@@ -72,7 +157,13 @@ class AdminAnnouncements extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(announcement == null ? 'Add Announcement' : 'Edit Announcement'),
+        title: Row(
+          children: [
+            Icon(announcement == null ? Icons.add : Icons.edit, color: Colors.orange),
+            const SizedBox(width: 8),
+            Text(announcement == null ? 'Add Announcement' : 'Edit Announcement'),
+          ],
+        ),
         content: SizedBox(
           width: 500,
           child: SingleChildScrollView(
@@ -80,19 +171,26 @@ class AdminAnnouncements extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text('Title', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
                   TextField(
                     controller: titleController,
-                    decoration: const InputDecoration(labelText: 'Title'),
+                    decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  const Text('Message', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
                   TextField(
                     controller: messageController,
-                    decoration: const InputDecoration(labelText: 'Message'),
+                    decoration: const InputDecoration(labelText: 'Message', border: OutlineInputBorder()),
                     minLines: 3,
                     maxLines: 5,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  const Text('Audience', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: audienceController.text,
                     items: const [
@@ -103,7 +201,7 @@ class AdminAnnouncements extends StatelessWidget {
                     onChanged: (value) {
                       audienceController.text = value ?? 'all';
                     },
-                    decoration: const InputDecoration(labelText: 'Audience'),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                   ),
                 ],
               ),
@@ -115,7 +213,7 @@ class AdminAnnouncements extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               final entity = AnnouncementEntity(
                 id: announcement?.id,

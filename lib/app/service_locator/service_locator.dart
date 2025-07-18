@@ -234,10 +234,8 @@ Future<void> setupLocator() async {
 
   // Employee - Remote Data Source
   getIt.registerLazySingleton(() => EmployeeRemoteDataSource(getIt<Dio>()));
-  final employeeToken = await getToken() ?? '';
   getIt.registerLazySingleton<IEmployeeRepository>(() => EmployeeRemoteRepository(
     baseUrl: 'http://192.168.18.175:3000/api',
-    token: employeeToken,
   ));
   getIt.registerLazySingleton(() => GetAllEmployeesUseCase(getIt<IEmployeeRepository>()));
   getIt.registerLazySingleton(() => AddEmployeeUseCase(getIt<IEmployeeRepository>()));

@@ -1,100 +1,222 @@
 import 'package:flutter/material.dart';
+import 'package:hready/features/admin/presentation/view/admin_leave.dart';
 import 'package:provider/provider.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:hready/features/admin/presentation/view/admin_profile.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_bloc.dart';
+import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_state.dart';
+import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
+import 'package:hready/features/admin/presentation/viewmodel/admin_profile_bloc.dart';
+import 'package:hready/features/admin/presentation/viewmodel/admin_profile_event.dart';
+import 'package:hready/features/admin/presentation/viewmodel/admin_profile_state.dart';
+import 'package:hready/features/admin/presentation/view/admin_tasks.dart';
+import 'package:hready/features/admin/presentation/view/admin_announcements.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_bloc.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_state.dart';
+import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
+import 'package:hready/features/admin/presentation/view/admin_attendance.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
 
+  String _resolveProfilePicture(String? picture) {
+    if (picture == null || picture.isEmpty) return '';
+    if (picture.startsWith('/uploads/')) {
+      return 'http://192.168.18.175:3000$picture';
+    }
+    if (picture.startsWith('http')) return picture;
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: ChangeNotifierProvider<AnnouncementViewModel>(
-        create: (_) => getIt<AnnouncementViewModel>()..loadAnnouncements(),
-        child: Consumer<AnnouncementViewModel>(
-          builder: (context, vm, _) {
-            final state = vm.state;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Welcome Banner
-                  Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 2,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          CircleAvatar(radius: 32, backgroundImage: AssetImage('assets/images/profile.webp')),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Hello, Admin', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    const Text('Today’s Attendance: '),
-                                    Text('Not Done', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<EmployeeBloc>(
+            create: (context) => EmployeeBloc(
+              getAllEmployeesUseCase: getIt(),
+              addEmployeeUseCase: getIt(),
+              updateEmployeeUseCase: getIt(),
+              deleteEmployeeUseCase: getIt(),
+            )..add(LoadEmployees()),
+          ),
+          BlocProvider<LeaveBloc>(
+            create: (context) => LeaveBloc(getIt())..add(LoadLeaves()),
+          ),
+          BlocProvider<TaskBloc>(
+            create: (context) => TaskBloc(
+              getAllTasksUseCase: getIt(),
+              getMyTasksUseCase: getIt(),
+              createTaskUseCase: getIt(),
+              updateTaskUseCase: getIt(),
+              deleteTaskUseCase: getIt(),
+              getAllUsersUseCase: getIt(),
+              updateMyTaskStatusUseCase: getIt(),
+            )..add(const LoadTasks()),
+          ),
+        ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Banner
+              BlocProvider(
+                create: (_) => AdminProfileBloc()..add(LoadAdminProfile()),
+                child: BlocBuilder<AdminProfileBloc, AdminProfileState>(
+                  builder: (context, state) {
+                    final name = (state.name.isNotEmpty) ? state.name : 'Admin';
+                    final firstName = name.split(' ').first;
+                    final profilePicture = state.profilePicture;
+                    return BlocProvider(
+                      create: (_) => getIt<AttendanceBloc>()..add(LoadTodayAttendance()),
+                      child: BlocBuilder<AttendanceBloc, AttendanceState>(
+                        builder: (context, attState) {
+                          String attendance = '-';
+                          Color attColor = Colors.red;
+                          if (attState is AttendanceLoaded) {
+                            attendance = attState.todayStatus;
+                            if (attendance == 'Checked In' || attendance == 'Checked Out' || attendance == 'Present') {
+                              attColor = Colors.green;
+                            } else if (attendance == 'Checked Out') {
+                              attColor = Colors.blue;
+                            }
+                          }
+                          return Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            elevation: 4,
+                            color: Colors.blueGrey[50],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 38,
+                                    backgroundImage: (profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
+                                        ? NetworkImage(_resolveProfilePicture(profilePicture)) as ImageProvider
+                                        : const AssetImage('assets/images/profile.webp'),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Hello, $firstName!', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            InkWell(
+                                              onTap: () {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(builder: (_) => const AdminAttendance()),
+                                                );
+                                              },
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: attColor.withOpacity(0.15),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  attendance,
+                                                  style: TextStyle(color: attColor, fontWeight: FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.settings, color: Color(0xFF042F46)),
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(builder: (_) => const AdminProfilePage()),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Color(0xFF042F46)),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const AdminProfilePage()),
-                              );
-                            },
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Info Cards Row (Overview and Employees only, taller, white)
-                  SizedBox(
-                    height: 160,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _InfoCard(
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Info Cards Row
+              SizedBox(
+                height: 160,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: BlocBuilder<EmployeeBloc, EmployeeState>(
+                        builder: (context, state) {
+                          int active = 0, onLeave = 0, absent = 0;
+                          if (state is EmployeeLoaded) {
+                            for (final emp in state.employees) {
+                              if (emp.status.toLowerCase() == 'active') active++;
+                              else if (emp.status.toLowerCase() == 'on leave') onLeave++;
+                              else if (emp.status.toLowerCase() == 'absent') absent++;
+                            }
+                          }
+                          return _InfoCard(
                             title: 'Today’s Overview',
                             content: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text('Active: 45'),
-                                Text('On Leave: 4'),
-                                Text('Absent: 9'),
+                              children: [
+                                Text('Active: $active'),
+                                Text('On Leave: $onLeave'),
+                                Text('Absent: $absent'),
                               ],
                             ),
                             color: Colors.white,
                             height: 160,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _InfoCard(
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: BlocBuilder<EmployeeBloc, EmployeeState>(
+                        builder: (context, state) {
+                          int total = 0;
+                          if (state is EmployeeLoaded) {
+                            total = state.employees.length;
+                          }
+                          return _InfoCard(
                             title: 'Total Employees',
-                            content: const Text('45', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                            content: Text('$total', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                             color: Colors.white,
                             height: 160,
-                          ),
-                        ),
-                      ],
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Pending Leave Requests card below (full width, button on right)
-                  Card(
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Pending Leave Requests Card
+              BlocBuilder<LeaveBloc, LeaveState>(
+                builder: (context, state) {
+                  int pending = 0;
+                  if (state is LeaveLoaded) {
+                    pending = state.leaves.where((l) => l.status?.toLowerCase() == 'pending').length;
+                  }
+                  return Card(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 2,
                     color: Colors.white,
@@ -104,106 +226,201 @@ class AdminHome extends StatelessWidget {
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text('Pending Leave Requests', style: TextStyle(fontWeight: FontWeight.bold)),
-                              SizedBox(height: 8),
-                              Text('4', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                            children: [
+                              const Text('Pending Leave Requests', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Text('$pending', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           const Spacer(),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const AdminLeave()),
+                              );
+                            },
                             child: const Text('Review'),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Recent Tasks
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              // Recent Tasks Header with View All
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   const Text('Recent Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 2,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: const [
-                              Expanded(child: Text('Task Name', style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-                              Expanded(child: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
-                            ],
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              BlocBuilder<TaskBloc, TaskState>(
+                builder: (context, state) {
+                  if (state is TaskLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is TaskError) {
+                    return Center(child: Text('Error: ${state.error}'));
+                  } else if (state is TaskLoaded && state.tasks.isNotEmpty) {
+                    final tasks = state.tasks.take(3).toList();
+                    return Column(
+                      children: [
+                        for (final task in tasks)
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => AdminTasks()),
+                              );
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 2,
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        task.title ?? '-',
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Text(
+                                        task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-',
+                                        style: const TextStyle(fontSize: 13, color: Colors.red),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[100] : Colors.green[100],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        task.status ?? '-',
+                                        style: TextStyle(
+                                          color: (task.status?.toLowerCase() == 'pending') ? Colors.orange[800] : Colors.green[800],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                          const Divider(height: 16),
-                          for (int i = 0; i < 3; i++)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                      ],
+                    );
+                  }
+                  return const Center(child: Text('No recent tasks.'));
+                },
+              ),
+              const SizedBox(height: 24),
+              // Recent Announcements Header with View All
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Recent Announcements Card List
+              ChangeNotifierProvider<AnnouncementViewModel>(
+                create: (_) => getIt<AnnouncementViewModel>()..loadAnnouncements(),
+                child: Consumer<AnnouncementViewModel>(
+                  builder: (context, vm, _) {
+                    final state = vm.state;
+                    if (state.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state.error != null) {
+                      return Center(child: Text('Error: ${state.error}'));
+                    } else if (state.announcements.isEmpty) {
+                      return const Center(child: Text('No announcements available.'));
+                    }
+                    final announcements = state.announcements.take(5).toList();
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: announcements.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final ann = announcements[index];
+                        return InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => AdminAnnouncements()),
+                            );
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 2,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(child: Text('Task ${i + 1}')),
-                                  Expanded(child: Text('Pending', style: TextStyle(color: Colors.orange))),
-                                  Expanded(child: TextButton(onPressed: () {}, child: const Text('Details'))),
+                                  const Icon(Icons.campaign, color: Colors.orange, size: 28),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          ann.message != null && ann.message!.length > 100
+                                              ? ann.message!.substring(0, 100) + '...'
+                                              : ann.message ?? '',
+                                        ),
+                                        if (ann.message != null && ann.message!.length > 100)
+                                          TextButton(
+                                            onPressed: () {
+                                              // Show full announcement (could use a dialog or new page)
+                                            },
+                                            child: const Text('Read More'),
+                                          ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          ann.createdAt != null
+                                              ? DateFormat('yyyy-MM-dd').format(ann.createdAt!)
+                                              : '',
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Recent Announcements
-                  const Text('Recent Announcements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  state.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : state.error != null
-                          ? Center(child: Text('Error: ${state.error}'))
-                          : state.announcements.isEmpty
-                              ? const Center(child: Text('No announcements available.'))
-                              : ListView.separated(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: state.announcements.take(5).length,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                  itemBuilder: (context, index) {
-                                    final ann = state.announcements[index];
-                                    return Card(
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                      elevation: 2,
-                                      color: Colors.white,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(ann.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              ann.message != null && ann.message!.length > 100
-                                                  ? ann.message!.substring(0, 100) + '...'
-                                                  : ann.message ?? '',
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              ann.createdAt != null
-                                                  ? DateFormat('yyyy-MM-dd').format(ann.createdAt!)
-                                                  : '',
-                                              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );

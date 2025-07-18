@@ -6,17 +6,24 @@ import 'package:hready/features/employee/data/models/employee_model.dart';
 import 'package:hready/features/employee/domain/entities/employee_entity.dart';
 import 'package:hready/features/employee/domain/repositories/employee_repository.dart';
 import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
+import 'package:hready/features/auth/data/models/user_model.dart';
 
 class EmployeeRemoteRepository implements IEmployeeRepository {
   final String baseUrl;
-  final String token;
 
-  EmployeeRemoteRepository({required this.baseUrl, required this.token});
+  EmployeeRemoteRepository({required this.baseUrl});
 
-  Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer $token',
-  };
+  Future<Map<String, String>> _headers() async {
+    final userBox = await Hive.openBox<UserHiveModel>('userBox');
+    final model = userBox.get('current_user');
+    final token = model?.token ?? '';
+    print('[EmployeeRemoteRepository] Using token: $token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   @override
   Future<Either<Failure, void>> addEmployee(EmployeeEntity employee) async {
@@ -35,7 +42,7 @@ class EmployeeRemoteRepository implements IEmployeeRepository {
       );
       final response = await http.post(
         Uri.parse('$baseUrl/employees'),
-        headers: _headers,
+        headers: await _headers(),
         body: jsonEncode(model.toJson()),
       );
       if (response.statusCode == 201) {
@@ -59,7 +66,7 @@ class EmployeeRemoteRepository implements IEmployeeRepository {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/employees/me'),
-        headers: _headers,
+        headers: await _headers(),
       );
       print('EMPLOYEE PROFILE RESPONSE: ' + response.body);
       if (response.statusCode == 200) {
@@ -85,7 +92,7 @@ class EmployeeRemoteRepository implements IEmployeeRepository {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/employees'),
-        headers: _headers,
+        headers: await _headers(),
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -116,7 +123,7 @@ class EmployeeRemoteRepository implements IEmployeeRepository {
       );
       final response = await http.put(
         Uri.parse('$baseUrl/employees/$id'),
-        headers: _headers,
+        headers: await _headers(),
         body: jsonEncode(model.toJson()),
       );
       if (response.statusCode == 200) {
@@ -134,7 +141,7 @@ class EmployeeRemoteRepository implements IEmployeeRepository {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/employees/$id'),
-        headers: _headers,
+        headers: await _headers(),
       );
       if (response.statusCode == 200) {
         return const Right(null);

@@ -22,14 +22,14 @@ class AdminRequests extends StatelessWidget {
       child: BlocBuilder<RequestsBloc, RequestsState>(
         builder: (context, state) {
           return Scaffold(
-            appBar: AppBar(title: const Text('All Employee Requests'),
-                        backgroundColor: Color(0xFFF5F5F5),
-                        foregroundColor: Colors.black,),
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('All Employee Requests', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 18),
                   if (state.isLoading)
                     const Center(child: CircularProgressIndicator()),
                   if (state.error != null)
@@ -178,7 +178,8 @@ class AdminRequests extends StatelessWidget {
                         },
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

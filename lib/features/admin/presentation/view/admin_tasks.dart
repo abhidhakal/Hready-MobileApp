@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
 class AdminTasks extends StatefulWidget {
-  const AdminTasks({super.key});
+  const AdminTasks({Key? key}) : super(key: key);
 
   @override
   State<AdminTasks> createState() => _AdminTasksState();
@@ -233,89 +233,97 @@ class _AdminTasksState extends State<AdminTasks> {
             final users = state.users;
             final tasks = state.tasks;
             return Scaffold(
-              body: Padding(
-                padding: const EdgeInsets.all(16),
-                child: tasks.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.assignment_turned_in, size: 80, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text('No tasks found.', style: TextStyle(color: Colors.grey, fontSize: 18)),
-                          ],
-                        ),
-                      )
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: tasks.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 16),
-                        itemBuilder: (context, index) {
-                          final task = tasks[index];
-                          return Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 2,
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              leading: _buildAvatar(task.assignedTo?.name),
-                              title: Text(task.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (task.description != null && task.description!.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-                                      child: Text(task.description!, style: const TextStyle(fontSize: 14)),
-                                    ),
-                                  Row(
+              appBar: AppBar(title: const Text('Tasks')),
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    tasks.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.assignment_turned_in, size: 80, color: Colors.grey),
+                                SizedBox(height: 16),
+                                Text('No tasks found.', style: TextStyle(color: Colors.grey, fontSize: 18)),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: tasks.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 16),
+                            itemBuilder: (context, index) {
+                              final task = tasks[index];
+                              return Card(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 2,
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  leading: _buildAvatar(task.assignedTo?.name),
+                                  title: Text(task.title ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(task.assignedTo != null ? '${task.assignedTo!.name} (${task.assignedTo!.department ?? '-'})' : '-', style: const TextStyle(fontSize: 13)),
-                                            const SizedBox(height: 4),
-                                            Text(task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-', style: const TextStyle(fontSize: 13)),
-                                          ],
+                                      if (task.description != null && task.description!.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+                                          child: Text(task.description!, style: const TextStyle(fontSize: 14)),
                                         ),
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(task.assignedTo != null ? '${task.assignedTo!.name} (${task.assignedTo!.department ?? '-'})' : '-', style: const TextStyle(fontSize: 13)),
+                                                const SizedBox(height: 4),
+                                                Text(task.dueDate != null ? DateFormat('yyyy-MM-dd').format(task.dueDate!) : '-', style: const TextStyle(fontSize: 13)),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          _buildStatusChip(task.status ?? ''),
+                                          const SizedBox(width: 12),
+                                          if (task.assignedDepartment != null && task.assignedDepartment!.isNotEmpty)
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.apartment, size: 16, color: Colors.teal),
+                                                const SizedBox(width: 4),
+                                                Text(task.assignedDepartment!, style: const TextStyle(fontSize: 13)),
+                                              ],
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    children: [
-                                      _buildStatusChip(task.status ?? ''),
-                                      const SizedBox(width: 12),
-                                      if (task.assignedDepartment != null && task.assignedDepartment!.isNotEmpty)
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.apartment, size: 16, color: Colors.teal),
-                                            const SizedBox(width: 4),
-                                            Text(task.assignedDepartment!, style: const TextStyle(fontSize: 13)),
-                                          ],
-                                        ),
+                                  trailing: PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _populateForm(task);
+                                        _showTaskDialog(context, users);
+                                      } else if (value == 'delete') {
+                                        context.read<TaskBloc>().add(DeleteTask(task.id ?? ''));
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit), title: Text('Edit'))),
+                                      const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete), title: Text('Delete'))),
                                     ],
                                   ),
-                                ],
-                              ),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (value) {
-                                  if (value == 'edit') {
-                                    _populateForm(task);
-                                    _showTaskDialog(context, users);
-                                  } else if (value == 'delete') {
-                                    context.read<TaskBloc>().add(DeleteTask(task.id ?? ''));
-                                  }
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit), title: Text('Edit'))),
-                                  const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete), title: Text('Delete'))),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                                ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {

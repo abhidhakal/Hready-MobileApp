@@ -248,15 +248,17 @@ class _AdminEmployeesState extends State<AdminEmployees> {
           }
           final employees = state is EmployeeLoaded ? state.employees : <EmployeeEntity>[];
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Manage Employees'),
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-            ),
             body: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: _buildEmployeeList(employees),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Manage Employees', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 18),
+                    _buildEmployeeList(employees),
+                  ],
+                ),
               ),
             ),
             floatingActionButton: FloatingActionButton(

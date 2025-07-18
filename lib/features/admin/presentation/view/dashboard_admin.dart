@@ -14,6 +14,7 @@ import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_vie
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:hive/hive.dart';
 import 'package:hready/features/auth/data/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardAdmin extends StatelessWidget {
   const DashboardAdmin({super.key});
@@ -98,8 +99,8 @@ class DashboardAdmin extends StatelessWidget {
                       leading: const Icon(Icons.logout, color: Colors.grey),
                       title: const Text("Logout", style: TextStyle(color: Colors.grey)),
                       onTap: () async {
-                        final userBox = Hive.box<UserHiveModel>('userBox');
-                        await userBox.delete('current_user');
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.remove('token');
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const LoginPage()),
                           (route) => false,
