@@ -244,33 +244,36 @@ class _AdminPayrollPageState extends State<AdminPayrollPage> {
     );
   }
 
-  Future<void> _showGeneratePayrollDialog(BuildContext context) async {
+  Future<void> _showGeneratePayrollDialog(BuildContext parentContext) async {
     int genMonth = selectedMonth;
     int genYear = selectedYear;
     final result = await showDialog<bool>(
-      context: context,
+      context: parentContext,
       builder: (ctx) => AlertDialog(
         title: const Text('Generate Payroll'),
-        content: Row(
-          children: [
-            DropdownButton<int>(
-              value: genMonth,
-              items: List.generate(12, (i) => DropdownMenuItem(
-                value: i + 1,
-                child: Text('${DateTime(0, i + 1).month.toString().padLeft(2, '0')}'),
-              )),
-              onChanged: (val) => setState(() => genMonth = val!),
-            ),
-            const SizedBox(width: 12),
-            DropdownButton<int>(
-              value: genYear,
-              items: List.generate(5, (i) {
-                final year = DateTime.now().year - 2 + i;
-                return DropdownMenuItem(value: year, child: Text('$year'));
-              }),
-              onChanged: (val) => setState(() => genYear = val!),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButton<int>(
+                value: genMonth,
+                items: List.generate(12, (i) => DropdownMenuItem(
+                  value: i + 1,
+                  child: Text('${DateTime(0, i + 1).month.toString().padLeft(2, '0')}'),
+                )),
+                onChanged: (val) => setState(() => genMonth = val!),
+              ),
+              const SizedBox(width: 12),
+              DropdownButton<int>(
+                value: genYear,
+                items: List.generate(5, (i) {
+                  final year = DateTime.now().year - 2 + i;
+                  return DropdownMenuItem(value: year, child: Text('$year'));
+                }),
+                onChanged: (val) => setState(() => genYear = val!),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -287,11 +290,11 @@ class _AdminPayrollPageState extends State<AdminPayrollPage> {
     if (result == true) {
       setState(() => isGenerating = true);
       try {
-        await context.read<PayrollBloc>().repository.generatePayroll(month: genMonth, year: genYear);
-        _onFilterChanged(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payroll generated successfully!')));
+        await BlocProvider.of<PayrollBloc>(parentContext).repository.generatePayroll(month: genMonth, year: genYear);
+        _onFilterChanged(parentContext);
+        ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('Payroll generated successfully!')));
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to generate payroll: $e')));
+        ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text('Failed to generate payroll: $e')));
       } finally {
         setState(() => isGenerating = false);
       }
@@ -428,31 +431,35 @@ class _AdminPayrollPageState extends State<AdminPayrollPage> {
                       return Center(child: Text('Error loading stats: ${state.message}'));
                     } else if (state is PayrollStatsLoaded) {
                       final stats = state.stats;
+                      final monthlyStats = (stats['monthlyStats'] ?? []) as List;
+                      final totalPayrolls = monthlyStats.fold<int>(0, (sum, s) => sum + ((s['totalPayrolls'] ?? 0) as int));
+                      final totalGross = monthlyStats.fold<double>(
+                        0.0,
+                        (sum, s) => sum + ((s['totalGrossSalary'] ?? 0) as num).toDouble(),
+                      );
+                      final totalNet = monthlyStats.fold<double>(
+                        0.0,
+                        (sum, s) => sum + ((s['totalNetSalary'] ?? 0) as num).toDouble(),
+                      );
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Flexible(
                             child: _InfoCard(
                               title: 'Total Payrolls',
-                              value: stats['monthlyStats'] != null && stats['monthlyStats'].isNotEmpty
-                                  ? stats['monthlyStats'].fold<int>(0, (sum, s) => sum + (s['totalPayrolls'] ?? 0))
-                                  : 0,
+                              value: totalPayrolls,
                             ),
                           ),
                           Flexible(
                             child: _InfoCard(
                               title: 'Total Gross',
-                              value: stats['monthlyStats'] != null && stats['monthlyStats'].isNotEmpty
-                                  ? stats['monthlyStats'].fold<double>(0, (sum, s) => sum + (s['totalGrossSalary'] ?? 0.0))
-                                  : 0.0,
+                              value: totalGross,
                             ),
                           ),
                           Flexible(
                             child: _InfoCard(
                               title: 'Total Net',
-                              value: stats['monthlyStats'] != null && stats['monthlyStats'].isNotEmpty
-                                  ? stats['monthlyStats'].fold<double>(0, (sum, s) => sum + (s['totalNetSalary'] ?? 0.0))
-                                  : 0.0,
+                              value: totalNet,
                             ),
                           ),
                         ],
@@ -461,133 +468,159 @@ class _AdminPayrollPageState extends State<AdminPayrollPage> {
                     return const SizedBox.shrink();
                   },
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    // Month filter
-                    DropdownButton<int>(
-                      value: selectedMonth,
-                      items: List.generate(12, (i) => DropdownMenuItem(
-                        value: i + 1,
-                        child: Text('${DateTime(0, i + 1).month.toString().padLeft(2, '0')}'),
-                      )),
-                      onChanged: (val) {
-                        setState(() => selectedMonth = val!);
-                        _onFilterChanged(context);
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    // Year filter
-                    DropdownButton<int>(
-                      value: selectedYear,
-                      items: List.generate(5, (i) {
-                        final year = DateTime.now().year - 2 + i;
-                        return DropdownMenuItem(value: year, child: Text('$year'));
-                      }),
-                      onChanged: (val) {
-                        setState(() => selectedYear = val!);
-                        _onFilterChanged(context);
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    // Status filter
-                    DropdownButton<String>(
-                      value: selectedStatus,
-                      items: const [
-                        DropdownMenuItem(value: '', child: Text('All Status')),
-                        DropdownMenuItem(value: 'draft', child: Text('Draft')),
-                        DropdownMenuItem(value: 'approved', child: Text('Approved')),
-                        DropdownMenuItem(value: 'paid', child: Text('Paid')),
-                        DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
+                // --- Professional Filter & Actions Card ---
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  margin: const EdgeInsets.only(bottom: 24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Filters Row
+                        Row(
+                          children: [
+                            // Month filter
+                            DropdownButton<int>(
+                              value: selectedMonth,
+                              items: List.generate(12, (i) => DropdownMenuItem(
+                                value: i + 1,
+                                child: Text('${DateTime(0, i + 1).month.toString().padLeft(2, '0')}'),
+                              )),
+                              onChanged: (val) {
+                                setState(() => selectedMonth = val!);
+                                _onFilterChanged(context);
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            // Year filter
+                            DropdownButton<int>(
+                              value: selectedYear,
+                              items: List.generate(5, (i) {
+                                final year = DateTime.now().year - 2 + i;
+                                return DropdownMenuItem(value: year, child: Text('$year'));
+                              }),
+                              onChanged: (val) {
+                                setState(() => selectedYear = val!);
+                                _onFilterChanged(context);
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            // Status filter
+                            DropdownButton<String>(
+                              value: selectedStatus,
+                              items: const [
+                                DropdownMenuItem(value: '', child: Text('All Status')),
+                                DropdownMenuItem(value: 'draft', child: Text('Draft')),
+                                DropdownMenuItem(value: 'approved', child: Text('Approved')),
+                                DropdownMenuItem(value: 'paid', child: Text('Paid')),
+                                DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
+                              ],
+                              onChanged: (val) {
+                                setState(() => selectedStatus = val!);
+                                _onFilterChanged(context);
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed: () => _onFilterChanged(context),
+                              tooltip: 'Refresh',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // Actions Row
+                        Builder(
+                          builder: (blocContext) => Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ElevatedButton.icon(
+                                icon: isGenerating ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.add),
+                                label: const Text('Generate Payroll'),
+                                style: ElevatedButton.styleFrom(minimumSize: const Size(160, 40)),
+                                onPressed: isGenerating ? null : () => _showGeneratePayrollDialog(blocContext),
+                              ),
+                              const SizedBox(width: 12),
+                              ElevatedButton.icon(
+                                icon: const Icon(Icons.check_circle_outline),
+                                label: const Text('Bulk Approve'),
+                                style: ElevatedButton.styleFrom(minimumSize: const Size(140, 40)),
+                                onPressed: () async {
+                                  final confirmed = await showDialog<bool>(
+                                    context: blocContext,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Bulk Approve Payrolls'),
+                                      content: const Text('Approve all draft payrolls in the current filter?'),
+                                      actions: [
+                                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                        ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Approve All')),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirmed == true) {
+                                    try {
+                                      // Get all draft payrolls in the current filter
+                                      final bloc = BlocProvider.of<PayrollBloc>(blocContext);
+                                      final state = bloc.state;
+                                      if (state is PayrollLoaded) {
+                                        final drafts = state.payrolls.where((p) => p.status == 'draft').toList();
+                                        for (final p in drafts) {
+                                          await bloc.repository.approvePayroll(p.id);
+                                        }
+                                        _onFilterChanged(blocContext);
+                                        ScaffoldMessenger.of(blocContext).showSnackBar(const SnackBar(content: Text('All draft payrolls approved!')));
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(blocContext).showSnackBar(SnackBar(content: Text('Failed to bulk approve: $e')));
+                                    }
+                                  }
+                                },
+                              ),
+                              const SizedBox(width: 12),
+                              ElevatedButton.icon(
+                                icon: const Icon(Icons.payments),
+                                label: const Text('Bulk Mark as Paid'),
+                                style: ElevatedButton.styleFrom(minimumSize: const Size(170, 40)),
+                                onPressed: () async {
+                                  final confirmed = await showDialog<bool>(
+                                    context: blocContext,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Bulk Mark as Paid'),
+                                      content: const Text('Mark all approved payrolls in the current filter as paid?'),
+                                      actions: [
+                                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                        ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Mark All as Paid')),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirmed == true) {
+                                    try {
+                                      final bloc = BlocProvider.of<PayrollBloc>(blocContext);
+                                      final state = bloc.state;
+                                      if (state is PayrollLoaded) {
+                                        final approved = state.payrolls.where((p) => p.status == 'approved').toList();
+                                        for (final p in approved) {
+                                          await bloc.repository.markPayrollAsPaid(p.id);
+                                        }
+                                        _onFilterChanged(blocContext);
+                                        ScaffoldMessenger.of(blocContext).showSnackBar(const SnackBar(content: Text('All approved payrolls marked as paid!')));
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(blocContext).showSnackBar(SnackBar(content: Text('Failed to bulk mark as paid: $e')));
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                      onChanged: (val) {
-                        setState(() => selectedStatus = val!);
-                        _onFilterChanged(context);
-                      },
                     ),
-                    const SizedBox(width: 12),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () => _onFilterChanged(context),
-                    ),
-                    const Spacer(),
-                    ElevatedButton.icon(
-                      icon: isGenerating ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.add),
-                      label: const Text('Generate Payroll'),
-                      onPressed: isGenerating ? null : () => _showGeneratePayrollDialog(context),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.check_circle_outline),
-                      label: const Text('Bulk Approve'),
-                      onPressed: () async {
-                        final confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Bulk Approve Payrolls'),
-                            content: const Text('Approve all draft payrolls in the current filter?'),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                              ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Approve All')),
-                            ],
-                          ),
-                        );
-                        if (confirmed == true) {
-                          try {
-                            // Get all draft payrolls in the current filter
-                            final bloc = context.read<PayrollBloc>();
-                            final state = bloc.state;
-                            if (state is PayrollLoaded) {
-                              final drafts = state.payrolls.where((p) => p.status == 'draft').toList();
-                              for (final p in drafts) {
-                                await bloc.repository.approvePayroll(p.id);
-                              }
-                              _onFilterChanged(context);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All draft payrolls approved!')));
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to bulk approve: $e')));
-                          }
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.payments),
-                      label: const Text('Bulk Mark as Paid'),
-                      onPressed: () async {
-                        final confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Bulk Mark as Paid'),
-                            content: const Text('Mark all approved payrolls in the current filter as paid?'),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                              ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Mark All as Paid')),
-                            ],
-                          ),
-                        );
-                        if (confirmed == true) {
-                          try {
-                            final bloc = context.read<PayrollBloc>();
-                            final state = bloc.state;
-                            if (state is PayrollLoaded) {
-                              final approved = state.payrolls.where((p) => p.status == 'approved').toList();
-                              for (final p in approved) {
-                                await bloc.repository.markPayrollAsPaid(p.id);
-                              }
-                              _onFilterChanged(context);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All approved payrolls marked as paid!')));
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to bulk mark as paid: $e')));
-                          }
-                        }
-                      },
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 16),
+                // --- End Professional Filter & Actions Card ---
                 Expanded(
                   child: BlocBuilder<PayrollBloc, PayrollState>(
                     builder: (context, state) {

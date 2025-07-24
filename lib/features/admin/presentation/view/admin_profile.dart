@@ -7,17 +7,18 @@ import 'package:hready/features/admin/presentation/viewmodel/admin_profile_state
 import 'package:file_picker/file_picker.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hready/core/utils/common_snackbar.dart';
+import 'package:hready/core/network/api_base.dart';
 
 class AdminProfilePage extends StatelessWidget {
   const AdminProfilePage({Key? key}) : super(key: key);
 
   String _resolveProfilePicture(String picture) {
-    if (picture.isEmpty) return '';
-    if (picture.startsWith('/uploads/')) {
-      return 'http://192.168.18.175:3000$picture'; // <-- Use your API base URL
+    if (picture.isEmpty) return 'assets/images/profile.webp';
+    if (picture.startsWith('/uploads')) {
+      return '$apiBaseUrl$picture';
     }
     if (picture.startsWith('http')) return picture;
-    return '';
+    return 'assets/images/profile.webp';
   }
 
   @override

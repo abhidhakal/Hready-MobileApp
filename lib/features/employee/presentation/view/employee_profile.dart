@@ -9,17 +9,18 @@ import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hready/core/utils/common_snackbar.dart';
+import 'package:hready/core/network/api_base.dart';
 
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
 
   String _resolveProfilePicture(String picture) {
-    if (picture.isEmpty) return '';
-    if (picture.startsWith('/uploads/')) {
-      return 'http://192.168.18.175:3000$picture';
+    if (picture.isEmpty) return 'assets/images/profile.webp';
+    if (picture.startsWith('/uploads')) {
+      return '$apiBaseUrl$picture';
     }
     if (picture.startsWith('http')) return picture;
-    return '';
+    return 'assets/images/profile.webp';
   }
 
   void _showChangePasswordDialog(BuildContext parentContext, EmployeeProfileState state) {
@@ -330,9 +331,10 @@ class EmployeeProfile extends StatelessWidget {
                                       onPressed: () async {
                                         final prefs = await SharedPreferences.getInstance();
                                         await prefs.remove('token');
-                                        // TODO: Add your logout/session clearing logic here
-                                        // For example, clear tokens from secure storage, etc.
-                                        // Then navigate to login page:
+                                        await prefs.remove('userId');
+                                        await prefs.remove('role');
+                                        await prefs.remove('userName');
+                                        // Optionally: await prefs.clear();
                                         Navigator.of(context).pushAndRemoveUntil(
                                           MaterialPageRoute(builder: (_) => const LoginPage()),
                                           (route) => false,

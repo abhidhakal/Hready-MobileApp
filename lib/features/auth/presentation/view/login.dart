@@ -7,6 +7,9 @@ import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart
 import 'package:hready/features/admin/presentation/view/dashboard_admin.dart';
 import 'package:hready/features/employee/presentation/view/dashboard_employee.dart';
 import 'package:hready/core/utils/common_snackbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,6 +23,44 @@ class _LoginPageState extends State<LoginPage> {
   final pwController = TextEditingController();
   final myKey = GlobalKey<FormState>();
   bool isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token != null && token.isNotEmpty) {
+      try {
+        final decoded = JwtDecoder.decode(token);
+        final isExpired = JwtDecoder.isExpired(token);
+        if (!isExpired) {
+          final role = prefs.getString('role');
+          final userId = prefs.getString('userId');
+          if (role == 'admin') {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardAdmin()));
+          } else if (role == 'employee') {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardEmployee()));
+          }
+        } else {
+          await prefs.clear();
+        }
+      } catch (e) {
+        await prefs.clear();
+      }
+    }
+  }
+
+  void _handleLogin(String token, String userId, String role, String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+    await prefs.setString('userId', userId);
+    await prefs.setString('role', role);
+    await prefs.setString('userName', name);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -21,17 +21,18 @@ import 'package:hready/features/attendance/presentation/view_model/attendance_st
 import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
 import 'package:hready/features/admin/presentation/view/admin_attendance.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/network/api_base.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
 
   String _resolveProfilePicture(String? picture) {
-    if (picture == null || picture.isEmpty) return '';
-    if (picture.startsWith('/uploads/')) {
-      return 'http://192.168.18.175:3000$picture';
+    if (picture == null || picture.isEmpty) return 'assets/images/profile.webp';
+    if (picture.startsWith('/uploads')) {
+      return '$apiBaseUrl$picture';
     }
     if (picture.startsWith('http')) return picture;
-    return '';
+    return 'assets/images/profile.webp';
   }
 
   @override

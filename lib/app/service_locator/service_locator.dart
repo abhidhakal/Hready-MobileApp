@@ -86,6 +86,15 @@ import 'package:hready/features/requests/domain/use_cases/reject_request_use_cas
 import 'package:hready/features/requests/domain/use_cases/get_my_requests_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/submit_request_use_case.dart';
 
+// Payroll
+import 'package:hready/features/payroll/data/datasources/remote_datasource/payroll_remote_data_source.dart';
+import 'package:hready/features/payroll/data/repositories/payroll_remote_repository.dart';
+import 'package:hready/features/payroll/data/datasources/remote_datasource/salary_remote_data_source.dart';
+import 'package:hready/features/payroll/data/repositories/salary_repository.dart';
+import 'package:hready/features/payroll/presentation/view_model/payroll_bloc.dart';
+
+import 'package:hready/core/network/api_base.dart';
+
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
@@ -94,7 +103,7 @@ Future<void> setupLocator() async {
 
   // Core - ApiService with getToken from Hive
   getIt.registerLazySingleton(() => ApiService(
-        'http://192.168.18.175:3000',
+        apiBaseUrl,
         getToken: () async {
           final model = userBox.get('current_user');
           return model?.token;
@@ -135,7 +144,7 @@ Future<void> setupLocator() async {
 
   // Register Dio for API calls
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.175:3000/api'));
+    final dio = Dio(BaseOptions(baseUrl: apiBaseUrl));
     // Optionally add an interceptor to always add the token
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -233,7 +242,7 @@ Future<void> setupLocator() async {
   // Employee - Remote Data Source
   getIt.registerLazySingleton(() => EmployeeRemoteDataSource(getIt<Dio>()));
   getIt.registerLazySingleton<IEmployeeRepository>(() => EmployeeRemoteRepository(
-    baseUrl: 'http://192.168.18.175:3000/api',
+    baseUrl: apiBaseUrl,
   ));
   getIt.registerLazySingleton(() => GetAllEmployeesUseCase(getIt<IEmployeeRepository>()));
   getIt.registerLazySingleton(() => AddEmployeeUseCase(getIt<IEmployeeRepository>()));
@@ -261,6 +270,17 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => RejectRequestUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => GetMyRequestsUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => SubmitRequestUseCase(getIt<RequestRepository>()));
+
+  // Payroll - Remote Data Source
+  getIt.registerLazySingleton(() => PayrollRemoteDataSource(getIt<Dio>()));
+  // Payroll - Repository
+  getIt.registerLazySingleton(() => PayrollRemoteRepository(getIt<PayrollRemoteDataSource>()));
+  // Salary - Remote Data Source
+  getIt.registerLazySingleton(() => SalaryRemoteDataSource(getIt<Dio>()));
+  // Salary - Repository
+  getIt.registerLazySingleton(() => SalaryRepository(getIt<SalaryRemoteDataSource>()));
+  // Payroll Bloc
+  getIt.registerFactory(() => PayrollBloc(getIt<PayrollRemoteRepository>()));
 }
 
 Future<String?> getToken() async {

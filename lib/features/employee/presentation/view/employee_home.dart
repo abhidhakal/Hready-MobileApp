@@ -20,17 +20,20 @@ import 'package:hready/features/tasks/presentation/view_model/task_event.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_state.dart';
 import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hready/features/auth/presentation/view/login.dart';
+import 'package:hready/core/network/api_base.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
 
   String _resolveProfilePicture(String? picture) {
-    if (picture == null || picture.isEmpty) return '';
-    if (picture.startsWith('/uploads/')) {
-      return 'http://192.168.18.175:3000$picture';
+    if (picture == null || picture.isEmpty) return 'assets/images/profile.webp';
+    if (picture.startsWith('/uploads')) {
+      return '$apiBaseUrl$picture';
     }
     if (picture.startsWith('http')) return picture;
-    return '';
+    return 'assets/images/profile.webp';
   }
 
   @override
@@ -556,10 +559,29 @@ class EmployeeHome extends StatelessWidget {
                   },
                 ),
               ),
+              const SizedBox(height: 32),
+              Center(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('token');
+                    await prefs.remove('userId');
+                    await prefs.remove('role');
+                    await prefs.remove('userName');
+                    // Optionally: await prefs.clear();
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.black),
+                  child: const Text('Logout'),
+                ),
+              ),
             ],
           ),
         ),
-    );
+      );
   }
 }
 
