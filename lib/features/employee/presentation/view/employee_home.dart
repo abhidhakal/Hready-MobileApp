@@ -39,161 +39,182 @@ class EmployeeHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome Banner
-            BlocProvider(
-              create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
-              child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
-                builder: (context, state) {
-                  if (state.isLoading) {
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        elevation: 4,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 76,
-                                height: 76,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(38),
+      child: RefreshIndicator(
+        onRefresh: () async {
+          // Dispatch load events to all BLoCs
+          context.read<EmployeeProfileBloc>().add(LoadEmployeeProfile());
+          context.read<AttendanceBloc>().add(LoadTodayAttendance());
+          context.read<LeaveBloc>().add(LoadMyLeaves());
+          context.read<TaskBloc>().add(const LoadTasks(onlyMyTasks: true));
+          // Refresh announcements
+          final annProvider = context.read<AnnouncementViewModel>();
+          await annProvider.loadAnnouncements();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Banner
+              BlocProvider(
+                create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
+                child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          elevation: 4,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 76,
+                                  height: 76,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(38),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(height: 22, width: 120, color: Colors.white),
+                                      const SizedBox(height: 10),
+                                      Container(height: 16, width: 80, color: Colors.white),
+                                      const SizedBox(height: 10),
+                                      Container(height: 16, width: 60, color: Colors.white),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    } else if (state.error.isNotEmpty) {
+                      return Center(child: Text('Error: ${state.error}'));
+                    }
+                    final name = state.name.isNotEmpty ? state.name : 'Employee';
+                    final firstName = name.split(' ').first;
+                    final position = state.position.isNotEmpty ? state.position : 'Employee';
+                    final profilePicture = state.profilePicture;
+                    return BlocProvider(
+                      create: (_) => getIt<AttendanceBloc>()..add(LoadTodayAttendance()),
+                      child: BlocBuilder<AttendanceBloc, AttendanceState>(
+                        builder: (context, attState) {
+                          String attendance = '-';
+                          Color attColor = Colors.red;
+                          if (attState is AttendanceLoaded) {
+                            attendance = attState.todayStatus;
+                            if (attendance == 'Checked In' || attendance == 'Checked Out') {
+                              attColor = Colors.green;
+                            }
+                          }
+                          return SafeArea(
+                            child: Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              elevation: 4,
+                              color: Colors.blueGrey[50],
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                                child: Row(
                                   children: [
-                                    Container(height: 22, width: 120, color: Colors.white),
-                                    const SizedBox(height: 10),
-                                    Container(height: 16, width: 80, color: Colors.white),
-                                    const SizedBox(height: 10),
-                                    Container(height: 16, width: 60, color: Colors.white),
+                                    CircleAvatar(
+                                      radius: 38,
+                                      backgroundColor: Colors.grey[200],
+                                      child: ClipOval(
+                                        child: (profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
+                                            ? Image.network(
+                                                _resolveProfilePicture(profilePicture),
+                                                width: 76,
+                                                height: 76,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) => Image.asset('assets/images/profile.webp', width: 76, height: 76, fit: BoxFit.cover),
+                                              )
+                                            : Image.asset('assets/images/profile.webp', width: 76, height: 76, fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Welcome, $firstName!', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                          const SizedBox(height: 6),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: attColor.withOpacity(0.15),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  attendance,
+                                                  style: TextStyle(color: attColor, fontWeight: FontWeight.bold),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.settings, color: Color(0xFF042F46)),
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (_) => const EmployeeProfile()),
+                                        );
+                                      },
+                                    ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     );
-                  } else if (state.error.isNotEmpty) {
-                    return Center(child: Text('Error: ${state.error}'));
-                  }
-                  final name = state.name.isNotEmpty ? state.name : 'Employee';
-                  final firstName = name.split(' ').first;
-                  final position = state.position.isNotEmpty ? state.position : 'Employee';
-                  final profilePicture = state.profilePicture;
-                  return BlocProvider(
-                    create: (_) => getIt<AttendanceBloc>()..add(LoadTodayAttendance()),
-                    child: BlocBuilder<AttendanceBloc, AttendanceState>(
-                      builder: (context, attState) {
-                        String attendance = '-';
-                        Color attColor = Colors.red;
-                        if (attState is AttendanceLoaded) {
-                          attendance = attState.todayStatus;
-                          if (attendance == 'Checked In' || attendance == 'Checked Out') {
-                            attColor = Colors.green;
-                          }
-                        }
-                        return SafeArea(
-                          child: Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            elevation: 4,
-                            color: Colors.blueGrey[50],
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 38,
-                                    backgroundImage: (profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
-                                        ? NetworkImage(_resolveProfilePicture(profilePicture)) as ImageProvider
-                                        : const AssetImage('assets/images/profile.webp'),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Welcome, $firstName!', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                                        const SizedBox(height: 6),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: attColor.withOpacity(0.15),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                attendance,
-                                                style: TextStyle(color: attColor, fontWeight: FontWeight.bold),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.settings, color: Color(0xFF042F46)),
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(builder: (_) => const EmployeeProfile()),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            // Info Cards Row
-            SizedBox(
-              height: 160,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: BlocProvider(
-                        create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
-                        child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
-                          builder: (context, state) {
-                            final position = state.position.isNotEmpty ? state.position : 'Employee';
-                            return _InfoCard(
-                              title: 'Position',
-                              content: Row(
-                                children: [
-                                  const SizedBox(width: 10),
-                                  Text(position, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              color: Colors.white,
-                              height: 160,
-                            );
-                          },
+              const SizedBox(height: 20),
+              // Info Cards Row
+              SizedBox(
+                height: 160,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: BlocProvider(
+                          create: (_) => EmployeeProfileBloc()..add(LoadEmployeeProfile()),
+                          child: BlocBuilder<EmployeeProfileBloc, EmployeeProfileState>(
+                            builder: (context, state) {
+                              final position = state.position.isNotEmpty ? state.position : 'Employee';
+                              return _InfoCard(
+                                title: 'Position',
+                                content: Row(
+                                  children: [
+                                    const SizedBox(width: 10),
+                                    Text(position, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                color: Colors.white,
+                                height: 160,
+                              );
+                            },
+                          ),
                         ),
-                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -581,7 +602,8 @@ class EmployeeHome extends StatelessWidget {
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
 

@@ -8,7 +8,6 @@ import 'package:hready/features/admin/presentation/view/admin_leave.dart';
 import 'package:hready/features/admin/presentation/view/admin_profile.dart';
 import 'package:hready/features/admin/presentation/view/admin_tasks.dart';
 import 'package:hready/features/admin/presentation/view/admin_requests.dart';
-import 'package:hready/features/admin/presentation/view/admin_payroll.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_event.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_state.dart';
 import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
@@ -22,7 +21,6 @@ class DashboardAdmin extends StatelessWidget {
     const AdminHome(),
     const AdminEmployees(),
     const AdminAttendance(),
-    const AdminPayrollPage(), // Payroll as 4th page
     const AdminTasks(),
     const AdminLeave(),
     const AdminAnnouncements(),
@@ -95,12 +93,11 @@ class DashboardAdmin extends StatelessWidget {
                       buildDrawerItem(context, Icons.dashboard_outlined, "Dashboard", 0, state.selectedIndex),
                       buildDrawerItem(context, Icons.people_outline, "Employees", 1, state.selectedIndex),
                       buildDrawerItem(context, Icons.access_time, "Attendance", 2, state.selectedIndex),
-                      buildDrawerItem(context, Icons.payments, "Payroll", 3, state.selectedIndex), // Payroll as 4th link
-                      buildDrawerItem(context, Icons.assignment, "Tasks", 4, state.selectedIndex),
-                      buildDrawerItem(context, Icons.request_page, "Leave Requests", 5, state.selectedIndex),
-                      buildDrawerItem(context, Icons.announcement_outlined, "Announcements", 6, state.selectedIndex),
-                      buildDrawerItem(context, Icons.inbox, "Requests", 7, state.selectedIndex),
-                      buildDrawerItem(context, Icons.person_outline, "Profile", 8, state.selectedIndex),
+                      buildDrawerItem(context, Icons.assignment, "Tasks", 3, state.selectedIndex),
+                      buildDrawerItem(context, Icons.request_page, "Leave Requests", 4, state.selectedIndex),
+                      buildDrawerItem(context, Icons.announcement_outlined, "Announcements", 5, state.selectedIndex),
+                      buildDrawerItem(context, Icons.inbox, "Requests", 6, state.selectedIndex),
+                      buildDrawerItem(context, Icons.person_outline, "Profile", 7, state.selectedIndex),
                       const Spacer(),
                       ListTile(
                         leading: const Icon(Icons.logout, color: Colors.grey),

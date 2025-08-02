@@ -213,9 +213,18 @@ class EmployeeProfile extends StatelessWidget {
                                               : null,
                                           child: CircleAvatar(
                                             radius: 60,
-                                            backgroundImage: state.profilePicture.isNotEmpty
-                                                ? NetworkImage(_resolveProfilePicture(state.profilePicture))
-                                                : const AssetImage('assets/images/profile.webp') as ImageProvider,
+                                            backgroundColor: Colors.grey[200],
+                                            child: ClipOval(
+                                              child: (state.profilePicture.isNotEmpty && _resolveProfilePicture(state.profilePicture).isNotEmpty)
+                                                  ? Image.network(
+                                                      _resolveProfilePicture(state.profilePicture),
+                                                      width: 120,
+                                                      height: 120,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder: (context, error, stackTrace) => Image.asset('assets/images/profile.webp', width: 120, height: 120, fit: BoxFit.cover),
+                                                    )
+                                                  : Image.asset('assets/images/profile.webp', width: 120, height: 120, fit: BoxFit.cover),
+                                            ),
                                           ),
                                         ),
                                         if (state.isEditing)
