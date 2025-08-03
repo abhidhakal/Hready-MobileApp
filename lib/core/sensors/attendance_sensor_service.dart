@@ -56,7 +56,14 @@ class AttendanceSensorService {
     // 1. Z-axis is positive (phone is upright)
     // 2. Y-axis is negative (phone is tilted up)
     // 3. Movement is minimal (stable)
-    return event.z > 5.0 && event.y < -2.0;
+    bool isNearFace = event.z > 5.0 && event.y < -2.0;
+    
+    // Debug logging
+    if (isNearFace != _isNearFace) {
+      print('Proximity changed: $isNearFace (z: ${event.z.toStringAsFixed(2)}, y: ${event.y.toStringAsFixed(2)})');
+    }
+    
+    return isNearFace;
   }
 
   void _startAttendanceTimer(int durationSeconds) {

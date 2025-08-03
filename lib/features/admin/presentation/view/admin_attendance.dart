@@ -6,6 +6,7 @@ import 'package:hready/features/attendance/presentation/view_model/attendance_bl
 import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_state.dart';
 import 'package:hready/core/sensors/attendance_sensor_service.dart';
+import 'package:hready/core/widgets/app_snackbar.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -20,11 +21,17 @@ class _AdminAttendanceState extends State<AdminAttendance> {
   final AttendanceSensorService _sensorService = AttendanceSensorService();
   bool _isSensorActive = false;
   double _timerProgress = 0.0;
+  bool _hasShownInitialSnackbar = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeSensor();
+    // Initialize sensor after a delay to ensure context is ready
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _initializeSensor();
+      }
+    });
   }
 
   @override
@@ -37,27 +44,37 @@ class _AdminAttendanceState extends State<AdminAttendance> {
     _sensorService.initialize(
       onAttendanceTriggered: _handleAttendanceTrigger,
       onProximityDetected: () {
-        setState(() {
-          _isSensorActive = true;
-          _timerProgress = 0.0;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Hold your head close to the camera for attendance"),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        if (mounted) {
+          setState(() {
+            _isSensorActive = true;
+            _timerProgress = 0.0;
+          });
+          
+          // Show initial snackbar only once and only if not already checked out
+          if (!_hasShownInitialSnackbar) {
+            final attendanceBloc = context.read<AttendanceBloc>();
+            final state = attendanceBloc.state;
+            if (state is AdminAttendanceLoaded && state.todayStatus != 'Checked Out') {
+              AppSnackbar.info(context, "Hold your head close to the camera for attendance");
+              _hasShownInitialSnackbar = true;
+            }
+          }
+        }
       },
       onProximityLost: () {
-        setState(() {
-          _isSensorActive = false;
-          _timerProgress = 0.0;
-        });
+        if (mounted) {
+          setState(() {
+            _isSensorActive = false;
+            _timerProgress = 0.0;
+          });
+        }
       },
       onTimerProgress: (progress) {
-        setState(() {
-          _timerProgress = progress;
-        });
+        if (mounted) {
+          setState(() {
+            _timerProgress = progress;
+          });
+        }
       },
     );
   }
@@ -75,25 +92,36 @@ class _AdminAttendanceState extends State<AdminAttendance> {
     
     if (state is AdminAttendanceLoaded) {
       final todayStatus = state.todayStatus;
-      if (todayStatus == 'Not Checked In') {
+      print('Current attendance status: $todayStatus'); // Debug log
+      
+      if (todayStatus == 'Not Checked In' || todayStatus == 'Checked Out') {
+        print('Triggering Check In...'); // Debug log
         attendanceBloc.add(CheckIn());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Checked in successfully!"),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        AppSnackbar.success(context, "Checked in successfully!");
+        
+        // Refresh attendance data after a short delay
+        Future.delayed(const Duration(seconds: 2), () {
+          attendanceBloc.add(LoadAllAttendance());
+        });
       } else if (todayStatus == 'Checked In') {
+        print('Triggering Check Out...'); // Debug log
         attendanceBloc.add(CheckOut());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Checked out successfully!"),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        AppSnackbar.success(context, "Checked out successfully!");
+        
+        // Disable sensor after checkout since no more actions needed
+        _sensorService.dispose();
+        
+        // Refresh attendance data after a short delay
+        Future.delayed(const Duration(seconds: 2), () {
+          attendanceBloc.add(LoadAllAttendance());
+        });
+      } else {
+        print('Unknown status: $todayStatus'); // Debug log
+        AppSnackbar.warning(context, "Unable to determine attendance status");
       }
+    } else {
+      print('State is not AdminAttendanceLoaded: ${state.runtimeType}'); // Debug log
+      AppSnackbar.warning(context, "Please wait for attendance data to load");
     }
   }
 
