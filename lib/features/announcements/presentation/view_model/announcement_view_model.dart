@@ -5,6 +5,7 @@ import '../../domain/use_cases/create_announcement_use_case.dart';
 import '../../domain/use_cases/update_announcement_use_case.dart';
 import '../../domain/use_cases/delete_announcement_use_case.dart';
 import 'announcement_state.dart';
+import 'package:hready/core/notifications/simple_notification_service.dart';
 
 class AnnouncementViewModel extends ChangeNotifier {
   final GetAnnouncementsUseCase getAnnouncementsUseCase;
@@ -37,8 +38,10 @@ class AnnouncementViewModel extends ChangeNotifier {
   Future<void> addAnnouncement(AnnouncementEntity announcement) async {
     try {
       await createAnnouncementUseCase(announcement);
+      await simpleNotificationService.showAnnouncementNotification(announcement.title ?? 'New Announcement');
       await loadAnnouncements();
     } catch (e) {
+      await simpleNotificationService.showErrorNotification('Failed to create announcement: ${e.toString()}');
       _state = _state.copyWith(error: e.toString());
       notifyListeners();
     }
@@ -47,8 +50,10 @@ class AnnouncementViewModel extends ChangeNotifier {
   Future<void> updateAnnouncement(String id, AnnouncementEntity announcement) async {
     try {
       await updateAnnouncementUseCase(id, announcement);
+      await simpleNotificationService.showSuccessNotification('Announcement updated successfully!');
       await loadAnnouncements();
     } catch (e) {
+      await simpleNotificationService.showErrorNotification('Failed to update announcement: ${e.toString()}');
       _state = _state.copyWith(error: e.toString());
       notifyListeners();
     }
@@ -57,8 +62,10 @@ class AnnouncementViewModel extends ChangeNotifier {
   Future<void> deleteAnnouncement(String id) async {
     try {
       await deleteAnnouncementUseCase(id);
+      await simpleNotificationService.showSuccessNotification('Announcement deleted successfully!');
       await loadAnnouncements();
     } catch (e) {
+      await simpleNotificationService.showErrorNotification('Failed to delete announcement: ${e.toString()}');
       _state = _state.copyWith(error: e.toString());
       notifyListeners();
     }

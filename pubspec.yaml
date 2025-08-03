@@ -40,6 +40,10 @@ dependencies:
   shimmer: ^3.0.0
   jwt_decoder: ^2.0.1
   test_cov_console: ^0.2.2
+  sensors_plus: ^6.1.1
+  
+  # Simple Notification Dependencies
+  flutter_local_notifications: ^18.0.1
 
 flutter_icons:
   android: true

@@ -196,13 +196,15 @@ class AdminHome extends StatelessWidget {
                               }
                               return _InfoCard(
                                 title: 'Today’s Overview',
-                                content: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Active: $active'),
-                                    Text('On Leave: $onLeave'),
-                                    Text('Absent: $absent'),
-                                  ],
+                                content: Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Active: $active', overflow: TextOverflow.ellipsis),
+                                      Text('On Leave: $onLeave', overflow: TextOverflow.ellipsis),
+                                      Text('Absent: $absent', overflow: TextOverflow.ellipsis),
+                                    ],
+                                  ),
                                 ),
                                 color: Colors.white,
                                 height: 160,
@@ -220,7 +222,13 @@ class AdminHome extends StatelessWidget {
                               }
                               return _InfoCard(
                                 title: 'Total Employees',
-                                content: Text('$total', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                content: Expanded(
+                                  child: Text(
+                                    '$total',
+                                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                                 color: Colors.white,
                                 height: 160,
                               );

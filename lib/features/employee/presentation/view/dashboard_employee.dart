@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hready/features/employee/presentation/view/employee_announcements.dart';
 import 'package:hready/features/employee/presentation/view/employee_attendance.dart';
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_home.dart';
@@ -8,6 +7,7 @@ import 'package:hready/features/employee/presentation/view/employee_requests.dar
 import 'package:hready/features/employee/presentation/view/employee_payroll.dart';
 import 'package:shake/shake.dart';
 import 'package:flutter/services.dart';
+import 'package:hready/core/notifications/notification_manager.dart';
 
 class DashboardEmployee extends StatefulWidget {
   const DashboardEmployee({super.key});
@@ -24,7 +24,6 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
     const EmployeeLeave(),
     const EmployeeAttendance(),
     const EmployeeTasks(),
-    const EmployeeAnnouncements(),
     const EmployeePayroll(),
   ];
 
@@ -49,11 +48,55 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
 
   Widget buildNavItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
     return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        // Clear notification count when user taps home tab
+        if (index == 0) {
+          notificationManager.resetCount();
+        }
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: selectedIndex == index ? const Color(0xFF042F46) : Colors.grey),
+          Stack(
+            children: [
+              Icon(icon, color: selectedIndex == index ? const Color(0xFF042F46) : Colors.grey),
+              if (index == 0) // Home tab - show notification badge
+                StreamBuilder<int>(
+                  stream: notificationManager.notificationCountStream,
+                  builder: (context, snapshot) {
+                    final count = snapshot.data ?? notificationManager.notificationCount;
+                    if (count > 0) {
+                      return Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            count > 99 ? '99+' : count.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+            ],
+          ),
           Text(
             label,
             style: TextStyle(
@@ -100,8 +143,7 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
                   buildNavItem(context, Icons.beach_access, "Leave", 1, _selectedIndex),
                   buildNavItem(context, Icons.fingerprint, "Attendance", 2, _selectedIndex),
                   buildNavItem(context, Icons.assignment_outlined, "Tasks", 3, _selectedIndex),
-                  buildNavItem(context, Icons.announcement_outlined, "News", 4, _selectedIndex),
-                  buildNavItem(context, Icons.payment, "Payroll", 5, _selectedIndex),
+                  buildNavItem(context, Icons.payment, "Payroll", 4, _selectedIndex),
                 ],
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/app/theme/hready_theme.dart';
 import 'package:hready/features/splash/view/splash_screen.dart';
+import 'package:hready/core/notifications/notification_permission_widget.dart';
 
 // GetIt
 import 'package:hready/app/service_locator/service_locator.dart';
@@ -22,11 +23,13 @@ class App extends StatelessWidget {
         BlocProvider(create: (_) => getIt<AdminDashboardViewModel>()),
         BlocProvider(create: (_) => getIt<EmployeeDashboardViewModel>()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'HReady',
-        theme: getApplicationTheme(),
-        home: const SplashScreen(),
+      child: NotificationPermissionWidget(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'HReady',
+          theme: getApplicationTheme(),
+          home: const SplashScreen(),
+        ),
       ),
     );
   }

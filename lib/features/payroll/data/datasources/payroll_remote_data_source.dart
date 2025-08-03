@@ -26,7 +26,7 @@ class PayrollRemoteDataSourceImpl implements PayrollRemoteDataSource {
   @override
   Future<List<PayrollModel>> getAllPayrolls() async {
     return await SafeExecutor.executeAsync(() async {
-      final response = await dio.get('/payroll');
+      final response = await dio.get('/payrolls');
       return (response.data as List).map((json) => PayrollModel.fromJson(json)).toList();
     }).then((result) => result.getOrThrow());
   }
@@ -34,56 +34,56 @@ class PayrollRemoteDataSourceImpl implements PayrollRemoteDataSource {
   @override
   Future<PayrollModel> getPayrollById(String id) async {
     return await SafeExecutor.executeAsync(() async {
-      final response = await dio.get('/payroll/$id');
+      final response = await dio.get('/payrolls/$id');
       return PayrollModel.fromJson(response.data);
     }).then((result) => result.getOrThrow());
   }
 
   @override
   Future<List<PayrollModel>> getEmployeePayrollHistory(String employeeId) async {
-    final response = await dio.get('/payroll/employee/$employeeId/history');
+    final response = await dio.get('/payrolls/employee/$employeeId/history');
     return (response.data as List).map((json) => PayrollModel.fromJson(json)).toList();
   }
 
   @override
   Future<PayrollModel> generatePayroll(Map<String, dynamic> payrollData) async {
     return await SafeExecutor.executeAsync(() async {
-      final response = await dio.post('/payroll/generate', data: payrollData);
+      final response = await dio.post('/payrolls/generate', data: payrollData);
       return PayrollModel.fromJson(response.data);
     }).then((result) => result.getOrThrow());
   }
 
   @override
   Future<PayrollModel> updatePayroll(String id, Map<String, dynamic> payrollData) async {
-    final response = await dio.put('/payroll/$id', data: payrollData);
+    final response = await dio.put('/payrolls/$id', data: payrollData);
     return PayrollModel.fromJson(response.data);
   }
 
   @override
   Future<PayrollModel> approvePayroll(String id) async {
-    final response = await dio.put('/payroll/$id/approve');
+    final response = await dio.put('/payrolls/$id/approve');
     return PayrollModel.fromJson(response.data);
   }
 
   @override
   Future<PayrollModel> markPayrollAsPaid(String id, Map<String, dynamic> paymentData) async {
-    final response = await dio.put('/payroll/$id/mark-paid', data: paymentData);
+    final response = await dio.put('/payrolls/$id/mark-paid', data: paymentData);
     return PayrollModel.fromJson(response.data);
   }
 
   @override
   Future<Map<String, dynamic>> getPayrollStats() async {
-    final response = await dio.get('/payroll/stats');
+    final response = await dio.get('/payrolls/stats');
     return response.data;
   }
 
   @override
   Future<void> deletePayroll(String id) async {
-    await dio.delete('/payroll/$id');
+    await dio.delete('/payrolls/$id');
   }
 
   @override
   Future<void> bulkApprovePayrolls(List<String> payrollIds) async {
-    await dio.put('/payroll/bulk-approve', data: {'payrollIds': payrollIds});
+    await dio.put('/payrolls/bulk-approve', data: {'payrollIds': payrollIds});
   }
 } 

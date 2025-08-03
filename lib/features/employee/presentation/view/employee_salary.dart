@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/payroll/presentation/view_model/payroll_bloc.dart';
 import 'package:hready/features/payroll/presentation/view_model/payroll_event.dart';
 import 'package:hready/features/payroll/presentation/view_model/payroll_state.dart';
+import 'package:hready/features/auth/domain/use_cases/get_cached_user_use_case.dart';
+import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class EmployeeSalary extends StatefulWidget {
   const EmployeeSalary({super.key});
@@ -23,12 +24,15 @@ class _EmployeeSalaryState extends State<EmployeeSalary> {
   }
 
   Future<void> _loadEmployeeId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId');
-    setState(() {
-      employeeId = userId;
-    });
-    // TODO: Load salary data when salary BLoC is implemented
+    try {
+      final cachedUser = await getIt<GetCachedUserUseCase>().call();
+      setState(() {
+        employeeId = cachedUser?.userId;
+      });
+      // TODO: Load salary data when salary BLoC is implemented
+    } catch (e) {
+      print('Error loading employee ID: $e');
+    }
   }
 
   @override

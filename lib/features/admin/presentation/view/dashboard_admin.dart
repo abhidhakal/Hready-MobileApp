@@ -14,6 +14,7 @@ import 'package:hready/features/admin/presentation/view_model/admin_dashboard_st
 import 'package:hready/features/admin/presentation/view_model/admin_dashboard_view_model.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hready/core/notifications/simple_notification_service.dart';
 
 class DashboardAdmin extends StatelessWidget {
   const DashboardAdmin({super.key});
@@ -101,6 +102,7 @@ class DashboardAdmin extends StatelessWidget {
                       buildDrawerItem(context, Icons.inbox, "Requests", 6, state.selectedIndex),
                       buildDrawerItem(context, Icons.payment, "Payroll", 7, state.selectedIndex),
                       buildDrawerItem(context, Icons.person_outline, "Profile", 8, state.selectedIndex),
+                      const Divider(color: Colors.grey),
                       const Spacer(),
                       ListTile(
                         leading: const Icon(Icons.logout, color: Colors.grey),

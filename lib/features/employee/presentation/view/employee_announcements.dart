@@ -26,77 +26,67 @@ class EmployeeAnnouncements extends StatelessWidget {
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    SizedBox(height: 16),
-                    state.isLoading
-                        ? ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: 4,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) => Shimmer.fromColors(
-                              baseColor: Colors.grey[300]!,
-                              highlightColor: Colors.grey[100]!,
-                              child: Card(
-                                margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(18.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: state.isLoading
+                    ? ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 4,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(18.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 36,
-                                            height: 36,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(18),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Container(height: 18, width: 120, color: Colors.white),
-                                        ],
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(18),
+                                        ),
                                       ),
-                                      const SizedBox(height: 10),
-                                      Container(height: 12, width: 180, color: Colors.white),
+                                      const SizedBox(width: 12),
+                                      Container(height: 18, width: 120, color: Colors.white),
                                     ],
                                   ),
-                                ),
+                                  const SizedBox(height: 10),
+                                  Container(height: 12, width: 180, color: Colors.white),
+                                ],
                               ),
                             ),
-                          )
-                        : state.error != null
-                            ? Center(child: Text('Error: ${state.error}'))
-                            : state.announcements.isEmpty
-                                ? Center(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: const [
-                                        Icon(Icons.campaign, size: 80, color: Colors.grey),
-                                        SizedBox(height: 16),
-                                        Text('No announcements yet!', style: TextStyle(color: Colors.grey, fontSize: 18)),
-                                      ],
-                                    ),
-                                  )
-                                : Expanded(
-                                    child: ListView.separated(
-                                      padding: EdgeInsets.zero,
-                                      itemCount: state.announcements.length,
-                                      separatorBuilder: (_, __) => const SizedBox(height: 16),
-                                      itemBuilder: (context, index) {
-                                        return _AnnouncementCard(announcement: state.announcements[index]);
-                                      },
-                                    ),
-                                  ),
-                    ],
-                  ),
-                ),
+                          ),
+                        ),
+                      )
+                    : state.error != null
+                        ? Center(child: Text('Error: ${state.error}'))
+                        : state.announcements.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.campaign, size: 80, color: Colors.grey),
+                                    SizedBox(height: 16),
+                                    Text('No announcements yet!', style: TextStyle(color: Colors.grey, fontSize: 18)),
+                                  ],
+                                ),
+                              )
+                            : ListView.separated(
+                                padding: EdgeInsets.zero,
+                                itemCount: state.announcements.length,
+                                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                                itemBuilder: (context, index) {
+                                  return _AnnouncementCard(announcement: state.announcements[index]);
+                                },
+                              ),
               ),
             ),
           );

@@ -98,6 +98,20 @@ import 'package:hready/features/payroll/domain/use_cases/mark_payroll_as_paid.da
 import 'package:hready/features/payroll/domain/use_cases/get_payroll_stats.dart';
 import 'package:hready/features/payroll/domain/use_cases/bulk_approve_payrolls.dart';
 import 'package:hready/features/payroll/domain/use_cases/delete_payroll.dart';
+
+// Bank Account
+import 'package:hready/features/payroll/data/datasources/bank_account_remote_data_source.dart';
+import 'package:hready/features/payroll/data/repositories/bank_account_repository_impl.dart';
+import 'package:hready/features/payroll/domain/repositories/bank_account_repository.dart';
+import 'package:hready/features/payroll/domain/use_cases/get_bank_accounts_by_employee.dart';
+
+// Salary
+import 'package:hready/features/payroll/data/datasources/salary_remote_data_source.dart';
+import 'package:hready/features/payroll/data/repositories/salary_repository_impl.dart';
+import 'package:hready/features/payroll/domain/repositories/salary_repository.dart';
+import 'package:hready/features/payroll/domain/use_cases/get_all_salaries.dart';
+import 'package:hready/features/payroll/domain/use_cases/get_salary_by_employee.dart';
+import 'package:hready/features/payroll/domain/use_cases/create_salary.dart';
 import 'package:hready/features/payroll/presentation/view_model/payroll_bloc.dart';
 
 import 'package:hready/core/network/api_base.dart';
@@ -280,6 +294,7 @@ Future<void> setupLocator() async {
 
   // Payroll - Remote Data Source
   getIt.registerLazySingleton(() => PayrollRemoteDataSourceImpl(dio: getIt<Dio>()));
+  getIt.registerLazySingleton<PayrollRemoteDataSource>(() => getIt<PayrollRemoteDataSourceImpl>());
   // Payroll - Repository
   getIt.registerLazySingleton<PayrollRepository>(() => PayrollRepositoryImpl(remoteDataSource: getIt()));
   // Payroll - Use Cases
@@ -302,6 +317,24 @@ Future<void> setupLocator() async {
     bulkApprovePayrolls: getIt(),
     deletePayroll: getIt(),
   ));
+
+  // Salary - Remote Data Source
+  getIt.registerLazySingleton(() => SalaryRemoteDataSourceImpl(dio: getIt<Dio>()));
+  getIt.registerLazySingleton<SalaryRemoteDataSource>(() => getIt<SalaryRemoteDataSourceImpl>());
+  // Salary - Repository
+  getIt.registerLazySingleton<SalaryRepository>(() => SalaryRepositoryImpl(remoteDataSource: getIt()));
+  // Salary - Use Cases
+  getIt.registerLazySingleton(() => GetAllSalaries(getIt<SalaryRepository>()));
+  getIt.registerLazySingleton(() => GetSalaryByEmployee(getIt<SalaryRepository>()));
+  getIt.registerLazySingleton(() => CreateSalary(getIt<SalaryRepository>()));
+
+  // Bank Account - Remote Data Source
+  getIt.registerLazySingleton(() => BankAccountRemoteDataSourceImpl(dio: getIt<Dio>()));
+  getIt.registerLazySingleton<BankAccountRemoteDataSource>(() => getIt<BankAccountRemoteDataSourceImpl>());
+  // Bank Account - Repository
+  getIt.registerLazySingleton<BankAccountRepository>(() => BankAccountRepositoryImpl(remoteDataSource: getIt()));
+  // Bank Account - Use Cases
+  getIt.registerLazySingleton(() => GetBankAccountsByEmployee(getIt<BankAccountRepository>()));
 }
 
 Future<String?> getToken() async {

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/leave_entity.dart';
 import '../../domain/repositories/leave_repository.dart';
+import 'package:hready/core/notifications/simple_notification_service.dart';
 
 abstract class LeaveEvent {}
 class LoadLeaves extends LeaveEvent {}
@@ -49,8 +50,10 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       emit(LeaveLoading());
       try {
         await repository.createAdminLeave(event.leave);
+        await simpleNotificationService.showSuccessNotification('Leave request created successfully!');
         add(LoadLeaves());
       } catch (e) {
+        await simpleNotificationService.showErrorNotification('Failed to create leave request: ${e.toString()}');
         emit(LeaveError(e.toString()));
       }
     });
@@ -58,8 +61,10 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       emit(LeaveLoading());
       try {
         await repository.updateLeaveStatus(event.id, 'Approved');
+        await simpleNotificationService.showLeaveNotification('approved');
         add(LoadLeaves());
       } catch (e) {
+        await simpleNotificationService.showErrorNotification('Failed to approve leave: ${e.toString()}');
         emit(LeaveError(e.toString()));
       }
     });
@@ -67,8 +72,10 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       emit(LeaveLoading());
       try {
         await repository.updateLeaveStatus(event.id, 'Rejected');
+        await simpleNotificationService.showLeaveNotification('rejected');
         add(LoadLeaves());
       } catch (e) {
+        await simpleNotificationService.showErrorNotification('Failed to reject leave: ${e.toString()}');
         emit(LeaveError(e.toString()));
       }
     });
@@ -85,8 +92,10 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       emit(LeaveLoading());
       try {
         await repository.createLeave(event.leave);
+        await simpleNotificationService.showSuccessNotification('Leave request submitted successfully!');
         add(LoadMyLeaves());
       } catch (e) {
+        await simpleNotificationService.showErrorNotification('Failed to submit leave request: ${e.toString()}');
         emit(LeaveError(e.toString()));
       }
     });

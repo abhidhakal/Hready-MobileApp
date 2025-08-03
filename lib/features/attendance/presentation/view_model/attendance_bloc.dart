@@ -6,6 +6,7 @@ import 'package:hready/features/attendance/domain/use_cases/mark_attendance_use_
 import 'package:hready/features/attendance/domain/entities/attendance_entity.dart';
 import 'package:dio/dio.dart';
 import 'package:hready/features/attendance/domain/use_cases/get_all_attendance_use_case.dart';
+import 'package:hready/core/notifications/simple_notification_service.dart';
 
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final GetMyAttendanceUseCase getMyAttendanceUseCase;
@@ -49,15 +50,21 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     emit(AttendanceLoading());
     try {
       await markAttendanceUseCase(checkIn: true);
-      add(LoadTodayAttendance());
+      // Show success notification
+      await simpleNotificationService.showAttendanceNotification('Successfully checked in! Welcome to work.');
+      // Load all attendance data for admin view
+      add(LoadAllAttendance());
     } catch (e) {
       if (e is DioError) {
         print('DIO CHECK-IN ERROR: status=${e.response?.statusCode}, data=${e.response?.data}');
         if (e.response?.statusCode == 400 || e.response?.statusCode == 500) {
-          emit(AttendanceError(e.response?.data['message'] ?? 'Check-in failed.'));
+          final errorMessage = e.response?.data['message'] ?? 'Check-in failed.';
+          await simpleNotificationService.showErrorNotification(errorMessage);
+          emit(AttendanceError(errorMessage));
           return;
         }
       }
+      await simpleNotificationService.showErrorNotification('Check-in failed. Please try again.');
       emit(AttendanceError(e.toString()));
     }
   }
@@ -66,15 +73,21 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     emit(AttendanceLoading());
     try {
       await markAttendanceUseCase(checkIn: false);
-      add(LoadTodayAttendance());
+      // Show success notification
+      await simpleNotificationService.showAttendanceNotification('Successfully checked out! Have a great day.');
+      // Load all attendance data for admin view
+      add(LoadAllAttendance());
     } catch (e) {
       if (e is DioError) {
         print('DIO CHECK-OUT ERROR: status=${e.response?.statusCode}, data=${e.response?.data}');
         if (e.response?.statusCode == 400 || e.response?.statusCode == 500) {
-          emit(AttendanceError(e.response?.data['message'] ?? 'Check-out failed.'));
+          final errorMessage = e.response?.data['message'] ?? 'Check-out failed.';
+          await simpleNotificationService.showErrorNotification(errorMessage);
+          emit(AttendanceError(errorMessage));
           return;
         }
       }
+      await simpleNotificationService.showErrorNotification('Check-out failed. Please try again.');
       emit(AttendanceError(e.toString()));
     }
   }

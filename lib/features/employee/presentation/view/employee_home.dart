@@ -22,6 +22,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:hready/core/network/api_base.dart';
+import 'package:hready/core/notifications/simple_notification_service.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
@@ -189,6 +190,7 @@ class EmployeeHome extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              
               // Info Cards Row
               SizedBox(
                 height: 160,
@@ -202,11 +204,14 @@ class EmployeeHome extends StatelessWidget {
                               final position = state.position.isNotEmpty ? state.position : 'Employee';
                               return _InfoCard(
                                 title: 'Position',
-                                content: Row(
-                                  children: [
-                                    const SizedBox(width: 10),
-                                    Text(position, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                                  ],
+                                content: Expanded(
+                                  child: Text(
+                                    position,
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 3,
+                                    textAlign: TextAlign.left,
+                                  ),
                                 ),
                                 color: Colors.white,
                                 height: 160,

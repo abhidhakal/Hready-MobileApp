@@ -57,4 +57,27 @@ void showCommonSnackbar(BuildContext context, String message) {
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
     ),
   );
+}
+
+/// Safely shows a snackbar using post-frame callback to avoid build-time issues
+void showSafeSnackBar(BuildContext context, String message, {Color? backgroundColor}) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: backgroundColor,
+        ),
+      );
+    }
+  });
+}
+
+/// Safely shows a common snackbar using post-frame callback to avoid build-time issues
+void showSafeCommonSnackbar(BuildContext context, String message) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (context.mounted) {
+      showCommonSnackbar(context, message);
+    }
+  });
 } 

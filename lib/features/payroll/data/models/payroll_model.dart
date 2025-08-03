@@ -1,6 +1,9 @@
 import 'package:hready/features/payroll/domain/entities/payroll.dart';
 
 class PayrollModel extends Payroll {
+  static Map<String, double> _convertMapToDouble(Map<String, dynamic> map) {
+    return map.map((key, value) => MapEntry(key, (value ?? 0).toDouble()));
+  }
   PayrollModel({
     required super.id,
     required super.employeeId,
@@ -35,13 +38,13 @@ class PayrollModel extends Payroll {
       employeeName: json['employee'] is String 
           ? json['employeeName'] ?? 'Unknown'
           : json['employee']['name'] ?? 'Unknown',
-      month: json['month'],
-      year: json['year'],
+      month: (json['month'] ?? 1).toInt(),
+      year: (json['year'] ?? DateTime.now().year).toInt(),
       basicSalary: (json['basicSalary'] ?? 0).toDouble(),
-      allowances: Map<String, double>.from(json['allowances'] ?? {}),
-      deductions: Map<String, double>.from(json['deductions'] ?? {}),
+      allowances: _convertMapToDouble(json['allowances'] ?? {}),
+      deductions: _convertMapToDouble(json['deductions'] ?? {}),
       overtime: Map<String, dynamic>.from(json['overtime'] ?? {}),
-      bonuses: Map<String, double>.from(json['bonuses'] ?? {}),
+      bonuses: _convertMapToDouble(json['bonuses'] ?? {}),
       leaves: Map<String, dynamic>.from(json['leaves'] ?? {}),
       currency: json['currency'] ?? 'Rs.',
       status: json['status'] ?? 'draft',

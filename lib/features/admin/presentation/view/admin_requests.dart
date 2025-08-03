@@ -72,11 +72,12 @@ class AdminRequests extends StatelessWidget {
                   if (!state.isLoading && state.requests.isEmpty && state.error == null)
                     const Center(child: Text('No requests found.')),
                   if (state.requests.isNotEmpty)
-                    Expanded(
-                      child: ListView.separated(
-                        itemCount: state.requests.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: state.requests.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
                           final r = state.requests[index];
                           final action = state.actionState[r.id];
                           return Card(
@@ -209,7 +210,6 @@ class AdminRequests extends StatelessWidget {
                           );
                         },
                       ),
-                    ),
                   ],
                 ),
               ),
