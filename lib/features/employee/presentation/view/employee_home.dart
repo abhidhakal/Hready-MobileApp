@@ -23,18 +23,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:hready/core/network/api_base.dart';
 import 'package:hready/core/notifications/simple_notification_service.dart';
+import 'package:hready/core/utils/profile_picture_utils.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
-
-  String _resolveProfilePicture(String? picture) {
-    if (picture == null || picture.isEmpty) return 'assets/images/profile.webp';
-    if (picture.startsWith('/uploads')) {
-      return '$apiBaseUrl$picture';
-    }
-    if (picture.startsWith('http')) return picture;
-    return 'assets/images/profile.webp';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,9 +123,9 @@ class EmployeeHome extends StatelessWidget {
                                       radius: 38,
                                       backgroundColor: Colors.grey[200],
                                       child: ClipOval(
-                                        child: (profilePicture.isNotEmpty && _resolveProfilePicture(profilePicture).isNotEmpty)
+                                        child: (profilePicture.isNotEmpty && ProfilePictureUtils.resolveProfilePicture(profilePicture).isNotEmpty)
                                             ? Image.network(
-                                                _resolveProfilePicture(profilePicture),
+                                                ProfilePictureUtils.resolveProfilePicture(profilePicture),
                                                 width: 76,
                                                 height: 76,
                                                 fit: BoxFit.cover,

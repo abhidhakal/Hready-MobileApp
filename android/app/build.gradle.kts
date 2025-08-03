@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.abhidhakal.hready.hready"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName

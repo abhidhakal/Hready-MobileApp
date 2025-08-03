@@ -17,11 +17,6 @@ void main() {
     expect(widget, isA<Widget>());
   });
 
-  testWidgets('DashboardAdmin has MaterialApp structure', (WidgetTester tester) async {
-    const widget = DashboardAdmin();
-    expect(widget, isA<StatelessWidget>());
-  });
-
   testWidgets('DashboardAdmin can be instantiated without errors', (WidgetTester tester) async {
     expect(() => const DashboardAdmin(), returnsNormally);
   });

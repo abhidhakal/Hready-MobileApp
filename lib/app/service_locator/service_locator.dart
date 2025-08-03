@@ -85,6 +85,7 @@ import 'package:hready/features/requests/domain/use_cases/approve_request_use_ca
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/get_my_requests_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/submit_request_use_case.dart';
+import 'package:hready/features/requests/presentation/view_model/requests_bloc.dart';
 
 // Payroll
 import 'package:hready/features/payroll/data/datasources/payroll_remote_data_source.dart';
@@ -291,6 +292,14 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => RejectRequestUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => GetMyRequestsUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => SubmitRequestUseCase(getIt<RequestRepository>()));
+  // Requests - Bloc
+  getIt.registerFactory(() => RequestsBloc(
+    getAllRequestsUseCase: getIt(),
+    approveRequestUseCase: getIt(),
+    rejectRequestUseCase: getIt(),
+    getMyRequestsUseCase: getIt(),
+    submitRequestUseCase: getIt(),
+  ));
 
   // Payroll - Remote Data Source
   getIt.registerLazySingleton(() => PayrollRemoteDataSourceImpl(dio: getIt<Dio>()));

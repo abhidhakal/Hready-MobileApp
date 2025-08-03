@@ -9,19 +9,10 @@ import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hready/core/utils/common_snackbar.dart';
-import 'package:hready/core/network/api_base.dart';
+import 'package:hready/core/utils/profile_picture_utils.dart';
 
 class EmployeeProfile extends StatelessWidget {
   const EmployeeProfile({super.key});
-
-  String _resolveProfilePicture(String picture) {
-    if (picture.isEmpty) return 'assets/images/profile.webp';
-    if (picture.startsWith('/uploads')) {
-      return '$apiBaseUrl$picture';
-    }
-    if (picture.startsWith('http')) return picture;
-    return 'assets/images/profile.webp';
-  }
 
   void _showChangePasswordDialog(BuildContext parentContext, EmployeeProfileState state) {
     showDialog(
@@ -215,9 +206,9 @@ class EmployeeProfile extends StatelessWidget {
                                             radius: 60,
                                             backgroundColor: Colors.grey[200],
                                             child: ClipOval(
-                                              child: (state.profilePicture.isNotEmpty && _resolveProfilePicture(state.profilePicture).isNotEmpty)
+                                              child: (state.profilePicture.isNotEmpty && ProfilePictureUtils.resolveProfilePicture(state.profilePicture).isNotEmpty)
                                                   ? Image.network(
-                                                      _resolveProfilePicture(state.profilePicture),
+                                                      ProfilePictureUtils.resolveProfilePicture(state.profilePicture),
                                                       width: 120,
                                                       height: 120,
                                                       fit: BoxFit.cover,

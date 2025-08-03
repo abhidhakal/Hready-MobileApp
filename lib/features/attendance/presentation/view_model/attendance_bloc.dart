@@ -52,8 +52,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       await markAttendanceUseCase(checkIn: true);
       // Show success notification
       await simpleNotificationService.showAttendanceNotification('Successfully checked in! Welcome to work.');
-      // Load all attendance data for admin view
-      add(LoadAllAttendance());
+      // Load today's attendance data for employee view
+      add(LoadTodayAttendance());
     } catch (e) {
       if (e is DioError) {
         print('DIO CHECK-IN ERROR: status=${e.response?.statusCode}, data=${e.response?.data}');
@@ -75,8 +75,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       await markAttendanceUseCase(checkIn: false);
       // Show success notification
       await simpleNotificationService.showAttendanceNotification('Successfully checked out! Have a great day.');
-      // Load all attendance data for admin view
-      add(LoadAllAttendance());
+      // Load today's attendance data for employee view
+      add(LoadTodayAttendance());
     } catch (e) {
       if (e is DioError) {
         print('DIO CHECK-OUT ERROR: status=${e.response?.statusCode}, data=${e.response?.data}');

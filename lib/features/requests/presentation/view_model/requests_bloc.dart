@@ -52,6 +52,10 @@ class RequestsBloc extends Bloc<RequestsEvent, RequestsState> {
     try {
       await approveRequestUseCase(event.requestId, comment: event.comment);
       emit(state.copyWith(isLoading: false));
+      // Clear the action state for this request
+      final newActionState = Map<String, ActionState>.from(state.actionState);
+      newActionState[event.requestId] = const ActionState();
+      emit(state.copyWith(actionState: newActionState));
       add(LoadRequests());
     } catch (e) {
       String errorMsg = 'Failed to approve request';
@@ -68,6 +72,10 @@ class RequestsBloc extends Bloc<RequestsEvent, RequestsState> {
     try {
       await rejectRequestUseCase(event.requestId, comment: event.comment);
       emit(state.copyWith(isLoading: false));
+      // Clear the action state for this request
+      final newActionState = Map<String, ActionState>.from(state.actionState);
+      newActionState[event.requestId] = const ActionState();
+      emit(state.copyWith(actionState: newActionState));
       add(LoadRequests());
     } catch (e) {
       String errorMsg = 'Failed to reject request';

@@ -15,9 +15,17 @@ import 'package:hready/features/admin/presentation/view_model/admin_dashboard_vi
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hready/core/notifications/simple_notification_service.dart';
+import 'package:hready/core/sensors/dashboard_proximity_service.dart';
 
-class DashboardAdmin extends StatelessWidget {
+class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});
+
+  @override
+  State<DashboardAdmin> createState() => _DashboardAdminState();
+}
+
+class _DashboardAdminState extends State<DashboardAdmin> {
+  final DashboardProximityService _proximityService = DashboardProximityService();
 
   static final List<Widget> _pages = [
     const AdminHome(),
@@ -30,6 +38,29 @@ class DashboardAdmin extends StatelessWidget {
     const AdminPayroll(),
     const AdminProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize proximity sensor for screen control
+    _proximityService.initialize(
+      onProximityDetected: () {
+        print('AdminDashboard: Proximity detected - screen should turn off');
+        // You can add screen off logic here or use the service's built-in functionality
+      },
+      onProximityLost: () {
+        print('AdminDashboard: Proximity lost - screen should turn on');
+        // You can add screen on logic here or use the service's built-in functionality
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _proximityService.dispose();
+    super.dispose();
+  }
 
   Widget buildDrawerItem(BuildContext context, IconData icon, String label, int index, int selectedIndex) {
     final bool selected = selectedIndex == index;

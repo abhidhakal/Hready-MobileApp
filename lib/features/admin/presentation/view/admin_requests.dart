@@ -8,6 +8,7 @@ import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_c
 import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hready/core/utils/common_snackbar.dart';
 
 class AdminRequests extends StatelessWidget {
   const AdminRequests({Key? key}) : super(key: key);
@@ -20,8 +21,16 @@ class AdminRequests extends StatelessWidget {
         approveRequestUseCase: getIt<ApproveRequestUseCase>(),
         rejectRequestUseCase: getIt<RejectRequestUseCase>(),
       )..add(LoadRequests()),
-      child: BlocBuilder<RequestsBloc, RequestsState>(
-        builder: (context, state) {
+      child: BlocListener<RequestsBloc, RequestsState>(
+        listener: (context, state) {
+          // Handle success and error states
+          if (!state.isLoading && state.error != null) {
+            showCommonSnackbar(context, 'Error: ${state.error!}');
+          }
+          // Note: Success feedback will be handled by the UI refresh
+        },
+        child: BlocBuilder<RequestsBloc, RequestsState>(
+          builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
               title: const Text('All Employee Requests'),
@@ -165,8 +174,10 @@ class AdminRequests extends StatelessWidget {
                                                       : () {
                                                           if (action.mode == 'approve') {
                                                             context.read<RequestsBloc>().add(ApproveRequest(r.id, action.comment));
+                                                            showCommonSnackbar(context, 'Request approved successfully!');
                                                           } else {
                                                             context.read<RequestsBloc>().add(RejectRequest(r.id, action.comment));
+                                                            showCommonSnackbar(context, 'Request rejected successfully!');
                                                           }
                                                         },
                                                   child: state.isLoading
@@ -217,6 +228,7 @@ class AdminRequests extends StatelessWidget {
           ),
           );
         },
+        ),
       ),
     );
   }

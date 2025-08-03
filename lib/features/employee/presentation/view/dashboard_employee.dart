@@ -8,6 +8,7 @@ import 'package:hready/features/employee/presentation/view/employee_payroll.dart
 import 'package:shake/shake.dart';
 import 'package:flutter/services.dart';
 import 'package:hready/core/notifications/notification_manager.dart';
+import 'package:hready/core/sensors/dashboard_proximity_service.dart';
 
 class DashboardEmployee extends StatefulWidget {
   const DashboardEmployee({super.key});
@@ -18,6 +19,7 @@ class DashboardEmployee extends StatefulWidget {
 
 class _DashboardEmployeeState extends State<DashboardEmployee> {
   ShakeDetector? detector;
+  final DashboardProximityService _proximityService = DashboardProximityService();
 
   static final List<Widget> _pages = [
     const EmployeeHome(),
@@ -38,11 +40,24 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
         );
       },
     );
+    
+    // Initialize proximity sensor for screen control
+    _proximityService.initialize(
+      onProximityDetected: () {
+        print('EmployeeDashboard: Proximity detected - screen should turn off');
+        // You can add screen off logic here or use the service's built-in functionality
+      },
+      onProximityLost: () {
+        print('EmployeeDashboard: Proximity lost - screen should turn on');
+        // You can add screen on logic here or use the service's built-in functionality
+      },
+    );
   }
 
   @override
   void dispose() {
     detector?.stopListening();
+    _proximityService.dispose();
     super.dispose();
   }
 
