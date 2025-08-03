@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hready/features/auth/presentation/view/register.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_event.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_state.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_event.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_state.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:hready/features/admin/presentation/view/dashboard_admin.dart';
 import 'package:hready/features/employee/presentation/view/dashboard_employee.dart';
-import 'package:hready/core/utils/common_snackbar.dart';
+import 'package:hready/core/widgets/app_snackbar.dart';
+import 'package:hready/core/utils/validators.dart';
+import 'package:hready/core/constants/app_constants.dart';
+import 'package:hready/core/enums/app_enums.dart';
+import 'package:hready/core/extensions/app_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginPage extends StatefulWidget {
@@ -32,17 +35,17 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _checkSession() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final token = prefs.getString(AppConstants.tokenKey);
     if (token != null && token.isNotEmpty) {
       try {
         final decoded = JwtDecoder.decode(token);
         final isExpired = JwtDecoder.isExpired(token);
         if (!isExpired) {
-          final role = prefs.getString('role');
-          final userId = prefs.getString('userId');
-          if (role == 'admin') {
+          final role = prefs.getString(AppConstants.userRoleKey);
+          final userId = prefs.getString(AppConstants.userIdKey);
+          if (role == UserRole.admin.name) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardAdmin()));
-          } else if (role == 'employee') {
+          } else if (role == UserRole.employee.name) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardEmployee()));
           }
         } else {
@@ -56,9 +59,9 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleLogin(String token, String userId, String role, String name) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-    await prefs.setString('userId', userId);
-    await prefs.setString('role', role);
+    await prefs.setString(AppConstants.tokenKey, token);
+    await prefs.setString(AppConstants.userIdKey, userId);
+    await prefs.setString(AppConstants.userRoleKey, role);
     await prefs.setString('userName', name);
   }
 
@@ -70,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
           listener: (context, state) {
             if (state is AuthSuccess) {
               final role = state.user.role;
-              if (role == 'admin') {
+              if (role == UserRole.admin.name) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const DashboardAdmin()),
@@ -82,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               }
             } else if (state is AuthFailure) {
-              showCommonSnackbar(context, state.message);
+              context.showErrorSnackBar(state.message);
             }
           },
           child: Padding(
@@ -104,9 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(labelText: 'Enter your email'),
-                    validator: (value) => value == null || value.isEmpty
-                        ? "Please enter your email"
-                        : null,
+                    validator: FormValidators.email,
                   ),
                   const SizedBox(height: 16),
 
@@ -128,15 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter your password";
-                      }
-                      if (value.length < 5) {
-                        return "Password must be at least 5 characters";
-                      }
-                      return null;
-                    },
+                    validator: FormValidators.password,
                   ),
                   const SizedBox(height: 24),
 

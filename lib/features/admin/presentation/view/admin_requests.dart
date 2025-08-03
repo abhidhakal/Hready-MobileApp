@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hready/features/requests/presentation/viewmodel/requests_bloc.dart';
-import 'package:hready/features/requests/presentation/viewmodel/requests_event.dart';
-import 'package:hready/features/requests/presentation/viewmodel/requests_state.dart';
+import 'package:hready/features/requests/presentation/view_model/requests_bloc.dart';
+import 'package:hready/features/requests/presentation/view_model/requests_event.dart';
+import 'package:hready/features/requests/presentation/view_model/requests_state.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/requests/domain/use_cases/get_all_requests_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/approve_request_use_case.dart';
@@ -32,9 +32,10 @@ class AdminRequests extends StatelessWidget {
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     if (state.isLoading)
                       ListView.separated(
                         shrinkWrap: true,
@@ -213,6 +214,7 @@ class AdminRequests extends StatelessWidget {
                 ),
               ),
             ),
+          ),
           );
         },
       ),

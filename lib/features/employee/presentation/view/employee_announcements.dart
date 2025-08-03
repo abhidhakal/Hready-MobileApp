@@ -26,9 +26,10 @@ class EmployeeAnnouncements extends StatelessWidget {
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     SizedBox(height: 16),
                     state.isLoading
                         ? ListView.separated(
@@ -93,7 +94,8 @@ class EmployeeAnnouncements extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

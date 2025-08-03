@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hready/features/admin/presentation/viewmodel/admin_profile_bloc.dart';
-import 'package:hready/features/admin/presentation/viewmodel/admin_profile_event.dart';
-import 'package:hready/features/admin/presentation/viewmodel/admin_profile_state.dart';
+import 'package:hready/features/admin/presentation/view_model/admin_profile_bloc.dart';
+import 'package:hready/features/admin/presentation/view_model/admin_profile_event.dart';
+import 'package:hready/features/admin/presentation/view_model/admin_profile_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hready/core/utils/common_snackbar.dart';

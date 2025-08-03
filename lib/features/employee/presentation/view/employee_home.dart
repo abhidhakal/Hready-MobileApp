@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hready/features/employee/presentation/view/employee_attendance.dart';
 import 'package:hready/features/employee/presentation/view/employee_profile.dart';
 import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_tasks.dart';
@@ -9,9 +8,9 @@ import 'package:hready/features/announcements/presentation/view_model/announceme
 import 'package:provider/provider.dart';
 import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:intl/intl.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_bloc.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_event.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_state.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_bloc.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_event.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_state.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_bloc.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_event.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_state.dart';

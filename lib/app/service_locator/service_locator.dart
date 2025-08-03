@@ -12,18 +12,18 @@ import 'package:hready/features/auth/domain/repositories/auth_repository.dart';
 import 'package:hready/features/auth/domain/use_cases/login_use_case.dart';
 import 'package:hready/features/auth/domain/use_cases/register_use_case.dart';
 import 'package:hready/features/auth/domain/use_cases/get_cached_user_use_case.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:hready/features/auth/data/models/user_model.dart';
 
 // Admin Dashboard
-import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
+import 'package:hready/features/admin/presentation/view_model/admin_dashboard_view_model.dart';
 import 'package:hready/features/employee/data/repositories/remote_repository/employee_remote_repository.dart';
 
 // Employee Dashboard
-import 'package:hready/features/employee/presentation/viewmodel/employee_dashboard_view_model.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_dashboard_view_model.dart';
 
 // Splash
-import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
+import 'package:hready/features/splash/view_model/splash_view_model.dart';
 
 // Announcements
 import 'package:hready/features/announcements/data/datasources/remote_datasource/announcement_remote_data_source.dart';
@@ -85,6 +85,20 @@ import 'package:hready/features/requests/domain/use_cases/approve_request_use_ca
 import 'package:hready/features/requests/domain/use_cases/reject_request_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/get_my_requests_use_case.dart';
 import 'package:hready/features/requests/domain/use_cases/submit_request_use_case.dart';
+
+// Payroll
+import 'package:hready/features/payroll/data/datasources/payroll_remote_data_source.dart';
+import 'package:hready/features/payroll/data/repositories/payroll_repository_impl.dart';
+import 'package:hready/features/payroll/domain/repositories/payroll_repository.dart';
+import 'package:hready/features/payroll/domain/use_cases/get_all_payrolls.dart';
+import 'package:hready/features/payroll/domain/use_cases/get_employee_payroll_history.dart';
+import 'package:hready/features/payroll/domain/use_cases/generate_payroll.dart';
+import 'package:hready/features/payroll/domain/use_cases/approve_payroll.dart';
+import 'package:hready/features/payroll/domain/use_cases/mark_payroll_as_paid.dart';
+import 'package:hready/features/payroll/domain/use_cases/get_payroll_stats.dart';
+import 'package:hready/features/payroll/domain/use_cases/bulk_approve_payrolls.dart';
+import 'package:hready/features/payroll/domain/use_cases/delete_payroll.dart';
+import 'package:hready/features/payroll/presentation/view_model/payroll_bloc.dart';
 
 import 'package:hready/core/network/api_base.dart';
 
@@ -263,6 +277,31 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => RejectRequestUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => GetMyRequestsUseCase(getIt<RequestRepository>()));
   getIt.registerLazySingleton(() => SubmitRequestUseCase(getIt<RequestRepository>()));
+
+  // Payroll - Remote Data Source
+  getIt.registerLazySingleton(() => PayrollRemoteDataSourceImpl(dio: getIt<Dio>()));
+  // Payroll - Repository
+  getIt.registerLazySingleton<PayrollRepository>(() => PayrollRepositoryImpl(remoteDataSource: getIt()));
+  // Payroll - Use Cases
+  getIt.registerLazySingleton(() => GetAllPayrolls(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => GetEmployeePayrollHistory(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => GeneratePayroll(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => ApprovePayroll(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => MarkPayrollAsPaid(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => GetPayrollStats(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => BulkApprovePayrolls(getIt<PayrollRepository>()));
+  getIt.registerLazySingleton(() => DeletePayroll(getIt<PayrollRepository>()));
+  // Payroll - Bloc
+  getIt.registerFactory(() => PayrollBloc(
+    getAllPayrolls: getIt(),
+    getEmployeePayrollHistory: getIt(),
+    generatePayroll: getIt(),
+    approvePayroll: getIt(),
+    markPayrollAsPaid: getIt(),
+    getPayrollStats: getIt(),
+    bulkApprovePayrolls: getIt(),
+    deletePayroll: getIt(),
+  ));
 }
 
 Future<String?> getToken() async {

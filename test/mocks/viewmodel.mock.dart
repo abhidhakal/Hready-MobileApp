@@ -1,9 +1,9 @@
 // test/mocks/mock_auth_view_model.dart
 
 import 'package:mocktail/mocktail.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
-import 'package:hready/features/admin/presentation/viewmodel/admin_dashboard_view_model.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_bloc.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_view_model.dart';
+import 'package:hready/features/admin/presentation/view_model/admin_dashboard_view_model.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_bloc.dart';
 import 'package:hready/features/attendance/presentation/view_model/attendance_bloc.dart';
 import 'package:hready/features/tasks/presentation/view_model/task_bloc.dart';
 import 'package:hready/features/leaves/presentation/view_model/leave_bloc.dart';

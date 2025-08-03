@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_event.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_state.dart';
-import 'package:hready/features/auth/presentation/viewmodel/auth_view_model.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_event.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_state.dart';
+import 'package:hready/features/auth/presentation/view_model/auth_view_model.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

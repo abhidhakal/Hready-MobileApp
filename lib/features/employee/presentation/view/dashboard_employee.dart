@@ -5,6 +5,7 @@ import 'package:hready/features/employee/presentation/view/employee_leave.dart';
 import 'package:hready/features/employee/presentation/view/employee_home.dart';
 import 'package:hready/features/employee/presentation/view/employee_tasks.dart';
 import 'package:hready/features/employee/presentation/view/employee_requests.dart';
+import 'package:hready/features/employee/presentation/view/employee_payroll.dart';
 import 'package:shake/shake.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +25,7 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
     const EmployeeAttendance(),
     const EmployeeTasks(),
     const EmployeeAnnouncements(),
+    const EmployeePayroll(),
   ];
 
   @override
@@ -92,13 +94,14 @@ class _DashboardEmployeeState extends State<DashboardEmployee> {
               color: Colors.transparent,
               elevation: 0,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   buildNavItem(context, Icons.home_outlined, "Home", 0, _selectedIndex),
                   buildNavItem(context, Icons.beach_access, "Leave", 1, _selectedIndex),
                   buildNavItem(context, Icons.fingerprint, "Attendance", 2, _selectedIndex),
                   buildNavItem(context, Icons.assignment_outlined, "Tasks", 3, _selectedIndex),
                   buildNavItem(context, Icons.announcement_outlined, "News", 4, _selectedIndex),
+                  buildNavItem(context, Icons.payment, "Payroll", 5, _selectedIndex),
                 ],
               ),
             ),

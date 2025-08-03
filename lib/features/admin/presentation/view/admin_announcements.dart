@@ -4,7 +4,6 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/announcements/presentation/view_model/announcement_view_model.dart';
 import 'package:hready/features/announcements/domain/entities/announcement_entity.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:hready/core/utils/common_snackbar.dart';
 
 class AdminAnnouncements extends StatelessWidget {
   const AdminAnnouncements({Key? key}) : super(key: key);
@@ -30,9 +29,10 @@ class AdminAnnouncements extends StatelessWidget {
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     state.isLoading
                         ? ListView.separated(
                             shrinkWrap: true,
@@ -174,7 +174,8 @@ class AdminAnnouncements extends StatelessWidget {
                                       );
                                     },
                                   ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

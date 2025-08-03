@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_bloc.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_event.dart';
-import 'package:hready/features/employee/presentation/viewmodel/employee_profile_state.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_bloc.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_event.dart';
+import 'package:hready/features/employee/presentation/view_model/employee_profile_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -232,11 +232,13 @@ class EmployeeAttendance extends StatelessWidget {
               return SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildAttendanceCard(context, attendance, todayStatus),
-                    ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildAttendanceCard(context, attendance, todayStatus),
+                      ],
+                    ),
                   ),
                 ),
               );

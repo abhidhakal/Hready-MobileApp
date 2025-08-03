@@ -289,25 +289,27 @@ class _AdminTasksState extends State<AdminTasks> {
               body: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    tasks.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.assignment_turned_in, size: 80, color: Colors.grey),
-                                SizedBox(height: 16),
-                                Text('No tasks found.', style: TextStyle(color: Colors.grey, fontSize: 18)),
-                              ],
-                            ),
-                          )
-                        : ListView.separated(
-                            shrinkWrap: true,
-                            itemCount: tasks.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 16),
-                            itemBuilder: (context, index) {
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        tasks.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.assignment_turned_in, size: 80, color: Colors.grey),
+                                    SizedBox(height: 16),
+                                    Text('No tasks found.', style: TextStyle(color: Colors.grey, fontSize: 18)),
+                                  ],
+                                ),
+                              )
+                            : ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: tasks.length,
+                                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                                itemBuilder: (context, index) {
                               final task = tasks[index];
                               return Card(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -376,6 +378,7 @@ class _AdminTasksState extends State<AdminTasks> {
                       ],
                     ),
                   ),
+                ),
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {

@@ -4,9 +4,9 @@ import 'package:hready/app/service_locator/service_locator.dart';
 import 'package:hready/features/admin/presentation/view/dashboard_admin.dart';
 import 'package:hready/features/auth/presentation/view/login.dart';
 import 'package:hready/features/employee/presentation/view/dashboard_employee.dart';
-import 'package:hready/features/splash/viewmodel/splash_event.dart';
-import 'package:hready/features/splash/viewmodel/splash_state.dart';
-import 'package:hready/features/splash/viewmodel/splash_view_model.dart';
+import 'package:hready/features/splash/view_model/splash_event.dart';
+import 'package:hready/features/splash/view_model/splash_state.dart';
+import 'package:hready/features/splash/view_model/splash_view_model.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatelessWidget {
