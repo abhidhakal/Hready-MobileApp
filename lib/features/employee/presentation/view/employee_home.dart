@@ -139,7 +139,7 @@ class EmployeeHome extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Welcome, $firstName!', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                          Text('Welcome, $firstName!', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                           const SizedBox(height: 6),
                                           const SizedBox(height: 10),
                                           Row(

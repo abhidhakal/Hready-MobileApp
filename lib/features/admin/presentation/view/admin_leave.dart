@@ -43,7 +43,7 @@ class _AdminLeaveState extends State<AdminLeave> {
     }
   }
 
-  void _showLeaveFormDialog(BuildContext context) {
+  void _showLeaveFormDialog(BuildContext context, LeaveBloc leaveBloc) {
     _resetForm();
     showDialog(
       context: context,
@@ -169,7 +169,7 @@ class _AdminLeaveState extends State<AdminLeave> {
                                   attachment: _attachmentPath,
                                   status: 'Pending',
                                 );
-                                context.read<LeaveBloc>().add(CreateLeave(leave));
+                                leaveBloc.add(CreateLeave(leave));
                                 Navigator.of(context).pop();
                                 setState(() => _loading = false);
                               }
@@ -329,7 +329,7 @@ class _AdminLeaveState extends State<AdminLeave> {
                         ),
                       ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () => _showLeaveFormDialog(context),
+              onPressed: () => _showLeaveFormDialog(context, context.read<LeaveBloc>()),
               child: const Icon(Icons.add),
               tooltip: 'Request Leave for Myself',
             ),

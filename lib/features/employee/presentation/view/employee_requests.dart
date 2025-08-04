@@ -21,132 +21,115 @@ class _EmployeeRequestsPageState extends State<EmployeeRequestsPage> {
   String message = '';
   String type = 'request';
   File? attachment;
+  bool _hasSubmittedRequest = false;
 
-  void _showRequestDialog(BuildContext context) {
+  void _showRequestDialog(BuildContext context, RequestsBloc requestsBloc) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return BlocListener<RequestsBloc, RequestsState>(
-          listener: (context, state) {
-            if (!state.isSubmitting && state.error == null) {
-              // Success - close dialog and show success message
-              Navigator.pop(context);
-              showCommonSnackbar(context, 'Request submitted successfully!');
-            } else if (!state.isSubmitting && state.error != null) {
-              // Error - show error message
-              showCommonSnackbar(context, 'Error: ${state.error!}');
-            }
-          },
-          child: AlertDialog(
-            title: const Text('New Request/Report'),
-            content: SizedBox(
-              width: 500,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Title', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Enter a title',
-                        border: OutlineInputBorder(),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('New Request/Report'),
+              content: SizedBox(
+                width: 500,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Title', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      TextField(
+                        decoration: const InputDecoration(
+                          hintText: 'Enter a title',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (val) => title = val,
                       ),
-                      onChanged: (val) => title = val,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const Text('Type:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 12),
-                        DropdownButton<String>(
-                          value: type,
-                          items: const [
-                            DropdownMenuItem(value: 'request', child: Text('Request')),
-                            DropdownMenuItem(value: 'report', child: Text('Report')),
-                          ],
-                          onChanged: (val) => setState(() => type = val ?? 'request'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('Message', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Describe your request or report',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const Text('Type:', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 12),
+                          DropdownButton<String>(
+                            value: type,
+                            items: const [
+                              DropdownMenuItem(value: 'request', child: Text('Request')),
+                              DropdownMenuItem(value: 'report', child: Text('Report')),
+                            ],
+                            onChanged: (val) => setState(() => type = val ?? 'request'),
+                          ),
+                        ],
                       ),
-                      maxLines: 3,
-                      onChanged: (val) => message = val,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(attachment?.path.split('/').last ?? 'No file selected'),
+                      const SizedBox(height: 20),
+                      const Text('Message', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      TextField(
+                        decoration: const InputDecoration(
+                          hintText: 'Describe your request or report',
+                          border: OutlineInputBorder(),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            FilePickerResult? result = await FilePicker.platform.pickFiles();
-                            if (result != null && result.files.single.path != null) {
-                              setState(() => attachment = File(result.files.single.path!));
-                            }
-                          },
-                          icon: const Icon(Icons.attach_file),
-                          label: const Text('Attach File'),
-                        ),
-                      ],
-                    ),
-                  ],
+                        maxLines: 3,
+                        onChanged: (val) => message = val,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(attachment?.path.split('/').last ?? 'No file selected'),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              FilePickerResult? result = await FilePicker.platform.pickFiles();
+                              if (result != null && result.files.single.path != null) {
+                                setState(() => attachment = File(result.files.single.path!));
+                              }
+                            },
+                            icon: const Icon(Icons.attach_file),
+                            label: const Text('Attach File'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              BlocBuilder<RequestsBloc, RequestsState>(
-                builder: (context, state) {
-                  return ElevatedButton(
-                    onPressed: state.isSubmitting
-                        ? null
-                        : () {
-                            if (title.trim().isEmpty) {
-                              showCommonSnackbar(context, 'Please enter a title');
-                              return;
-                            }
-                            if (message.trim().isEmpty) {
-                              showCommonSnackbar(context, 'Please enter a message');
-                              return;
-                            }
-                            
-                            context.read<RequestsBloc>().add(SubmitRequest(
-                                  title: title.trim(),
-                                  message: message.trim(),
-                                  type: type,
-                                  attachment: attachment,
-                                ));
-                          },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    child: state.isSubmitting 
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Send'),
-                  );
-                },
-              ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (title.trim().isEmpty) {
+                      showCommonSnackbar(context, 'Please enter a title');
+                      return;
+                    }
+                    if (message.trim().isEmpty) {
+                      showCommonSnackbar(context, 'Please enter a message');
+                      return;
+                    }
+                    
+                    requestsBloc.add(SubmitRequest(
+                          title: title.trim(),
+                          message: message.trim(),
+                          type: type,
+                          attachment: attachment,
+                        ));
+                    _hasSubmittedRequest = true; // Set flag to indicate request was submitted
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text('Send'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -158,12 +141,13 @@ class _EmployeeRequestsPageState extends State<EmployeeRequestsPage> {
       create: (_) => getIt<RequestsBloc>()..add(LoadMyRequests()),
       child: BlocListener<RequestsBloc, RequestsState>(
         listener: (context, state) {
-          if (!state.isSubmitting && state.error == null && state.requests.isNotEmpty) {
-            // Success - show success message
+          // Only show success message when a request is actually submitted
+          if (!state.isSubmitting && state.error == null && _hasSubmittedRequest) {
             showCommonSnackbar(context, 'Request submitted successfully!');
-          } else if (!state.isSubmitting && state.error != null) {
-            // Error - show error message
+            _hasSubmittedRequest = false; // Reset the flag
+          } else if (!state.isSubmitting && state.error != null && _hasSubmittedRequest) {
             showCommonSnackbar(context, 'Error: ${state.error!}');
+            _hasSubmittedRequest = false; // Reset the flag
           }
         },
         child: BlocBuilder<RequestsBloc, RequestsState>(
@@ -178,7 +162,7 @@ class _EmployeeRequestsPageState extends State<EmployeeRequestsPage> {
             ),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
-                _showRequestDialog(context);
+                _showRequestDialog(context, context.read<RequestsBloc>());
               },
               icon: const Icon(Icons.add),
               label: const Text('New Request'),

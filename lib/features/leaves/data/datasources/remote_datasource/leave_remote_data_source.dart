@@ -43,7 +43,23 @@ class LeaveRemoteDataSource {
   }
 
   Future<LeaveModel> createAdminLeave(LeaveModel leave) async {
-    final response = await dio.post('/leaves/admin', data: leave.toJson());
+    final formData = FormData.fromMap({
+      'leaveType': leave.leaveType,
+      'startDate': leave.startDate?.toIso8601String(),
+      'endDate': leave.endDate?.toIso8601String(),
+      'reason': leave.reason,
+      'halfDay': leave.halfDay?.toString(),
+    });
+    
+    // Add file attachment if present
+    if (leave.attachment != null && leave.attachment!.isNotEmpty) {
+      formData.files.add(MapEntry(
+        'attachment',
+        await MultipartFile.fromFile(leave.attachment!),
+      ));
+    }
+    
+    final response = await dio.post('/leaves/admin', data: formData);
     return LeaveModel.fromJson(response.data['leave'] ?? response.data);
   }
 } 

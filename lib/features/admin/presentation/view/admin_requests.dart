@@ -115,17 +115,36 @@ class AdminRequests extends StatelessWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(r.type, style: const TextStyle(fontWeight: FontWeight.w500)),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF042F46).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: const Color(0xFF042F46).withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      r.type.toUpperCase(),
+                                      style: TextStyle(
+                                        color: const Color(0xFF042F46),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4.0),
                                     child: Text(r.message),
                                   ),
                                   const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text('By: ${r.createdBy?.name ?? r.createdBy?.email ?? 'Unknown'}'),
-                                      Text('${r.createdAt.toLocal()}'),
+                                      const SizedBox(height: 4),
+                                      Text('${r.createdAt.toLocal()}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                                     ],
                                   ),
                                   if (r.attachment != null)

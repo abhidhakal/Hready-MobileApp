@@ -22,6 +22,7 @@ class _AdminTasksState extends State<AdminTasks> {
   String? _editingTaskId;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _departmentController = TextEditingController();
   DateTime? _dueDate;
   String? _assignedTo;
   String? _assignedDepartment;
@@ -32,6 +33,7 @@ class _AdminTasksState extends State<AdminTasks> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _departmentController.dispose();
     super.dispose();
   }
 
@@ -40,6 +42,7 @@ class _AdminTasksState extends State<AdminTasks> {
       _editingTaskId = null;
       _titleController.clear();
       _descriptionController.clear();
+      _departmentController.clear();
       _dueDate = null;
       _assignedTo = null;
       _assignedDepartment = null;
@@ -52,6 +55,7 @@ class _AdminTasksState extends State<AdminTasks> {
       _editingTaskId = task.id;
       _titleController.text = task.title ?? '';
       _descriptionController.text = task.description ?? '';
+      _departmentController.text = task.assignedDepartment ?? '';
       _dueDate = task.dueDate;
       _assignedTo = task.assignedTo?.userId;
       _assignedDepartment = task.assignedDepartment;
@@ -91,131 +95,143 @@ class _AdminTasksState extends State<AdminTasks> {
     );
   }
 
-  void _showTaskDialog(BuildContext context, List users) {
+  void _showTaskDialog(BuildContext context, List users, TaskBloc taskBloc) {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(_editingTaskId == null ? 'Add Task' : 'Edit Task'),
-          content: SizedBox(
-            width: 400,
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(labelText: 'Task Title', border: OutlineInputBorder()),
-                      validator: (v) => v == null || v.isEmpty ? 'Title required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(_editingTaskId == null ? 'Add Task' : 'Edit Task'),
+              content: SizedBox(
+                width: 400,
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: _dueDate ?? DateTime.now(),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) setState(() => _dueDate = picked);
-                            },
-                            child: InputDecorator(
-                              decoration: const InputDecoration(
-                                labelText: 'Due Date',
-                                border: OutlineInputBorder(),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.calendar_today, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(_dueDate != null ? DateFormat('yyyy-MM-dd').format(_dueDate!) : 'Select date'),
-                                ],
+                        TextFormField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(labelText: 'Task Title', border: OutlineInputBorder()),
+                          validator: (v) => v == null || v.isEmpty ? 'Title required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _descriptionController,
+                          decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: _dueDate ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2100),
+                                  );
+                                  if (picked != null) {
+                                    setState(() => _dueDate = picked);
+                                    setDialogState(() {}); // Rebuild the dialog
+                                  }
+                                },
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Due Date',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.calendar_today, size: 18),
+                                      const SizedBox(width: 8),
+                                      Text(_dueDate != null ? DateFormat('yyyy-MM-dd').format(_dueDate!) : 'Select date'),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          value: _assignedTo,
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('Assign to Employee')),
+                            ...users.map((u) => DropdownMenuItem(
+                                  value: u.userId,
+                                  child: Text('${u.name} (${u.department ?? 'N/A'})'),
+                                )),
+                          ],
+                          onChanged: (v) {
+                            setState(() => _assignedTo = v);
+                            setDialogState(() {}); // Rebuild the dialog
+                          },
+                          decoration: const InputDecoration(labelText: 'Employee', border: OutlineInputBorder()),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _departmentController,
+                          decoration: const InputDecoration(labelText: 'Or Assign to Department', border: OutlineInputBorder()),
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _status,
+                          items: const [
+                            DropdownMenuItem(value: 'Pending', child: Text('Pending')),
+                            DropdownMenuItem(value: 'In Progress', child: Text('In Progress')),
+                            DropdownMenuItem(value: 'Completed', child: Text('Completed')),
+                          ],
+                          onChanged: (v) {
+                            setState(() => _status = v ?? 'Pending');
+                            setDialogState(() {}); // Rebuild the dialog
+                          },
+                          decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      value: _assignedTo,
-                      items: [
-                        const DropdownMenuItem(value: null, child: Text('Assign to Employee')),
-                        ...users.map((u) => DropdownMenuItem(
-                              value: u.userId,
-                              child: Text('${u.name} (${u.department ?? 'N/A'})'),
-                            )),
-                      ],
-                      onChanged: (v) => setState(() => _assignedTo = v),
-                      decoration: const InputDecoration(labelText: 'Employee', border: OutlineInputBorder()),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Or Assign to Department', border: OutlineInputBorder()),
-                      initialValue: _assignedDepartment,
-                      onChanged: (v) => setState(() => _assignedDepartment = v),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _status,
-                      items: const [
-                        DropdownMenuItem(value: 'Pending', child: Text('Pending')),
-                        DropdownMenuItem(value: 'In Progress', child: Text('In Progress')),
-                        DropdownMenuItem(value: 'Completed', child: Text('Completed')),
-                      ],
-                      onChanged: (v) => setState(() => _status = v ?? 'Pending'),
-                      decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
-                  final assignedUser = users.firstWhereOrNull((u) => u.userId == _assignedTo);
-                  final entity = TaskEntity(
-                    id: _editingTaskId,
-                    title: _titleController.text.trim(),
-                    description: _descriptionController.text.trim(),
-                    dueDate: _dueDate,
-                    assignedTo: assignedUser,
-                    assignedDepartment: _assignedDepartment,
-                    status: _status,
-                  );
-                  if (_editingTaskId == null) {
-                    context.read<TaskBloc>().add(AddTask(entity));
-                  } else {
-                    context.read<TaskBloc>().add(UpdateTask(_editingTaskId!, entity));
-                  }
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text(_editingTaskId == null ? 'Add Task' : 'Update Task'),
-            ),
-            if (_editingTaskId != null)
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel'),
-              ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      final assignedUser = _assignedTo != null ? users.firstWhereOrNull((u) => u.userId == _assignedTo) : null;
+                      final entity = TaskEntity(
+                        id: _editingTaskId,
+                        title: _titleController.text.trim(),
+                        description: _descriptionController.text.trim(),
+                        dueDate: _dueDate,
+                        assignedTo: assignedUser,
+                        assignedDepartment: _departmentController.text.trim().isNotEmpty ? _departmentController.text.trim() : null,
+                        status: _status,
+                      );
+                      if (_editingTaskId == null) {
+                        taskBloc.add(AddTask(entity));
+                      } else {
+                        taskBloc.add(UpdateTask(_editingTaskId!, entity));
+                      }
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: Text(_editingTaskId == null ? 'Add Task' : 'Update Task'),
+                ),
+                if (_editingTaskId != null)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -361,7 +377,7 @@ class _AdminTasksState extends State<AdminTasks> {
                                     onSelected: (value) {
                                       if (value == 'edit') {
                                         _populateForm(task);
-                                        _showTaskDialog(context, users);
+                                        _showTaskDialog(context, users, context.read<TaskBloc>());
                                       } else if (value == 'delete') {
                                         context.read<TaskBloc>().add(DeleteTask(task.id ?? ''));
                                       }
@@ -383,7 +399,7 @@ class _AdminTasksState extends State<AdminTasks> {
               floatingActionButton: FloatingActionButton(
                 onPressed: () {
                   _resetForm();
-                  _showTaskDialog(context, users);
+                  _showTaskDialog(context, users, context.read<TaskBloc>());
                 },
                 child: const Icon(Icons.add),
               ),
